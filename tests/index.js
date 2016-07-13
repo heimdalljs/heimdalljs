@@ -14,47 +14,49 @@ describe('heimdall', function() {
   });
 
   describe('.node', function() {
-    it('sync callback name POJO', function() {
-      var cbInvoked = false;
+    it('implicitly stops the cookie when the promise resolves', function () {
+      var callbackInvoked = false;
 
       expect(heimdall.stack).to.eql([]);
 
-      heimdall.node({ name: 'node-a' }, function() {
+      return heimdall.node('node-a', function () {
+        callbackInvoked = true;
         expect(heimdall.stack).to.eql(['node-a']);
-        cbInvoked = true;
-      });
-
-      expect(heimdall.stack).to.eql([]);
-      expect(cbInvoked).to.equal(true);
-    });
-
-    it('sync callback name string shorthand', function () {
-      expect(heimdall.stack).to.eql([]);
-
-      heimdall.node('node-a', function() {
-        expect(heimdall.stack).to.eql(['node-a']);
-      });
-
-      expect(heimdall.stack).to.eql([]);
-    });
-
-    it('promise callback', function() {
-      var defer = RSVP.defer();
-      var session = heimdall.node('node-a', function() {
-        return defer.promise;
-      });
-
-      expect(heimdall.stack).to.eql(['node-a']);
-
-      defer.resolve();
-
-      expect(heimdall.stack).to.eql(['node-a']);
-
-      return session.then(function() {
+      }).then(function () {
+        expect(callbackInvoked).to.equal(true);
         expect(heimdall.stack).to.eql([]);
       });
     });
-  });
+
+    it('supports nodes with children', function () {
+    });
+
+    it.only('throws when child nodes escape their parent', function () {
+      expect(heimdall.stack).to.eql([]);
+
+      var deferA = RSVP.defer();
+      var nodeA = heimdall.node('node-a', function () {
+        return deferA.promise;
+      });
+
+      expect(heimdall.stack).to.eql(['node-a']);
+
+      var deferB = RSVP.defer();
+      var nodeB = heimdall.node('node-b', function () {
+        return deferB.promise;
+      });
+
+      deferA.resolve();
+
+      // chai as promised;
+      return nodeA.then(function() {
+        throw new Error('NO!');
+      }, function(reason) {
+        console.log(reason);
+        expect(reason.message).to.equal('canot stop because child escaped')
+      });
+    });
+});
 
   describe('.start/stop/resume', function() {
     it('supports basic start/stop', function() {

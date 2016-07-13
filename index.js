@@ -2,13 +2,14 @@
 
 var Heimdall = require('./lib/heimdall');
 var semver = require('semver');
-var compatibleVersion = '^' + require('./package.json');
+var version = require('./package.json').version;
+var compatibleVersion = '^' + version;
 
 
 if (process._heimdall) {
-  var version = process._heimdall.version;
-  if (!semver.satisfies(version, compatibleVersion)) {
-    throw new Error('Version "' + version + '" not compatible with "' + compatibleVersion + '"');
+  var globalVersion = process._heimdall.version;
+  if (!semver.satisfies(globalVersion, compatibleVersion)) {
+    throw new Error('Version "' + globalVersion + '" not compatible with "' + compatibleVersion + '"');
   }
 } else {
   process._heimdall = new Heimdall();
