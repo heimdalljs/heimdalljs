@@ -9,10 +9,44 @@ TODO
 ```js
 var H = require('heimdall')('broccoli');
 
-var h = H.somehow(this.description, this.id);
+var h = new H('merge-trees', this.id, ['build:count', 'build:time']);
 h.start();
+h.stats()['build:count']++;
+h.stats().measure('build:time');
+foo();
+foo();
 h.end();
+
+
+// implemented elsewhere
+var H = require('heimdall')('broccoli-merge-trees');
+var h = new H(this.description, this.id, ['io:stat']);
+
+function foo() {
+  h.start(); // lets previous measure know it's no longer in selftime
+  h.stats()['io:stat']++;
+  h.end();
+}
 ```
 
-```
+```json
+{
+  "nodes": [{
+    "id": 0,
+    "name": "broccoli",
+  }, {
+    "id": 1,
+    "name": "broccoli-plugin-whatever"
+  }],
+  
+  "graph": {
+    "root": 0,
+    "stats": {
+    },
+    "startChildren": [{
+    }],
+    "endChildren": [
+    ]
+  }
+}
 ```
