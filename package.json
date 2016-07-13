@@ -1,0 +1,34 @@
+{
+  "name": "heimdall.js",
+  "version": "0.0.1",
+  "description": "TODO",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hjdivad/heimdall-lib.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hjdivad/heimdall-lib/issues"
+  },
+  "homepage": "https://github.com/hjdivad/heimdall-lib#readme",
+  "scripts": {
+    "test": "mocha tests/",
+    "test:debug": "mocha --no-timeouts debug tests/"
+  },
+  "keywords": [
+    "javascript"
+  ],
+  "devDependencies": {
+    "broccoli": "^0.16.9",
+    "chai": "^3.2.0",
+    "chai-as-promised": "^5.1.0",
+    "chai-files": "^1.2.0",
+    "mocha": "^2.2.5",
+    "mocha-jshint": "~2.2.3"
+  }
+}

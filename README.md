@@ -1,52 +1,88 @@
 TODO
 
-- write out js example to cover broccoli
-- include JSON graph output
-- think about cases in ember at runtime as well (counting sendEvents, &c.)
-  - lazy granularity (initially pushing stats on a single root node; adding detail by calling start/stop)
+  - monitor provided partial schema?
+    - cpu
+    - fs
+  - monitor registration?
 
 
 ```js
-var H = require('heimdall')('broccoli');
+var heimdall = require('heimdall');
+var heimdallCpu = require('heimdall/monitors/cpu');
+var heimdallFs = require('heimdall/monitors/fs');
 
-var h = new H('merge-trees', this.id, ['build:count', 'build:time']);
-h.start();
-h.stats()['build:count']++;
-h.stats().measure('build:time');
-foo();
-foo();
-h.end();
-
-
-// implemented elsewhere
-var H = require('heimdall')('broccoli-merge-trees');
-var h = new H(this.description, this.id, ['io:stat']);
-
-function foo() {
-  h.start(); // lets previous measure know it's no longer in selftime
-  h.stats()['io:stat']++;
-  h.end();
+function BroccoliNodeSchema() {
+  this.builds = 0;
 }
+
+heimdall.registerMonitor(cpu);
+heimdall.registerMonitor(fs);
+
+heimdall.start('broccoli', function () {
+  heimdall.start('node:babel', BroccoliNodeSchema, function (h) {
+    h.builds++;
+
+    heimdall.start('node:persistent-filter', BroccoliNodeSchema, function (h) {
+      h.builds++;
+    });
+
+    heimdall.start('node:caching-writer', BroccoliNodeSchema, function (h) {
+      h.builds++;
+    });
+  });
+});
+
 ```
 
 ```json
 {
   "nodes": [{
     "id": 0,
-    "name": "broccoli",
+    "name": "broccoli",,
+    stats: {
+      cpu: {
+        self: 10,
+      },
+      fs: { /* ... */ },
+    },
+    children: {
+      start: [1],
+      end: [1],
+    },
   }, {
     "id": 1,
-    "name": "broccoli-plugin-whatever"
-  }],
-  
-  "graph": {
-    "root": 0,
-    "stats": {
+    "name": "node:babel"
+    stats: {
+      builds: 1,
+      cpu: {
+        self: 20,
+      },
+      fs: { /* ... */ },
     },
-    "startChildren": [{
-    }],
-    "endChildren": [
-    ]
-  }
+    children: {
+      start: [2, 3],
+      end: [2, 3],
+    },
+  }, {
+    "id": 2,
+    "name": "node:persistent-filter"
+    stats: {
+      builds: 1,
+      cpu: {
+        self: 30,
+      },
+      fs: { /* ... */ },
+    },
+  }, {
+    "id": 3,
+    "name": "node:caching-writer"
+    stats: {
+      builds: 1,
+      cpu: {
+        self: 40,
+      },
+      fs: { /* ... */ },
+    },
+  }],
 }
 ```
