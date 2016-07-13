@@ -4,7 +4,8 @@
   "description": "TODO",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha tests/",
+    "test:debug": "mocha --no-timeouts debug tests/"
   },
   "repository": {
     "type": "git",
@@ -16,10 +17,6 @@
     "url": "https://github.com/hjdivad/heimdall-lib/issues"
   },
   "homepage": "https://github.com/hjdivad/heimdall-lib#readme",
-  "scripts": {
-    "test": "mocha tests/",
-    "test:debug": "mocha --no-timeouts debug tests/"
-  },
   "keywords": [
     "javascript"
   ],
@@ -30,5 +27,8 @@
     "chai-files": "^1.2.0",
     "mocha": "^2.2.5",
     "mocha-jshint": "~2.2.3"
+  },
+  "dependencies": {
+    "semver": "^5.2.0"
   }
 }

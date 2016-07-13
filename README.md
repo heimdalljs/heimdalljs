@@ -18,15 +18,15 @@ function BroccoliNodeSchema() {
 heimdall.registerMonitor(cpu);
 heimdall.registerMonitor(fs);
 
-heimdall.start('broccoli', function () {
-  heimdall.start('node:babel', BroccoliNodeSchema, function (h) {
+heimdall.node('broccoli', function () {
+  heimdall.node('node:babel', BroccoliNodeSchema, function (h) {
     h.builds++;
 
-    heimdall.start('node:persistent-filter', BroccoliNodeSchema, function (h) {
+    heimdall.node('node:persistent-filter', BroccoliNodeSchema, function (h) {
       h.builds++;
     });
 
-    heimdall.start('node:caching-writer', BroccoliNodeSchema, function (h) {
+    heimdall.node('node:caching-writer', BroccoliNodeSchema, function (h) {
       h.builds++;
     });
   });
@@ -86,3 +86,4 @@ heimdall.start('broccoli', function () {
   }],
 }
 ```
+
