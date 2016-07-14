@@ -298,8 +298,86 @@ describe('heimdall', function() {
   });
 
   describe('monitors', function() {
-    it('has tests', function() {
-      expect('test implemented').to.equal(true);
+    function MonitorSchema() {
+      this.mstatA = 0;
+      this.mstatB = 0;
+    }
+
+    function MyMonitor() {
+      this.id = 'my-monitor';
+      this.Schema = MonitorSchema;
+      this.counter = 0;
+    }
+
+    MyMonitor.prototype.onNodeStart = function (h) {
+    };
+
+    MyMonitor.prototype.onNodeResume = function (h) {
+    };
+
+    MyMonitor.prototype.onNodeStop = function (h, n) {
+      this.counter++;
+
+      h.mstatA = this.counter;
+      h.mstatB = this.counter * 10;
+    };
+
+    it('records stats for each node', function() {
+      heimdall.registerMonitor(new MyMonitor());
+
+      return expect(heimdall.node('node-a', function () {
+        return heimdall.node('node-b', function () { });
+      }).then(function () {
+        return heimdall.node('node-c', function () {});
+      }).then(function () {
+        return heimdall.toJSON();
+      })).to.eventually.deep.equal({
+        nodes: [{
+          _id: 0,
+          id: { name: 'heimdall' },
+          stats: {
+            own: {},
+            'my-monitor': {
+              mstatA: 0,
+              mstatB: 0,
+            },
+          },
+          children: [1, 3],
+        }, {
+          _id: 1,
+          id: { name: 'node-a' },
+          stats: {
+            own: {},
+            'my-monitor': {
+              mstatA: 2,
+              mstatB: 20,
+            },
+          },
+          children: [2],
+        }, {
+          _id: 2,
+          id: { name: 'node-b' },
+          stats: {
+            own: {},
+            'my-monitor': {
+              mstatA: 1,
+              mstatB: 10,
+            },
+          },
+          children: [],
+        }, {
+          _id: 3,
+          id: { name: 'node-c' },
+          stats: {
+            own: {},
+            'my-monitor': {
+              mstatA: 3,
+              mstatB: 30,
+            },
+          },
+          children: [],
+        }],
+      });
     });
   });
 });
