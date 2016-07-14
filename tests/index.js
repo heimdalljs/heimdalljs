@@ -7,6 +7,14 @@ var heimdall = require('../');
 chai.use(chaiAsPromised);
 chai.use(chaiFiles);
 
+function getJSONSansTime() {
+  var json = heimdall.toJSON();
+  for (var i=0; i<json.nodes.length; ++i) {
+    delete json.nodes[i].stats.time;
+  }
+  return json;
+}
+
 describe('heimdall', function() {
   beforeEach(function () {
     heimdall._reset();
@@ -177,12 +185,20 @@ describe('heimdall', function() {
       this.statB = 0;
     }
 
+    it('always includes time', function() {
+      return heimdall.node('node-a', function () {}).then(function () {
+        var json = heimdall.toJSON();
+        var nodeA = json.nodes.find(function (n) { return n.id.name === 'node-a'; });
+
+        expect(nodeA).to.not.eql(undefined);
+        expect(typeof nodeA.stats.time).to.eql('object');
+      });
+    });
+
     it('reports node-specific stats for an individual node', function () {
       return expect(heimdall.node('node-a', SchemaA, function (h) {
         h.count = 6;
-      }).then(function(){
-        return heimdall.toJSON();
-      })).to.eventually.deep.equal({
+      }).then(getJSONSansTime)).to.eventually.deep.equal({
         nodes: [
           {
             _id: 0,
@@ -226,9 +242,7 @@ describe('heimdall', function() {
             h.statB = 64;
           });
         });
-      }).then(function(){
-        return heimdall.toJSON();
-      })).to.eventually.deep.equal({
+      }).then(getJSONSansTime)).to.eventually.deep.equal({
         nodes: [
           {
             _id: 0,
@@ -340,6 +354,16 @@ describe('heimdall', function() {
       }).to.throw('A monitor for "some-monitor" is already registered');
     });
 
+    it('throws if using the reserved namespaces own or time', function() {
+      expect(function () {
+        heimdall.registerMonitor('own', function MySchema() {});
+      }).to.throw('Cannot register monitor at namespace "own".  "own" and "time" are reserved');
+
+      expect(function () {
+        heimdall.registerMonitor('time', function MySchema() {});
+      }).to.throw('Cannot register monitor at namespace "time".  "own" and "time" are reserved');
+    });
+
     it('records stats for each node', function() {
       heimdall.registerMonitor('my-monitor', MonitorSchema);
 
@@ -351,9 +375,7 @@ describe('heimdall', function() {
         return heimdall.node('node-c', function () {
           monitorEvent();
         });
-      }).then(function () {
-        return heimdall.toJSON();
-      })).to.eventually.deep.equal({
+      }).then(getJSONSansTime)).to.eventually.deep.equal({
         nodes: [{
           _id: 0,
           id: { name: 'heimdall' },
