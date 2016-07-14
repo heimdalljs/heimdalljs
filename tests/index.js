@@ -32,9 +32,22 @@ describe('heimdall', function() {
       });
     });
 
-    it('supports nodes with children', function () {
+    it('implicitly stops the cookie when the promise resolves', function () {
       expect(heimdall.stack).to.eql([]);
-      expect('test implemented').to.equal(true);
+
+      return heimdall.node('node-a', function () {
+        expect(heimdall.stack).to.eql(['node-a']);
+
+        var nodeB = heimdall.node('node-b', function() {
+          expect(heimdall.stack).to.eql(['node-a', 'node-b']);
+        });
+
+        expect(heimdall.stack).to.eql(['node-a', 'node-b']);
+
+        return nodeB;
+      }).finally(function () {
+        expect(heimdall.stack).to.eql([]);
+      });
     });
 
     it('throws when child nodes escape their parent', function () {
