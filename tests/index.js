@@ -8,6 +8,10 @@ chai.use(chaiAsPromised);
 chai.use(chaiFiles);
 
 describe('heimdall', function() {
+  beforeEach(function () {
+    heimdall._reset();
+  });
+
   describe('logging', function() {
     describe('log', function() { });
     describe('log.verbose', function() { });
@@ -22,16 +26,18 @@ describe('heimdall', function() {
       return heimdall.node('node-a', function () {
         callbackInvoked = true;
         expect(heimdall.stack).to.eql(['node-a']);
-      }).then(function () {
+      }).finally(function () {
         expect(callbackInvoked).to.equal(true);
         expect(heimdall.stack).to.eql([]);
       });
     });
 
     it('supports nodes with children', function () {
+      expect(heimdall.stack).to.eql([]);
+      expect('test implemented').to.equal(true);
     });
 
-    it.only('throws when child nodes escape their parent', function () {
+    it('throws when child nodes escape their parent', function () {
       expect(heimdall.stack).to.eql([]);
 
       var deferA = RSVP.defer();
@@ -48,13 +54,7 @@ describe('heimdall', function() {
 
       deferA.resolve();
 
-      // chai as promised;
-      return nodeA.then(function() {
-        throw new Error('NO!');
-      }, function(reason) {
-        console.log(reason);
-        expect(reason.message).to.equal('canot stop because child escaped')
-      });
+      return expect(nodeA).to.eventually.be.rejectedWith('cannot stop: not the current node');
     });
 });
 
@@ -101,6 +101,34 @@ describe('heimdall', function() {
       expect(heimdall.stack).to.eql(['node-a', 'node-b']);
 
       cookieB.stop();
+      expect(heimdall.stack).to.eql(['node-a']);
+
+      cookieA.stop();
+      expect(heimdall.stack).to.eql([]);
+    });
+
+    it('restores the node at time of resume', function () {
+      expect(heimdall.stack).to.eql([]);
+
+      var cookieA = heimdall.start('node-a');
+      expect(heimdall.stack).to.eql(['node-a']);
+
+      var cookieB = heimdall.start('node-b');
+      expect(heimdall.stack).to.eql(['node-a', 'node-b']);
+
+      cookieB.stop();
+      expect(heimdall.stack).to.eql(['node-a']);
+
+      var cookieC = heimdall.start('node-c');
+      expect(heimdall.stack).to.eql(['node-a', 'node-c']);
+
+      cookieB.resume();
+      expect(heimdall.stack).to.eql(['node-a', 'node-b']);
+
+      cookieB.stop();
+      expect(heimdall.stack).to.eql(['node-a', 'node-c']);
+
+      cookieC.stop();
       expect(heimdall.stack).to.eql(['node-a']);
 
       cookieA.stop();
