@@ -297,51 +297,67 @@ describe('heimdall', function() {
     });
   });
 
+  describe('.statsFor', function () {
+    it('throws if no schema is registered for the given name', function () {
+      heimdall.registerMonitor('valid', function Schema() {});
+
+      var stats = heimdall.statsFor('valid');
+
+      expect(typeof stats).to.equal('object');
+
+      expect(function () {
+        heimdall.statsFor('something completely different');
+      }).to.throw('No monitor registered for "something completely different"');
+    });
+  });
+
   describe('monitors', function() {
     function MonitorSchema() {
       this.mstatA = 0;
       this.mstatB = 0;
     }
 
-    function MyMonitor() {
-      this.id = 'my-monitor';
-      this.Schema = MonitorSchema;
-      this.counter = 0;
+    var counter;
+
+    function monitorEvent() {
+      counter++;
+      var stats = heimdall.statsFor('my-monitor');
+
+      stats.mstatA = counter;
+      stats.mstatB = counter * 10;
     }
 
-    MyMonitor.prototype.onNodeStart = function (h) {
-    };
+    beforeEach(function () {
+      counter = 0;
+    });
 
-    MyMonitor.prototype.onNodeResume = function (h) {
-    };
+    it('throws if another schema is registered at the given namespace', function () {
+      function MySchema() {}
 
-    MyMonitor.prototype.onNodeStop = function (h, n) {
-      this.counter++;
-
-      h.mstatA = this.counter;
-      h.mstatB = this.counter * 10;
-    };
+      heimdall.registerMonitor('some-monitor', MySchema);
+      expect(function () {
+        heimdall.registerMonitor('some-monitor', MySchema);
+      }).to.throw('A monitor for "some-monitor" is already registered');
+    });
 
     it('records stats for each node', function() {
-      heimdall.registerMonitor(new MyMonitor());
+      heimdall.registerMonitor('my-monitor', MonitorSchema);
 
       return expect(heimdall.node('node-a', function () {
-        return heimdall.node('node-b', function () { });
+        return heimdall.node('node-b', function () {
+          monitorEvent();
+        }).then(monitorEvent);
       }).then(function () {
-        return heimdall.node('node-c', function () {});
+        return heimdall.node('node-c', function () {
+          monitorEvent();
+        });
       }).then(function () {
         return heimdall.toJSON();
       })).to.eventually.deep.equal({
         nodes: [{
           _id: 0,
           id: { name: 'heimdall' },
-          stats: {
-            own: {},
-            'my-monitor': {
-              mstatA: 0,
-              mstatB: 0,
-            },
-          },
+          stats: { own: {}, },
           children: [1, 3],
         }, {
           _id: 1,
