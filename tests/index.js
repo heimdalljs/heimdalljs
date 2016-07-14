@@ -69,7 +69,7 @@ describe('heimdall', function() {
 
       return expect(nodeA).to.eventually.be.rejectedWith('cannot stop: not the current node');
     });
-});
+  });
 
   describe('.start/stop/resume', function() {
     it('supports basic start/stop', function() {
@@ -164,6 +164,133 @@ describe('heimdall', function() {
       expect(function () {
         cookieA.resume();
       }).to.throw('cannot resume: not stopped');
+    });
+  });
+
+  describe('toJSON', function () {
+    function SchemaA() {
+      this.count = 0;
+    }
+
+    function SchemaB() {
+      this.statA = 0;
+      this.statB = 0;
+    }
+
+    it('reports node-specific stats for an individual node', function () {
+      return expect(heimdall.node('node-a', SchemaA, function (h) {
+        h.count = 6;
+      }).then(function(){
+        return heimdall.toJSON();
+      })).to.eventually.deep.equal({
+        root: {
+          _id: 0,
+          id: {
+            name: 'heimdall',
+          },
+          stats: {
+            own: { },
+          },
+          children: [{
+            _id: 1,
+            id: {
+              name: 'node-a',
+            },
+            stats: {
+              own: {
+                count: 6,
+              },
+            },
+            children: [],
+          }],
+        }
+      });
+    });
+
+    it('reports node-specific stats for a graph', function (){
+      return expect(heimdall.node('node-a', SchemaA, function (h) {
+        h.count = 1;
+        return heimdall.node('node-b', SchemaB, function (h) {
+          h.statA = 2;
+          h.statB = 4;
+          return heimdall.node('node-b2', SchemaB, function (h) {
+            h.statA = 8;
+            h.statB = 16;
+          });
+        }).then(function () {
+          return heimdall.node('node-b', SchemaB, function (h) {
+            h.statA = 32;
+            h.statB = 64;
+          });
+        });
+      }).then(function(){
+        return heimdall.toJSON();
+      })).to.eventually.deep.equal({
+        "root": {
+          "_id": 0,
+          "id": {
+            "name": "heimdall"
+          },
+          "stats": {
+            "own": {}
+          },
+          "children": [
+            {
+              "_id": 1,
+              "id": {
+                "name": "node-a"
+              },
+              "stats": {
+                "own": {
+                  "count": 1
+                }
+              },
+              "children": [
+                {
+                  "_id": 2,
+                  "id": {
+                    "name": "node-b"
+                  },
+                  "stats": {
+                    "own": {
+                      "statA": 2,
+                      "statB": 4
+                    }
+                  },
+                  "children": [
+                    {
+                      "_id": 3,
+                      "id": {
+                        "name": "node-b2"
+                      },
+                      "stats": {
+                        "own": {
+                          "statA": 8,
+                          "statB": 16
+                        }
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "_id": 4,
+                  "id": {
+                    "name": "node-b"
+                  },
+                  "stats": {
+                    "own": {
+                      "statA": 32,
+                      "statB": 64
+                    }
+                  },
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      });
     });
   });
 
