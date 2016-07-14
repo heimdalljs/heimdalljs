@@ -1,11 +1,3 @@
-TODO
-
-  - monitor provided partial schema?
-    - cpu
-    - fs
-  - monitor registration?
-
-
 ```js
 var heimdall = require('heimdall');
 var heimdallCpu = require('heimdall/monitors/cpu');
