@@ -38,50 +38,50 @@ heimdall.node('broccoli', function () {
 {
   "nodes": [{
     "id": 0,
-    "name": "broccoli",,
-    stats: {
-      cpu: {
-        self: 10,
+    "name": "broccoli",
+    "stats": {
+      "cpu": {
+        "self": 10,
       },
-      fs: { /* ... */ },
+      "fs": {},
     },
-    children: {
-      start: [1],
-      end: [1],
+    "children": {
+      "start": [1],
+      "end": [1],
     },
   }, {
     "id": 1,
-    "name": "node:babel"
-    stats: {
-      builds: 1,
-      cpu: {
-        self: 20,
+    "name": "node:babel",
+    "stats": {
+      "builds": 1,
+      "cpu": {
+        "self": 20,
       },
-      fs: { /* ... */ },
+      "fs": {},
     },
-    children: {
-      start: [2, 3],
-      end: [2, 3],
+    "children": {
+      "start": [2, 3],
+      "end": [2, 3],
     },
   }, {
     "id": 2,
-    "name": "node:persistent-filter"
-    stats: {
-      builds: 1,
-      cpu: {
-        self: 30,
+    "name": "node:persistent-filter",
+    "stats": {
+      "builds": 1,
+      "cpu": {
+        "self": 30,
       },
-      fs: { /* ... */ },
+      "fs": {},
     },
   }, {
     "id": 3,
-    "name": "node:caching-writer"
-    stats: {
-      builds: 1,
-      cpu: {
-        self: 40,
+    "name": "node:caching-writer",
+    "stats": {
+      "builds": 1,
+      "cpu": {
+        "self": 40,
       },
-      fs: { /* ... */ },
+      "fs": {},
     },
   }],
 }
