@@ -183,15 +183,18 @@ describe('heimdall', function() {
       }).then(function(){
         return heimdall.toJSON();
       })).to.eventually.deep.equal({
-        root: {
-          _id: 0,
-          id: {
-            name: 'heimdall',
+        nodes: [
+          {
+            _id: 0,
+            id: {
+              name: 'heimdall',
+            },
+            stats: {
+              own: { },
+            },
+            children: [1],
           },
-          stats: {
-            own: { },
-          },
-          children: [{
+          {
             _id: 1,
             id: {
               name: 'node-a',
@@ -202,8 +205,8 @@ describe('heimdall', function() {
               },
             },
             children: [],
-          }],
-        }
+          }
+        ]
       });
     });
 
@@ -226,70 +229,70 @@ describe('heimdall', function() {
       }).then(function(){
         return heimdall.toJSON();
       })).to.eventually.deep.equal({
-        "root": {
-          "_id": 0,
-          "id": {
-            "name": "heimdall"
+        nodes: [
+          {
+            _id: 0,
+            id: {
+              name: "heimdall"
+            },
+            stats: {
+              own: {}
+            },
+            children: [1],
           },
-          "stats": {
-            "own": {}
+          {
+            _id: 1,
+            id: {
+              name: "node-a"
+            },
+            stats: {
+              own: {
+                count: 1
+              }
+            },
+            children: [2,4],
           },
-          "children": [
-            {
-              "_id": 1,
-              "id": {
-                "name": "node-a"
-              },
-              "stats": {
-                "own": {
-                  "count": 1
-                }
-              },
-              "children": [
-                {
-                  "_id": 2,
-                  "id": {
-                    "name": "node-b"
-                  },
-                  "stats": {
-                    "own": {
-                      "statA": 2,
-                      "statB": 4
-                    }
-                  },
-                  "children": [
-                    {
-                      "_id": 3,
-                      "id": {
-                        "name": "node-b2"
-                      },
-                      "stats": {
-                        "own": {
-                          "statA": 8,
-                          "statB": 16
-                        }
-                      },
-                      "children": []
-                    }
-                  ]
-                },
-                {
-                  "_id": 4,
-                  "id": {
-                    "name": "node-b"
-                  },
-                  "stats": {
-                    "own": {
-                      "statA": 32,
-                      "statB": 64
-                    }
-                  },
-                  "children": []
-                }
-              ]
-            }
-          ]
-        }
+
+          {
+            _id: 2,
+            id: {
+              name: "node-b"
+            },
+            stats: {
+              own: {
+                statA: 2,
+                statB: 4
+              }
+            },
+            children: [3],
+          },
+          {
+            _id: 3,
+            id: {
+              name: "node-b2"
+            },
+            stats: {
+              own: {
+                statA: 8,
+                statB: 16
+              }
+            },
+            children: []
+          },
+          {
+            _id: 4,
+            id: {
+              name: "node-b"
+            },
+            stats: {
+              own: {
+                statA: 32,
+                statB: 64
+              }
+            },
+            children: []
+          }
+        ]
       });
     });
   });
