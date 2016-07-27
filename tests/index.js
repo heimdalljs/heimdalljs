@@ -1,15 +1,15 @@
-var chai = require('chai'), expect = chai.expect;
-var chaiAsPromised = require('chai-as-promised');
-var chaiFiles = require('chai-files'), file = chaiFiles.file;
-var RSVP = require('RSVP');
-var heimdall = require('../');
+import chai from 'chai';
+import chaiAsPromised from 'chai-as-promised';
+import { Promise, defer } from 'rsvp';
+import heimdall from '../';
+
+const { expect } = chai;
 
 chai.use(chaiAsPromised);
-chai.use(chaiFiles);
 
 function getJSONSansTime() {
-  var json = heimdall.toJSON();
-  for (var i=0; i<json.nodes.length; ++i) {
+  let json = heimdall.toJSON();
+  for (let i=0; i<json.nodes.length; ++i) {
     delete json.nodes[i].stats.time;
   }
   return json;
@@ -27,14 +27,14 @@ describe('heimdall', function() {
 
   describe('.node', function() {
     it('implicitly stops the cookie when the promise resolves', function () {
-      var callbackInvoked = false;
+      let callbackInvoked = false;
 
       expect(heimdall.stack).to.eql([]);
 
-      return heimdall.node('node-a', function () {
+      return heimdall.node('node-a', () => {
         callbackInvoked = true;
         expect(heimdall.stack).to.eql(['node-a']);
-      }).finally(function () {
+      }).finally(() => {
         expect(callbackInvoked).to.equal(true);
         expect(heimdall.stack).to.eql([]);
       });
@@ -43,35 +43,29 @@ describe('heimdall', function() {
     it('implicitly stops the cookie when the promise resolves', function () {
       expect(heimdall.stack).to.eql([]);
 
-      return heimdall.node('node-a', function () {
+      return heimdall.node('node-a', () => {
         expect(heimdall.stack).to.eql(['node-a']);
 
-        var nodeB = heimdall.node('node-b', function() {
+        let nodeB = heimdall.node('node-b', () => {
           expect(heimdall.stack).to.eql(['node-a', 'node-b']);
         });
 
         expect(heimdall.stack).to.eql(['node-a', 'node-b']);
 
         return nodeB;
-      }).finally(function () {
-        expect(heimdall.stack).to.eql([]);
-      });
+      }).finally(() => expect(heimdall.stack).to.eql([]));
     });
 
     it('throws when child nodes escape their parent', function () {
       expect(heimdall.stack).to.eql([]);
 
-      var deferA = RSVP.defer();
-      var nodeA = heimdall.node('node-a', function () {
-        return deferA.promise;
-      });
+      let deferA = defer();
+      let nodeA = heimdall.node('node-a',  () => deferA.promise);
 
       expect(heimdall.stack).to.eql(['node-a']);
 
-      var deferB = RSVP.defer();
-      var nodeB = heimdall.node('node-b', function () {
-        return deferB.promise;
-      });
+      let deferB = defer();
+      let nodeB = heimdall.node('node-b', () => deferB.promise);
 
       deferA.resolve();
 
@@ -83,10 +77,10 @@ describe('heimdall', function() {
     it('supports basic start/stop', function() {
       expect(heimdall.stack).to.eql([]);
 
-      var cookieA = heimdall.start({ name: 'node-a' });
+      let cookieA = heimdall.start({ name: 'node-a' });
       expect(heimdall.stack).to.eql(['node-a']);
 
-      var cookieB = heimdall.start({ name: 'node-b'});
+      let cookieB = heimdall.start({ name: 'node-b'});
       expect(heimdall.stack).to.eql(['node-a', 'node-b']);
 
       cookieB.stop();
@@ -99,7 +93,7 @@ describe('heimdall', function() {
     it('supports simple name shorthand', function () {
       expect(heimdall.stack).to.eql([]);
 
-      var cookieA = heimdall.start('node-a');
+      let cookieA = heimdall.start('node-a');
       expect(heimdall.stack).to.eql(['node-a']);
 
       cookieA.stop();
@@ -109,10 +103,10 @@ describe('heimdall', function() {
     it('supports resume', function () {
       expect(heimdall.stack).to.eql([]);
 
-      var cookieA = heimdall.start({ name: 'node-a' });
+      let cookieA = heimdall.start({ name: 'node-a' });
       expect(heimdall.stack).to.eql(['node-a']);
 
-      var cookieB = heimdall.start({ name: 'node-b'});
+      let cookieB = heimdall.start({ name: 'node-b'});
       expect(heimdall.stack).to.eql(['node-a', 'node-b']);
 
       cookieB.stop();
@@ -131,16 +125,16 @@ describe('heimdall', function() {
     it('restores the node at time of resume', function () {
       expect(heimdall.stack).to.eql([]);
 
-      var cookieA = heimdall.start('node-a');
+      let cookieA = heimdall.start('node-a');
       expect(heimdall.stack).to.eql(['node-a']);
 
-      var cookieB = heimdall.start('node-b');
+      let cookieB = heimdall.start('node-b');
       expect(heimdall.stack).to.eql(['node-a', 'node-b']);
 
       cookieB.stop();
       expect(heimdall.stack).to.eql(['node-a']);
 
-      var cookieC = heimdall.start('node-c');
+      let cookieC = heimdall.start('node-c');
       expect(heimdall.stack).to.eql(['node-a', 'node-c']);
 
       cookieB.resume();
@@ -157,38 +151,38 @@ describe('heimdall', function() {
     });
 
     it('throws if stop is called when stopped', function () {
-      var cookieA = heimdall.start({ name: 'node-a' });
+      let cookieA = heimdall.start({ name: 'node-a' });
 
       cookieA.stop();
 
-      expect(function () {
-        cookieA.stop();
-      }).to.throw('cannot stop: not the current node');
+      expect(() => cookieA.stop()).to.throw('cannot stop: not the current node');
     });
 
     it('throws if resume is called when not stopped', function () {
-      var cookieA = heimdall.start({ name: 'node-a' });
+      let cookieA = heimdall.start({ name: 'node-a' });
 
-      expect(function () {
-        cookieA.resume();
-      }).to.throw('cannot resume: not stopped');
+      expect(() => cookieA.resume()).to.throw('cannot resume: not stopped');
     });
   });
 
   describe('toJSON', function () {
-    function SchemaA() {
-      this.count = 0;
+    class SchemaA {
+      constructor() {
+        this.count = 0;
+      }
     }
 
-    function SchemaB() {
-      this.statA = 0;
-      this.statB = 0;
+    class SchemaB {
+      constructor() {
+        this.statA = 0;
+        this.statB = 0;
+      }
     }
 
     it('always includes time', function() {
-      return heimdall.node('node-a', function () {}).then(function () {
-        var json = heimdall.toJSON();
-        var nodeA = json.nodes.find(function (n) { return n.id.name === 'node-a'; });
+      return heimdall.node('node-a', () => {}).then(() => {
+        let json = heimdall.toJSON();
+        let nodeA = json.nodes.find(n => n.id.name === 'node-a');
 
         expect(nodeA).to.not.eql(undefined);
         expect(typeof nodeA.stats.time).to.eql('object');
@@ -196,7 +190,7 @@ describe('heimdall', function() {
     });
 
     it('reports node-specific stats for an individual node', function () {
-      return expect(heimdall.node('node-a', SchemaA, function (h) {
+      return expect(heimdall.node('node-a', SchemaA, h => {
         h.count = 6;
       }).then(getJSONSansTime)).to.eventually.deep.equal({
         nodes: [
@@ -227,17 +221,17 @@ describe('heimdall', function() {
     });
 
     it('reports node-specific stats for a graph', function (){
-      return expect(heimdall.node('node-a', SchemaA, function (h) {
+      return expect(heimdall.node('node-a', SchemaA, h => {
         h.count = 1;
-        return heimdall.node('node-b', SchemaB, function (h) {
+        return heimdall.node('node-b', SchemaB, h => {
           h.statA = 2;
           h.statB = 4;
-          return heimdall.node('node-b2', SchemaB, function (h) {
+          return heimdall.node('node-b2', SchemaB, h => {
             h.statA = 8;
             h.statB = 16;
           });
-        }).then(function () {
-          return heimdall.node('node-b', SchemaB, function (h) {
+        }).then(() => {
+          return heimdall.node('node-b', SchemaB, h => {
             h.statA = 32;
             h.statB = 64;
           });
@@ -313,68 +307,64 @@ describe('heimdall', function() {
 
   describe('.statsFor', function () {
     it('throws if no schema is registered for the given name', function () {
-      heimdall.registerMonitor('valid', function Schema() {});
+      heimdall.registerMonitor('valid',  class Schema {});
 
-      var stats = heimdall.statsFor('valid');
+      let stats = heimdall.statsFor('valid');
 
       expect(typeof stats).to.equal('object');
 
-      expect(function () {
+      expect(() => {
         heimdall.statsFor('something completely different');
       }).to.throw('No monitor registered for "something completely different"');
     });
   });
 
   describe('monitors', function() {
-    function MonitorSchema() {
-      this.mstatA = 0;
-      this.mstatB = 0;
+    class MonitorSchema {
+      constructor() {
+        this.mstatA = 0;
+        this.mstatB = 0;
+      }
     }
 
-    var counter;
+    let counter;
 
     function monitorEvent() {
       counter++;
-      var stats = heimdall.statsFor('my-monitor');
+      let stats = heimdall.statsFor('my-monitor');
 
       stats.mstatA = counter;
       stats.mstatB = counter * 10;
     }
 
-    beforeEach(function () {
-      counter = 0;
-    });
+    beforeEach(() => counter = 0);
 
     it('throws if another schema is registered at the given namespace', function () {
-      function MySchema() {}
+      class MySchema {}
 
       heimdall.registerMonitor('some-monitor', MySchema);
-      expect(function () {
+      expect(() => {
         heimdall.registerMonitor('some-monitor', MySchema);
       }).to.throw('A monitor for "some-monitor" is already registered');
     });
 
     it('throws if using the reserved namespaces own or time', function() {
-      expect(function () {
-        heimdall.registerMonitor('own', function MySchema() {});
-      }).to.throw('Cannot register monitor at namespace "own".  "own" and "time" are reserved');
+      expect(() => {
+        heimdall.registerMonitor('own', class MySchema {});
+      }).to.throw(/Cannot register monitor at namespace "own"/);
 
-      expect(function () {
-        heimdall.registerMonitor('time', function MySchema() {});
-      }).to.throw('Cannot register monitor at namespace "time".  "own" and "time" are reserved');
+      expect(() => {
+        heimdall.registerMonitor('time', class MySchema {});
+      }).to.throw(/Cannot register monitor at namespace "time"/);
     });
 
     it('records stats for each node', function() {
       heimdall.registerMonitor('my-monitor', MonitorSchema);
 
-      return expect(heimdall.node('node-a', function () {
-        return heimdall.node('node-b', function () {
-          monitorEvent();
-        }).then(monitorEvent);
-      }).then(function () {
-        return heimdall.node('node-c', function () {
-          monitorEvent();
-        });
+      return expect(heimdall.node('node-a', () => {
+        return heimdall.node('node-b',  monitorEvent).then(monitorEvent);
+      }).then(() => {
+        return heimdall.node('node-c', monitorEvent);
       }).then(getJSONSansTime)).to.eventually.deep.equal({
         nodes: [{
           _id: 0,

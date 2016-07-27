@@ -2,9 +2,10 @@
   "name": "heimdalljs",
   "version": "0.1.0",
   "description": "TODO",
-  "main": "index.js",
+  "main": "dist/bundle.cjs.js",
   "scripts": {
-    "test": "mocha tests/",
+    "build": "rollup --no-strict -c test.config.js && rollup -c index.config.js",
+    "test": "npm run build && mocha dist/tests/bundle.cjs",
     "test:debug": "mocha --no-timeouts debug tests/"
   },
   "repository": {
@@ -22,13 +23,18 @@
   ],
   "devDependencies": {
     "broccoli": "^0.16.9",
-    "chai": "^3.2.0",
-    "chai-as-promised": "^5.1.0",
+    "chai": "^3.5.0",
+    "chai-as-promised": "^5.3.0",
     "chai-files": "^1.2.0",
     "mocha": "^2.2.5",
-    "mocha-jshint": "~2.2.3"
+    "mocha-jshint": "~2.2.3",
+    "rollup": "^0.34.1",
+    "rollup-plugin-buble": "^0.12.1",
+    "rollup-plugin-commonjs": "^3.3.1",
+    "rollup-plugin-node-resolve": "^1.7.1"
   },
   "dependencies": {
-    "semver": "^5.2.0"
+    "rsvp": "^3.2.1",
+    "semver": "^5.3.0"
   }
 }
