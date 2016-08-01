@@ -1,7 +1,7 @@
 {
   "name": "heimdalljs",
   "version": "0.1.0",
-  "description": "TODO",
+  "description": "Structured instrumentation library",
   "main": "index.js",
   "scripts": {
     "test": "mocha tests/",
