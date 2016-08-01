@@ -29,6 +29,7 @@
     "mocha-jshint": "~2.2.3"
   },
   "dependencies": {
+    "rsvp": "^3.2.1",
     "semver": "^5.2.0"
   }
 }
