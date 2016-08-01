@@ -325,6 +325,21 @@ describe('heimdall', function() {
     });
   });
 
+  describe('.configFor', function() {
+    it('returns a config bucket for the given name', function() {
+      expect(heimdall.configFor('logging')).to.deep.equal({});
+    });
+
+    it('returns the same config each time for a given name', function() {
+      var logConfig = heimdall.configFor('logging');
+
+      logConfig.depth = 30;
+
+      expect(heimdall.configFor('logging')).to.equal(heimdall.configFor('logging'));
+      expect(heimdall.configFor('logging').depth).to.equal(30);
+    });
+  });
+
   describe('monitors', function() {
     function MonitorSchema() {
       this.mstatA = 0;
