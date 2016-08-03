@@ -188,7 +188,13 @@ describe('heimdall', function() {
     it('always includes time', function() {
       return heimdall.node('node-a', function () {}).then(function () {
         var json = heimdall.toJSON();
-        var nodeA = json.nodes.find(function (n) { return n.id.name === 'node-a'; });
+        var nodeA;
+        for (var i=0; i<json.nodes.length; ++i) {
+          if (json.nodes[i].id.name === 'node-a') {
+            nodeA = json.nodes[i];
+            break;
+          }
+        }
 
         expect(nodeA).to.not.eql(undefined);
         expect(typeof nodeA.stats.time).to.eql('object');
