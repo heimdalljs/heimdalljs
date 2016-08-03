@@ -340,6 +340,64 @@ describe('heimdall', function() {
     });
   });
 
+  describe('nodes', function() {
+    function nodeNames() {
+      var count = 0;
+      var names = [];
+
+      heimdall.visitPreOrder(function (node) {
+        names.push(node.id.name);
+      });
+
+      // ignore root
+      return names.slice(1).join(' ');
+    }
+
+    describe('.remove', function() {
+      describe('for the root node', function() {
+        it('throws an error', function() {
+          expect(function () {
+            expect(heimdall.current.isRoot).to.equal(true);
+            heimdall.current.remove();
+          }).to.throw('Cannot remove the root heimdalljs node.');
+        });
+      });
+
+      describe('for non-root nodes', function() {
+        it('frees the node from its parent', function() {
+          expect(nodeNames()).to.equal('');
+
+          var cookieA = heimdall.start('a');
+          var cookieAA = heimdall.start('aa');
+
+          expect(nodeNames()).to.equal('a aa');
+
+          cookieAA.stop();
+
+          expect(nodeNames()).to.equal('a aa');
+
+          expect(cookieAA.node.remove()).to.equal(cookieAA.node);
+
+          expect(nodeNames()).to.equal('a');
+        });
+      });
+
+      // Really this is an error for any active node (ie path from current ->
+      // root
+      //
+      // A case could be made it's an error for any node with an outstanding
+      // cookie
+      describe('for the current node', function() {
+        it('throws an error', function() {
+          var cookie = heimdall.start('node');
+          expect(function () {
+            cookie.node.remove();
+          }).to.throw('Cannot remove an active heimdalljs node.');
+        });
+      });
+    });
+  });
+
   describe('monitors', function() {
     function MonitorSchema() {
       this.mstatA = 0;
