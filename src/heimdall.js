@@ -1,7 +1,11 @@
 'use strict';
 
 var RSVP = require('rsvp');
+
 var VERSION = require('../package.json').version;
+var Cookie = require('./cookie');
+var HeimdallNode = require('./node');
+
 
 module.exports = Heimdall;
 function Heimdall() {
@@ -160,94 +164,3 @@ Object.defineProperty(Heimdall.prototype, 'stack', {
   }
 });
 
-function HeimdallNode(heimdall, id, data, parent) {
-  this.heimdall = heimdall;
-
-  this.id = id;
-  this._id = heimdall._nextId++;
-  this.stats = this.heimdall._createStats(data);
-  this.children = [];
-  this.parent = parent;
-}
-
-Object.defineProperty(HeimdallNode.prototype, 'isRoot', {
-  get: function () {
-    return this.parent === undefined;
-  },
-});
-
-HeimdallNode.prototype.visitPreOrder = function (cb) {
-  cb(this);
-
-  for (var i = 0; i < this.children.length; i++) {
-    this.children[i].visitPreOrder(cb);
-  }
-};
-
-HeimdallNode.prototype.visitPostOrder = function (cb) {
-  for (var i = 0; i < this.children.length; i++) {
-    this.children[i].visitPostOrder(cb);
-  }
-
-  cb(this);
-};
-
-HeimdallNode.prototype.toJSON = function () {
-  return {
-    _id: this._id,
-    id: this.id,
-    stats: this.stats,
-    children: this.children.map(function (child) { return child._id; }),
-  };
-};
-
-HeimdallNode.prototype.toJSONSubgraph = function () {
-  var nodes = [];
-
-  this.visitPreOrder(function(node) {
-    nodes.push(node.toJSON());
-  });
-
-  return nodes;
-};
-
-HeimdallNode.prototype.addChild = function (node) {
-  this.children.push(node);
-};
-
-function Cookie(node, heimdall) {
-  this.node = node;
-  this.restoreNode = this.node.parent;
-  this.heimdall = heimdall;
-  this.stopped = false;
-}
-
-Object.defineProperty(Cookie.prototype, 'stats', {
-  get: function() {
-    return this.node.stats.own;
-  }
-});
-
-Cookie.prototype.stop = function() {
-  var monitor;
-
-  if (this.heimdall._current !== this.node) {
-    throw new TypeError('cannot stop: not the current node');
-  } else if (this.stopped === true) {
-    throw new TypeError('cannot stop: already stopped');
-  }
-
-  this.stopped = true;
-  this.heimdall._recordTime();
-  this.heimdall._current = this.restoreNode;
-};
-
-Cookie.prototype.resume = function() {
-  if (this.stopped === false) {
-    throw new TypeError('cannot resume: not stopped');
-  }
-
-  this.stopped = false;
-  this.restoreNode = this.heimdall._current;
-  this.heimdall._current = this.node;
-};

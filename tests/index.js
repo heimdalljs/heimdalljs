@@ -1,7 +1,7 @@
 var chai = require('chai'), expect = chai.expect;
 var chaiAsPromised = require('chai-as-promised');
 var chaiFiles = require('chai-files'), file = chaiFiles.file;
-var RSVP = require('RSVP');
+var RSVP = require('rsvp');
 var heimdall = require('../');
 
 chai.use(chaiAsPromised);
@@ -188,7 +188,13 @@ describe('heimdall', function() {
     it('always includes time', function() {
       return heimdall.node('node-a', function () {}).then(function () {
         var json = heimdall.toJSON();
-        var nodeA = json.nodes.find(function (n) { return n.id.name === 'node-a'; });
+        var nodeA;
+        for (var i=0; i<json.nodes.length; ++i) {
+          if (json.nodes[i].id.name === 'node-a') {
+            nodeA = json.nodes[i];
+            break;
+          }
+        }
 
         expect(nodeA).to.not.eql(undefined);
         expect(typeof nodeA.stats.time).to.eql('object');
@@ -337,6 +343,64 @@ describe('heimdall', function() {
 
       expect(heimdall.configFor('logging')).to.equal(heimdall.configFor('logging'));
       expect(heimdall.configFor('logging').depth).to.equal(30);
+    });
+  });
+
+  describe('nodes', function() {
+    function nodeNames() {
+      var count = 0;
+      var names = [];
+
+      heimdall.visitPreOrder(function (node) {
+        names.push(node.id.name);
+      });
+
+      // ignore root
+      return names.slice(1).join(' ');
+    }
+
+    describe('.remove', function() {
+      describe('for the root node', function() {
+        it('throws an error', function() {
+          expect(function () {
+            expect(heimdall.current.isRoot).to.equal(true);
+            heimdall.current.remove();
+          }).to.throw('Cannot remove the root heimdalljs node.');
+        });
+      });
+
+      describe('for non-root nodes', function() {
+        it('frees the node from its parent', function() {
+          expect(nodeNames()).to.equal('');
+
+          var cookieA = heimdall.start('a');
+          var cookieAA = heimdall.start('aa');
+
+          expect(nodeNames()).to.equal('a aa');
+
+          cookieAA.stop();
+
+          expect(nodeNames()).to.equal('a aa');
+
+          expect(cookieAA.node.remove()).to.equal(cookieAA.node);
+
+          expect(nodeNames()).to.equal('a');
+        });
+      });
+
+      // Really this is an error for any active node (ie path from current ->
+      // root
+      //
+      // A case could be made it's an error for any node with an outstanding
+      // cookie
+      describe('for the current node', function() {
+        it('throws an error', function() {
+          var cookie = heimdall.start('node');
+          expect(function () {
+            cookie.node.remove();
+          }).to.throw('Cannot remove an active heimdalljs node.');
+        });
+      });
     });
   });
 
