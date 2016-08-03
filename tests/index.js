@@ -1,7 +1,7 @@
 var chai = require('chai'), expect = chai.expect;
 var chaiAsPromised = require('chai-as-promised');
 var chaiFiles = require('chai-files'), file = chaiFiles.file;
-var RSVP = require('RSVP');
+var RSVP = require('rsvp');
 var heimdall = require('../');
 
 chai.use(chaiAsPromised);
