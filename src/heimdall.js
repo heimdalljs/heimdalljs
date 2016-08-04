@@ -71,7 +71,6 @@ Heimdall.prototype.start = function (name, Schema) {
 };
 
 Heimdall.prototype._recordTime = function () {
-  debugger;
   var hrtime = process.hrtime();
   var time = hrtime[0] * 1e9 + hrtime[1];
 

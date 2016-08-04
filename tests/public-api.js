@@ -326,20 +326,18 @@ describe('HeimdallNode', function() {
   });
 
   describe('remove', function() {
-    it('errors if called on the non-current node', function() {
+    // Really this should error if called on any active node, ie any node from
+    // current to root
+    it('errors if called on the current node', function() {
       var heimdall = new Heimdall();
 
       heimdall.start('a');
 
       var nodeA = heimdall.current;
 
-      heimdall.start('b');
-
-      expect(heimdall.current).to.not.equal(nodeA);
-
       expect(function () {
         nodeA.remove();
-      }).to.throw('something');
+      }).to.throw('Cannot remove an active heimdalljs node.');
     });
 
     it('errors if called on nodes without a parent', function() {
@@ -347,7 +345,7 @@ describe('HeimdallNode', function() {
 
       expect(function () {
         orphanNode.remove();
-      }).to.throw('something');
+      }).to.throw(/Cannot remove/);
     });
 
     it('errors if called on the root node', function() {
@@ -359,7 +357,7 @@ describe('HeimdallNode', function() {
 
       expect(function () {
         heimdall.root.remove();
-      }).to.throw('something');
+      }).to.throw('Cannot remove the root heimdalljs node.');
     });
 
     it('calls removeChild on its parent', function() {
@@ -369,11 +367,15 @@ describe('HeimdallNode', function() {
 
       var nodeA = heimdall.current;
 
-      heimdall.start('b');
+      var cookieB = heimdall.start('b');
 
       var nodeB = heimdall.current;
 
       expect(nodeB._id).to.equal(2);
+
+      cookieB.stop();
+
+      expect(heimdall.current).to.equal(nodeA);
 
       expect(nodeB.parent).to.equal(nodeA);
       expect(nodeA.toJSON().children).to.eql([2]);
@@ -385,15 +387,59 @@ describe('HeimdallNode', function() {
     });
   });
 
-  describe('.visitPreOrder', function() {
-    it('has tests', function() {
-      expect('assertions exist').to.eql(true);
-    });
-  });
+  describe('visiting', function() {
+    var root;
+    // root
+    //-  |- a1
+    //   |   |- a1.b
+    //   |
+    //   |- a2
 
-  describe('.visitPostOrder', function() {
-    it('has tests', function() {
-      expect('assertions exist').to.eql(true);
+
+    beforeEach( function() {
+      heimdall = new Heimdall();
+
+      var cookieRoot = heimdall.start('root');
+      // root of subtree
+      root = heimdall.current;
+
+      var cookieA1 = heimdall.start('a1');
+      var cookieB = heimdall.start('a1.b');
+
+      cookieB.stop();
+      cookieA1.stop();
+
+      heimdall.start('a2').stop();
+
+      cookieRoot.stop();
+
+      heimdall.start('sibling1').stop();
+      heimdall.start('sibling2').stop();
+    });
+    
+    it('.visitPreOrder visits nodes depth first pre-order', function() {
+      var path = [];
+
+      root.visitPreOrder(function (node) {
+        path.push(node.id.name);
+      });
+
+      expect(path).to.eql([
+        'root', 'a1', 'a1.b', 'a2',
+      ]);
+    });
+
+
+    it('.visitPostOrder visits nodes depth first post-order', function() {
+      var path = [];
+
+      root.visitPostOrder(function (node) {
+        path.push(node.id.name);
+      });
+
+      expect(path).to.eql([
+        'a1.b', 'a1', 'a2', 'root',
+      ]);
     });
   });
 });
