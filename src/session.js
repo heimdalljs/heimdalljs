@@ -1,38 +1,42 @@
-module.exports = HeimdallSession;
-function HeimdallSession() {
-  this.reset();
-}
-
-HeimdallSession.prototype.reset = function () {
-  this._nextId = 0;
-  this.current = undefined;
-  this.root = null;
-  this.previousTimeNS = 0;
-  this.monitorSchemas = new Dict();
-  this.configs = new Dict();
-};
-
-HeimdallSession.prototype.generateNextId = function () {
-  return this._nextId++;
-};
-
 // provides easily interceptable indirection.
-function Dict() {
-  this._storage  = {};
+class Dict {
+  constructor() {
+    this._storage  = {};
+  }
+
+  has(key) {
+    return key in this._storage;
+  }
+
+  get(key) {
+    return this._storage[key];
+  }
+
+  set(key, value) {
+    return this._storage[key] = value;
+  }
+
+  'delete'(key) {
+    delete this._storage[key];
+  }
 }
 
-Dict.prototype.has = function (key) {
-  return key in this._storage;
-};
+export default class HeimdallSession {
 
-Dict.prototype.get = function(key) {
-  return this._storage[key];
-};
+  constructor() {
+    this.reset();
+  }
 
-Dict.prototype.set = function(key, value) {
-  return this._storage[key] = value;
-};
+  reset() {
+    this._nextId = 0;
+    this.current = undefined;
+    this.root = null;
+    this.previousTimeNS = 0;
+    this.monitorSchemas = new Dict();
+    this.configs = new Dict();
+  }
 
-Dict.prototype.delete = function(key) {
-  delete this._storage[key];
-};
+  generateNextId() {
+    return this._nextId++;
+  }
+}

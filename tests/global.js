@@ -1,15 +1,16 @@
-var chai = require('chai'), expect = chai.expect;
-var chaiAsPromised = require('chai-as-promised');
-var path = require('path');
+import chai from 'chai';
+import chaiAsPromised from 'chai-as-promised';
+import Session from '../src/session';
 
-var Session = require('../src/session');
+const { expect } = chai;
 
-var indexPath = path.resolve(__dirname + '/../index.js');
+const path = require('path');
+const indexPath = path.resolve(__dirname + '/../bundle.cjs.js');
 
 chai.use(chaiAsPromised);
 
 describe('the exported global instance', function() {
-  beforeEach( function() {
+  beforeEach(function() {
     delete process._heimdall_session_1;
     delete require.cache[indexPath];
   });
@@ -18,10 +19,10 @@ describe('the exported global instance', function() {
     it('reuses that session', function() {
       expect(process._heimdall_session_1).to.equal(undefined);
 
-      var session = new Session();
+      let session = new Session();
       process._heimdall_session_1 = session;
 
-      var global = require(indexPath);
+      let global = require(indexPath);
 
       expect(global._session).to.equal(session);
       expect(process._heimdall_session_1).to.equal(session);
@@ -32,7 +33,7 @@ describe('the exported global instance', function() {
     it('creates a new session and installs it on process', function() {
       expect(process._heimdall_session_1).to.equal(undefined);
 
-      var global = require(indexPath);
+      let global = require(indexPath);
 
       expect(global._session).to.equal(process._heimdall_session_1);
       expect(global._session).to.be.an.instanceOf(Session);

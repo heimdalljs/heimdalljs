@@ -1,11 +1,8 @@
-var Heimdall = require('./src/heimdall');
-var Session = require('./src/session');
+import Heimdall from './src/heimdall';
+import Session from './src/session';
 
+import sessionSetup from './src/session-setup'
 
-// The name of the property encodes the session/node compatibilty version
-if (!process._heimdall_session_1) {
-  process._heimdall_session_1 = new Session();
-}
+sessionSetup(process);
 
-
-module.exports = new Heimdall(process._heimdall_session_1);
+export default new Heimdall(process._heimdall_session_1);
