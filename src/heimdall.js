@@ -14,7 +14,7 @@ function Heimdall(session) {
   }
 
   this._session = session;
-  this._reset();
+  this._reset(false);
 }
 
 Object.defineProperty(Heimdall.prototype, 'current', {
@@ -29,12 +29,17 @@ Object.defineProperty(Heimdall.prototype, 'root', {
   }
 });
 
-Heimdall.prototype._reset = function () {
-  this._session.reset();
+Heimdall.prototype._reset = function (resetSession) {
+  if (resetSession !== false) {
+    this._session.reset();
+  }
 
-  this._previousTime = undefined;
-  this.start('heimdall');
-  this._session.root = this._session.current;
+  if (!this.root) {
+    // The first heimdall to start will create the session and root.  Subsequent
+    // heimdall instances continue to use the existing graph
+    this.start('heimdall');
+    this._session.root = this._session.current;
+  }
 };
 
 Heimdall.prototype.start = function (name, Schema) {
@@ -55,24 +60,27 @@ Heimdall.prototype.start = function (name, Schema) {
 
   this._recordTime();
 
-  var node = new HeimdallNode(this, id, data, this.current);
-  // always true except for root
+  var node = new HeimdallNode(this, id, data);
   if (this.current) {
     this.current.addChild(node);
   }
+
   this._session.current = node;
 
   return new Cookie(node, this);
 };
 
 Heimdall.prototype._recordTime = function () {
-  var time = process.hrtime();
+  debugger;
+  var hrtime = process.hrtime();
+  var time = hrtime[0] * 1e9 + hrtime[1];
+
   // always true except for root
   if (this.current) {
-    var delta = (time[0] - this._previousTime[0]) * 1e9 + (time[1] - this._previousTime[1]);
+    var delta = time - this._session.previousTimeNS;
     this.current.stats.time.self += delta;
   }
-  this._previousTime = time;
+  this._session.previousTimeNS = time;
 };
 
 Heimdall.prototype.node = function (name, Schema, callback, context) {
@@ -87,7 +95,7 @@ Heimdall.prototype.node = function (name, Schema, callback, context) {
   // not escape their parents lifetime. In theory, promises could be augmented
   // to support those more advanced scenarios.
   return new RSVP.Promise(function(resolve) {
-    resolve(callback.call(context, cookie.node.stats.own));
+    resolve(callback.call(context, cookie._node.stats.own));
   }).finally(function() {
     cookie.stop();
   });

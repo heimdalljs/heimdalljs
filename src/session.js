@@ -1,21 +1,20 @@
-var SESSION_VERSION = 1;
-
 module.exports = HeimdallSession;
 function HeimdallSession() {
-  this.version = SESSION_VERSION;
+  this.reset();
 }
 
 HeimdallSession.prototype.reset = function () {
   this._nextId = 0;
   this.current = undefined;
   this.root = null;
+  this.previousTimeNS = 0;
   this.monitorSchemas = new Dict();
   this.configs = new Dict();
 };
 
 HeimdallSession.prototype.generateNextId = function () {
   return this._nextId++;
-}
+};
 
 // provides easily interceptable indirection.
 function Dict() {
@@ -34,3 +33,6 @@ Dict.prototype.set = function(key, value) {
   return this._storage[key] = value;
 };
 
+Dict.prototype.delete = function(key) {
+  delete this._storage[key];
+};

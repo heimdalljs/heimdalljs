@@ -1,16 +1,22 @@
 module.exports = HeimdallNode;
-function HeimdallNode(heimdall, id, data, parent) {
-  this.heimdall = heimdall;
+function HeimdallNode(heimdall, id, data) {
+  this._heimdall = heimdall;
 
   this._id = heimdall.generateNextId();
   this.id = id;
+
+  if (!(typeof this.id === 'object' && this.id !== null && typeof this.id.name === 'string')) {
+    throw new TypeError('HeimdallNode#id.name must be a string');
+  }
+
   this.stats = {
     own: data,
     time: { self: 0 },
   };
-  this.parent = parent;
 
   this._children = [];
+
+  this.parent = null;
 }
 
 Object.defineProperty(HeimdallNode.prototype, 'isRoot', {
@@ -39,7 +45,7 @@ HeimdallNode.prototype.remove = function () {
   if (!this.parent) {
     throw new Error('Cannot remove the root heimdalljs node.');
   }
-  if (this.heimdall.current === this) {
+  if (this._heimdall.current === this) {
     throw new Error('Cannot remove an active heimdalljs node.');
   }
 
@@ -66,7 +72,13 @@ HeimdallNode.prototype.toJSONSubgraph = function () {
 };
 
 HeimdallNode.prototype.addChild = function (node) {
+  if (node.parent) {
+    throw new TypeError('Node ' + node._id + ' already has a parent.  Cannot add to ' + this._id);
+  }
+
   this._children.push(node);
+
+  node.parent = this;
 };
 
 
@@ -77,6 +89,8 @@ HeimdallNode.prototype.removeChild = function (child) {
     throw new Error('Child(' + child._id + ') not found in Parent(' + this._id + ').  Something is very wrong.');
   }
   this._children.splice(index, 1);
+
+  child.parent = null;
 
   return child;
 };

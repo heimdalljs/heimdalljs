@@ -3,6 +3,8 @@ var chaiAsPromised = require('chai-as-promised');
 var chaiFiles = require('chai-files'), file = chaiFiles.file;
 var RSVP = require('rsvp');
 var heimdall = require('../');
+var Heimdall = require('../heimdall');
+var Session = require('../src/session');
 
 chai.use(chaiAsPromised);
 chai.use(chaiFiles);
@@ -18,6 +20,80 @@ function getJSONSansTime() {
 describe('heimdall', function() {
   beforeEach(function () {
     heimdall._reset();
+  });
+
+  it('creates a new session if none is provided', function() {
+    var h1 = new Heimdall();
+    var h2 = new Heimdall();
+
+    h1.start('a');
+    h2.start('b');
+
+    expect(h1._session).to.not.equal(h2._session);
+    expect(h1.current).to.not.equal(h2.current);
+    expect(h1.root).to.not.equal(h2.root);
+
+    expect(h1.stack).to.eql(['a']);
+    expect(h2.stack).to.eql(['b']);
+  });
+
+  it('uses a provided session', function() {
+    var session = new Session();
+
+    var h1 = new Heimdall(session);
+
+    var root = session.root;
+
+    h1.start('a');
+
+    var h2 = new Heimdall(session);
+
+    h2.start('b');
+
+    expect(session.root).to.equal(root);
+
+    expect(h1._session).to.equal(h2._session);
+    expect(h1.current).to.equal(h2.current);
+    expect(h1.root).to.equal(h2.root);
+
+    expect(h1.stack).to.eql(['a', 'b']);
+    expect(h2.stack).to.eql(['a', 'b']);
+  });
+
+  describe('with nodes from multiple heimdall instances', function() {
+    var origHRTime;
+    var nextTime;
+
+    beforeEach( function() {
+      origHRTime = process.hrtime;
+      nextTime = [0, 0];
+      process.hrtime = function () { return nextTime; };
+    });
+
+    afterEach( function() {
+      process.hrtime = origHRTime;
+    });
+
+    it('sets time correctly over shared sessions', function() {
+      var session = new Session();
+      var h1 = new Heimdall(session);
+      var h2 = new Heimdall(session);
+
+      var cookieA = h1.start('a');
+
+      nextTime = [1, 10];
+      var cookieB = h2.start('b');
+
+      nextTime = [2, 20];
+      cookieB.stop();
+
+      nextTime = [4, 40];
+      cookieA.stop();
+
+      expect(cookieB._node.stats.time.self).to.equal(1e9 + 10);
+      // total A self time is time before B and time after B
+      expect(cookieA._node.stats.time.self).to.equal(1e9 + 10 + 2e9 + 20);
+    });
   });
 
   describe('.node', function() {
@@ -338,64 +414,6 @@ describe('heimdall', function() {
 
       expect(heimdall.configFor('logging')).to.equal(heimdall.configFor('logging'));
       expect(heimdall.configFor('logging').depth).to.equal(30);
-    });
-  });
-
-  describe('nodes', function() {
-    function nodeNames() {
-      var count = 0;
-      var names = [];
-
-      heimdall.visitPreOrder(function (node) {
-        names.push(node.id.name);
-      });
-
-      // ignore root
-      return names.slice(1).join(' ');
-    }
-
-    describe('.remove', function() {
-      describe('for the root node', function() {
-        it('throws an error', function() {
-          expect(function () {
-            expect(heimdall.current.isRoot).to.equal(true);
-            heimdall.current.remove();
-          }).to.throw('Cannot remove the root heimdalljs node.');
-        });
-      });
-
-      describe('for non-root nodes', function() {
-        it('frees the node from its parent', function() {
-          expect(nodeNames()).to.equal('');
-
-          var cookieA = heimdall.start('a');
-          var cookieAA = heimdall.start('aa');
-
-          expect(nodeNames()).to.equal('a aa');
-
-          cookieAA.stop();
-
-          expect(nodeNames()).to.equal('a aa');
-
-          expect(cookieAA.node.remove()).to.equal(cookieAA.node);
-
-          expect(nodeNames()).to.equal('a');
-        });
-      });
-
-      // Really this is an error for any active node (ie path from current ->
-      // root
-      //
-      // A case could be made it's an error for any node with an outstanding
-      // cookie
-      describe('for the current node', function() {
-        it('throws an error', function() {
-          var cookie = heimdall.start('node');
-          expect(function () {
-            cookie.node.remove();
-          }).to.throw('Cannot remove an active heimdalljs node.');
-        });
-      });
     });
   });
 

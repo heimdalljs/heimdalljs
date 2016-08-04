@@ -1,37 +1,37 @@
 module.exports = Cookie;
 function Cookie(node, heimdall) {
-  this.node = node;
-  this.restoreNode = this.node.parent;
-  this.heimdall = heimdall;
-  this.stopped = false;
+  this._node = node;
+  this._restoreNode = node.parent;
+  this._heimdall = heimdall;
+  this._stopped = false;
 }
 
 Object.defineProperty(Cookie.prototype, 'stats', {
   get: function() {
-    return this.node.stats.own;
+    return this._node.stats.own;
   }
 });
 
 Cookie.prototype.stop = function() {
   var monitor;
 
-  if (this.heimdall.current !== this.node) {
+  if (this._heimdall.current !== this._node) {
     throw new TypeError('cannot stop: not the current node');
   } else if (this.stopped === true) {
     throw new TypeError('cannot stop: already stopped');
   }
 
-  this.stopped = true;
-  this.heimdall._recordTime();
-  this.heimdall._session.current = this.restoreNode;
+  this._stopped = true;
+  this._heimdall._recordTime();
+  this._heimdall._session.current = this._restoreNode;
 };
 
 Cookie.prototype.resume = function() {
-  if (this.stopped === false) {
+  if (this._stopped === false) {
     throw new TypeError('cannot resume: not stopped');
   }
 
-  this.stopped = false;
-  this.restoreNode = this.heimdall.current;
-  this.heimdall._session.current = this.node;
+  this._stopped = false;
+  this._restoreNode = this._heimdall.current;
+  this._heimdall._session.current = this._node;
 };
