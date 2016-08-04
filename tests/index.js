@@ -20,11 +20,6 @@ describe('heimdall', function() {
     heimdall._reset();
   });
 
-  describe('logging', function() {
-    describe('log', function() { });
-    describe('log.verbose', function() { });
-  });
-
   describe('.node', function() {
     it('implicitly stops the cookie when the promise resolves', function () {
       var callbackInvoked = false;
@@ -40,7 +35,7 @@ describe('heimdall', function() {
       });
     });
 
-    it('implicitly stops the cookie when the promise resolves', function () {
+    it('implicitly stops the cookie when the promise resolves for a nested graph', function () {
       expect(heimdall.stack).to.eql([]);
 
       return heimdall.node('node-a', function () {

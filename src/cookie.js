@@ -15,7 +15,7 @@ Object.defineProperty(Cookie.prototype, 'stats', {
 Cookie.prototype.stop = function() {
   var monitor;
 
-  if (this.heimdall._current !== this.node) {
+  if (this.heimdall.current !== this.node) {
     throw new TypeError('cannot stop: not the current node');
   } else if (this.stopped === true) {
     throw new TypeError('cannot stop: already stopped');
@@ -23,7 +23,7 @@ Cookie.prototype.stop = function() {
 
   this.stopped = true;
   this.heimdall._recordTime();
-  this.heimdall._current = this.restoreNode;
+  this.heimdall._session.current = this.restoreNode;
 };
 
 Cookie.prototype.resume = function() {
@@ -32,6 +32,6 @@ Cookie.prototype.resume = function() {
   }
 
   this.stopped = false;
-  this.restoreNode = this.heimdall._current;
-  this.heimdall._current = this.node;
+  this.restoreNode = this.heimdall.current;
+  this.heimdall._session.current = this.node;
 };

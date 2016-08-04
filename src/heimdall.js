@@ -2,32 +2,39 @@
 
 var RSVP = require('rsvp');
 
-var VERSION = require('../package.json').version;
 var Cookie = require('./cookie');
 var HeimdallNode = require('./node');
+var Session = require('./session');
 
 
 module.exports = Heimdall;
-function Heimdall() {
-  this.version = VERSION;
+function Heimdall(session) {
+  if (arguments.length < 1) {
+    session = new Session();
+  }
 
+  this._session = session;
   this._reset();
 }
 
 Object.defineProperty(Heimdall.prototype, 'current', {
   get: function() {
-    return this._current;
+    return this._session.current;
+  }
+});
+
+Object.defineProperty(Heimdall.prototype, 'root', {
+  get: function() {
+    return this._session.root;
   }
 });
 
 Heimdall.prototype._reset = function () {
-  this._nextId = 0;
-  this._current = undefined;
+  this._session.reset();
+
   this._previousTime = undefined;
   this.start('heimdall');
-  this._root = this._current;
-  this._monitorSchema = {};
-  this._configs = {};
+  this._session.root = this._session.current;
 };
 
 Heimdall.prototype.start = function (name, Schema) {
@@ -48,12 +55,12 @@ Heimdall.prototype.start = function (name, Schema) {
 
   this._recordTime();
 
-  var node = new HeimdallNode(this, id, data, this._current);
+  var node = new HeimdallNode(this, id, data, this.current);
   // always true except for root
-  if (this._current) {
-    this._current.addChild(node);
+  if (this.current) {
+    this.current.addChild(node);
   }
-  this._current = node;
+  this._session.current = node;
 
   return new Cookie(node, this);
 };
@@ -61,9 +68,9 @@ Heimdall.prototype.start = function (name, Schema) {
 Heimdall.prototype._recordTime = function () {
   var time = process.hrtime();
   // always true except for root
-  if (this._current) {
+  if (this.current) {
     var delta = (time[0] - this._previousTime[0]) * 1e9 + (time[1] - this._previousTime[1]);
-    this._current.stats.time.self += delta;
+    this.current.stats.time.self += delta;
   }
   this._previousTime = time;
 };
@@ -90,18 +97,19 @@ Heimdall.prototype.registerMonitor = function (name, Schema) {
   if (name === 'own' || name === 'time') {
     throw new Error('Cannot register monitor at namespace "' + name + '".  "own" and "time" are reserved');
   }
-  if (this._monitorSchema[name]) {
+  if (this._session.monitorSchemas.has(name)) {
     throw new Error('A monitor for "' + name + '" is already registered"');
   }
-  this._monitorSchema[name] = Schema;
+
+  this._session.monitorSchemas.set(name, Schema);
 };
 
 Heimdall.prototype.statsFor = function(name) {
-  var stats = this._current.stats;
+  var stats = this.current.stats;
   var Schema;
 
   if (!stats[name]) {
-    Schema = this._monitorSchema[name];
+    Schema = this._session.monitorSchemas.get(name);
     if (!Schema) {
       throw new Error('No monitor registered for "' + name + '"');
     }
@@ -112,10 +120,10 @@ Heimdall.prototype.statsFor = function(name) {
 };
 
 Heimdall.prototype.configFor = function configFor(name) {
-  var config = this._configs[name];
+  var config = this._session.configs.get(name);
 
   if (!config) {
-    config = this._configs[name] = {};
+    config = this._session.configs.set(name, {});
   }
 
   return config;
@@ -133,27 +141,23 @@ Heimdall.prototype.toJSON = function () {
 };
 
 Heimdall.prototype.visitPreOrder = function (cb) {
-  this._root.visitPreOrder(cb);
+  this.root.visitPreOrder(cb);
 };
 
 Heimdall.prototype.visitPostOrder = function (cb) {
-  this._root.visitPostOrder(cb);
+  this.root.visitPostOrder(cb);
 };
 
-Heimdall.prototype._createStats = function (data) {
-  var stats = {
-    own: data,
-    time: { self: 0 },
-  };
-  return stats;
+Heimdall.prototype.generateNextId = function () {
+  return this._session.generateNextId();
 };
 
 Object.defineProperty(Heimdall.prototype, 'stack', {
   get: function () {
     var stack = [];
-    var top = this._current;
+    var top = this.current;
 
-    while (top !== undefined && top !== this._root) {
+    while (top !== undefined && top !== this.root) {
       stack.unshift(top);
       top = top.parent;
     }

@@ -1,5 +1,3 @@
-'use strict';
-
 var Heimdall = require('./src/heimdall');
 var semver = require('semver');
 var version = require('./package.json').version;
