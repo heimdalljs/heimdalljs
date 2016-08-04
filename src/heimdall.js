@@ -137,22 +137,15 @@ Heimdall.prototype.configFor = function configFor(name) {
 };
 
 Heimdall.prototype.toJSON = function () {
-  var result = [];
-
-  this.visitPreOrder(function(node) {
-    result.push(node.toJSON());
-  });
-
-  return { nodes: result }
-  ;
+  return { nodes: this.root.toJSONSubgraph() };
 };
 
 Heimdall.prototype.visitPreOrder = function (cb) {
-  this.root.visitPreOrder(cb);
+  return this.root.visitPreOrder(cb);
 };
 
 Heimdall.prototype.visitPostOrder = function (cb) {
-  this.root.visitPostOrder(cb);
+  return this.root.visitPostOrder(cb);
 };
 
 Heimdall.prototype.generateNextId = function () {
