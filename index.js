@@ -1,17 +1,11 @@
 var Heimdall = require('./src/heimdall');
-var semver = require('semver');
-var version = require('./package.json').version;
-var compatibleVersion = '^' + version;
+var Session = require('./src/session');
 
 
-if (process._heimdall) {
-  var globalVersion = process._heimdall.version;
-  if (!semver.satisfies(globalVersion, compatibleVersion)) {
-    throw new Error('Heimdalljs global version "' + globalVersion + '" not compatible with "' + compatibleVersion + '"');
-  }
-} else {
-  process._heimdall = new Heimdall();
+// The name of the property encodes the session/node compatibilty version
+if (!process._heimdall_session_1) {
+  process._heimdall_session_1 = new Session();
 }
 
 
-module.exports = process._heimdall;
+module.exports = new Heimdall(process._heimdall_session_1);
