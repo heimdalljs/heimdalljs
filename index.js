@@ -1,8 +1,8 @@
 import Heimdall from './src/heimdall';
 import Session from './src/session';
 
-import sessionSetup from './src/session-setup'
+import setupSession from './src/setup-session';
 
-sessionSetup(process);
+setupSession(process);
 
 export default new Heimdall(process._heimdall_session_1);

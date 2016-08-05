@@ -4,17 +4,17 @@ import commonjs from 'rollup-plugin-commonjs';
 
 export default {
   entry: 'index.js',
-  moduleName: 'heimdall',
+  moduleName: 'heimdalljs',
   plugins: [
     babel({
       exclude: 'node_modules/**'
     }),
     nodeResolve({ jsnext: true, main: true }),
-    commonjs({ include: 'node_modules/**' })
+    commonjs({ include: 'node_modules/**' }),
   ],
   targets: [
     { dest: 'dist/bundle.cjs.js', format: 'cjs' },
     { dest: 'dist/bundle.umd.js', format: 'umd' },
     { dest: 'dist/bundle.es.js', format: 'es' },
   ]
-}
+};
