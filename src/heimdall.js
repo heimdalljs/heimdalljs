@@ -1,8 +1,9 @@
-import { Promise }from 'rsvp';
+import { Promise } from 'rsvp';
 
 import Cookie from './cookie';
 import HeimdallNode from './node';
 import Session from './session';
+import timeNS from './time';
 
 export default class Heimdall{
   constructor(session) {
@@ -61,11 +62,10 @@ export default class Heimdall{
     this._session.current = node;
 
     return new Cookie(node, this);
-  };
+  }
 
   _recordTime() {
-    let hrtime = process.hrtime();
-    let time = hrtime[0] * 1e9 + hrtime[1];
+    let time = timeNS();
 
     // always true except for root
     if (this.current) {
@@ -88,7 +88,7 @@ export default class Heimdall{
     // to support those more advanced scenarios.
     return new Promise(resolve => resolve(callback.call(context, cookie._node.stats.own))).
       finally(() => cookie.stop());
-  };
+  }
 
   registerMonitor(name, Schema) {
     if (name === 'own' || name === 'time') {

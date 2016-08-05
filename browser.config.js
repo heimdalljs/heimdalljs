@@ -3,7 +3,7 @@ import babel from 'rollup-plugin-babel';
 import commonjs from 'rollup-plugin-commonjs';
 
 export default {
-  entry: 'index.js',
+  entry: 'src/browser/index.js',
   moduleName: 'heimdalljs',
   plugins: [
     babel({
@@ -13,8 +13,8 @@ export default {
     commonjs({ include: 'node_modules/**' }),
   ],
   targets: [
-    { dest: 'dist/bundle.cjs.js', format: 'cjs' },
-    { dest: 'dist/bundle.umd.js', format: 'umd' },
-    { dest: 'dist/bundle.es.js', format: 'es' },
+    { dest: 'dist/heimdalljs.umd.js', format: 'umd' },
+    { dest: 'dist/heimdalljs.iife.js', format: 'iife' },
   ]
 };
+

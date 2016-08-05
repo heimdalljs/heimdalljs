@@ -2,13 +2,14 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { Promise, defer } from 'rsvp';
 
-import heimdall from '../';
 import Session from '../src/session';
 import Heimdall from '../src/heimdall';
 
 const { expect } = chai;
 
 chai.use(chaiAsPromised);
+
+let heimdall;
 
 function getJSONSansTime() {
   let json = heimdall.toJSON();
@@ -20,7 +21,7 @@ function getJSONSansTime() {
 
 describe('heimdall', function() {
   beforeEach(function () {
-    heimdall._reset();
+    heimdall = new Heimdall();
   });
 
   it('creates a new session if none is provided', function() {
