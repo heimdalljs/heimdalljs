@@ -1,73 +1,93 @@
-module.exports = HeimdallNode;
-function HeimdallNode(heimdall, id, data, parent) {
-  this.heimdall = heimdall;
+export default class HeimdallNode {
+  constructor(heimdall, id, data) {
+    this._heimdall = heimdall;
 
-  this.id = id;
-  this._id = heimdall._nextId++;
-  this.stats = this.heimdall._createStats(data);
-  this.children = [];
-  this.parent = parent;
-}
+    this._id = heimdall.generateNextId();
+    this.id = id;
 
-Object.defineProperty(HeimdallNode.prototype, 'isRoot', {
-  get: function () {
+    if (!(typeof this.id === 'object' && this.id !== null && typeof this.id.name === 'string')) {
+      throw new TypeError('HeimdallNode#id.name must be a string');
+    }
+
+    this.stats = {
+      own: data,
+      time: { self: 0 },
+    };
+
+    this._children = [];
+
+    this.parent = null;
+  }
+
+  get isRoot() {
     return this.parent === undefined;
-  },
-});
-
-HeimdallNode.prototype.visitPreOrder = function (cb) {
-  cb(this);
-
-  for (var i = 0; i < this.children.length; i++) {
-    this.children[i].visitPreOrder(cb);
-  }
-};
-
-HeimdallNode.prototype.visitPostOrder = function (cb) {
-  for (var i = 0; i < this.children.length; i++) {
-    this.children[i].visitPostOrder(cb);
   }
 
-  cb(this);
-};
+  visitPreOrder(cb) {
+    cb(this);
 
-HeimdallNode.prototype.remove = function () {
-  if (!this.parent) {
-    throw new Error('Cannot remove the root heimdalljs node.');
-  }
-  if (this.heimdall.current === this) {
-    throw new Error('Cannot remove an active heimdalljs node.');
+    for (let i = 0; i < this._children.length; i++) {
+      this._children[i].visitPreOrder(cb);
+    }
   }
 
-  var index = this.parent.children.indexOf(this);
-  if (index < 0) {
-    throw new Error('Child(' + this._id + ') not found in Parent(' + this.parent._id + ').  Something is very wrong.');
+  visitPostOrder(cb) {
+    for (let i = 0; i < this._children.length; i++) {
+      this._children[i].visitPostOrder(cb);
+    }
+
+    cb(this);
   }
-  this.parent.children.splice(index, 1);
 
-  return this;
-};
+  remove() {
+    if (!this.parent) {
+      throw new Error('Cannot remove the root heimdalljs node.');
+    }
+    if (this._heimdall.current === this) {
+      throw new Error('Cannot remove an active heimdalljs node.');
+    }
 
-HeimdallNode.prototype.toJSON = function () {
-  return {
-    _id: this._id,
-    id: this.id,
-    stats: this.stats,
-    children: this.children.map(function (child) { return child._id; }),
+    return this.parent.removeChild(this);
+  }
+
+  toJSON() {
+    return {
+      _id: this._id,
+      id: this.id,
+      stats: this.stats,
+      children: this._children.map(child => child._id ),
+    }
   };
-};
 
-HeimdallNode.prototype.toJSONSubgraph = function () {
-  var nodes = [];
+  toJSONSubgraph() {
+    let nodes = [];
 
-  this.visitPreOrder(function(node) {
-    nodes.push(node.toJSON());
-  });
+    this.visitPreOrder(node => nodes.push(node.toJSON()));
 
-  return nodes;
-};
+    return nodes;
+  }
 
-HeimdallNode.prototype.addChild = function (node) {
-  this.children.push(node);
-};
+  addChild(node) {
+    if (node.parent) {
+      throw new TypeError('Node ' + node._id + ' already has a parent.  Cannot add to ' + this._id);
+    }
 
+    this._children.push(node);
+
+    node.parent = this;
+  }
+
+
+  removeChild(child) {
+    let index = this._children.indexOf(child);
+
+    if (index < 0) {
+      throw new Error('Child(' + child._id + ') not found in Parent(' + this._id + ').  Something is very wrong.');
+    }
+    this._children.splice(index, 1);
+
+    child.parent = null;
+
+    return child;
+  }
+}

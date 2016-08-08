@@ -1,166 +1,156 @@
-'use strict';
+import { Promise } from 'rsvp';
 
-var RSVP = require('rsvp');
+import Cookie from './cookie';
+import HeimdallNode from './node';
+import Session from './session';
+import timeNS from './time';
 
-var VERSION = require('../package.json').version;
-var Cookie = require('./cookie');
-var HeimdallNode = require('./node');
-
-
-module.exports = Heimdall;
-function Heimdall() {
-  this.version = VERSION;
-
-  this._reset();
-}
-
-Object.defineProperty(Heimdall.prototype, 'current', {
-  get: function() {
-    return this._current;
-  }
-});
-
-Heimdall.prototype._reset = function () {
-  this._nextId = 0;
-  this._current = undefined;
-  this._previousTime = undefined;
-  this.start('heimdall');
-  this._root = this._current;
-  this._monitorSchema = {};
-  this._configs = {};
-};
-
-Heimdall.prototype.start = function (name, Schema) {
-  var id;
-  var data;
-
-  if (typeof name === 'string') {
-    id = { name: name };
-  } else {
-    id = name;
-  }
-
-  if (typeof Schema === 'function') {
-    data = new Schema();
-  } else {
-    data = {};
-  }
-
-  this._recordTime();
-
-  var node = new HeimdallNode(this, id, data, this._current);
-  // always true except for root
-  if (this._current) {
-    this._current.addChild(node);
-  }
-  this._current = node;
-
-  return new Cookie(node, this);
-};
-
-Heimdall.prototype._recordTime = function () {
-  var time = process.hrtime();
-  // always true except for root
-  if (this._current) {
-    var delta = (time[0] - this._previousTime[0]) * 1e9 + (time[1] - this._previousTime[1]);
-    this._current.stats.time.self += delta;
-  }
-  this._previousTime = time;
-};
-
-Heimdall.prototype.node = function (name, Schema, callback, context) {
-  if (arguments.length < 3) {
-    callback = Schema;
-    Schema = undefined;
-  }
-
-  var cookie = this.start(name, Schema);
-
-  // NOTE: only works in very specific scenarios, specifically promises must
-  // not escape their parents lifetime. In theory, promises could be augmented
-  // to support those more advanced scenarios.
-  return new RSVP.Promise(function(resolve) {
-    resolve(callback.call(context, cookie.node.stats.own));
-  }).finally(function() {
-    cookie.stop();
-  });
-};
-
-Heimdall.prototype.registerMonitor = function (name, Schema) {
-  if (name === 'own' || name === 'time') {
-    throw new Error('Cannot register monitor at namespace "' + name + '".  "own" and "time" are reserved');
-  }
-  if (this._monitorSchema[name]) {
-    throw new Error('A monitor for "' + name + '" is already registered"');
-  }
-  this._monitorSchema[name] = Schema;
-};
-
-Heimdall.prototype.statsFor = function(name) {
-  var stats = this._current.stats;
-  var Schema;
-
-  if (!stats[name]) {
-    Schema = this._monitorSchema[name];
-    if (!Schema) {
-      throw new Error('No monitor registered for "' + name + '"');
+export default class Heimdall{
+  constructor(session) {
+    if (arguments.length < 1) {
+      session = new Session();
     }
-    stats[name] = new Schema();
+
+    this._session = session;
+    this._reset(false);
   }
 
-  return stats[name];
-};
-
-Heimdall.prototype.configFor = function configFor(name) {
-  var config = this._configs[name];
-
-  if (!config) {
-    config = this._configs[name] = {};
+  get current() {
+    return this._session.current;
   }
 
-  return config;
-};
+  get root() {
+    return this._session.root;
+  }
 
-Heimdall.prototype.toJSON = function () {
-  var result = [];
+  _reset(resetSession) {
+    if (resetSession !== false) {
+      this._session.reset();
+    }
 
-  this.visitPreOrder(function(node) {
-    result.push(node.toJSON());
-  });
+    if (!this.root) {
+      // The first heimdall to start will create the session and root.  Subsequent
+      // heimdall instances continue to use the existing graph
+      this.start('heimdall');
+      this._session.root = this._session.current;
+    }
+  }
 
-  return { nodes: result }
-  ;
-};
+  start(name, Schema) {
+    let id;
+    let data;
 
-Heimdall.prototype.visitPreOrder = function (cb) {
-  this._root.visitPreOrder(cb);
-};
+    if (typeof name === 'string') {
+      id = { name: name };
+    } else {
+      id = name;
+    }
 
-Heimdall.prototype.visitPostOrder = function (cb) {
-  this._root.visitPostOrder(cb);
-};
+    if (typeof Schema === 'function') {
+      data = new Schema();
+    } else {
+      data = {};
+    }
 
-Heimdall.prototype._createStats = function (data) {
-  var stats = {
-    own: data,
-    time: { self: 0 },
-  };
-  return stats;
-};
+    this._recordTime();
 
-Object.defineProperty(Heimdall.prototype, 'stack', {
-  get: function () {
-    var stack = [];
-    var top = this._current;
+    let node = new HeimdallNode(this, id, data);
+    if (this.current) {
+      this.current.addChild(node);
+    }
 
-    while (top !== undefined && top !== this._root) {
+    this._session.current = node;
+
+    return new Cookie(node, this);
+  }
+
+  _recordTime() {
+    let time = timeNS();
+
+    // always true except for root
+    if (this.current) {
+      let delta = time - this._session.previousTimeNS;
+      this.current.stats.time.self += delta;
+    }
+    this._session.previousTimeNS = time;
+  }
+
+  node(name, Schema, callback, context) {
+    if (arguments.length < 3) {
+      callback = Schema;
+      Schema = undefined;
+    }
+
+    let cookie = this.start(name, Schema);
+
+    // NOTE: only works in very specific scenarios, specifically promises must
+    // not escape their parents lifetime. In theory, promises could be augmented
+    // to support those more advanced scenarios.
+    return new Promise(resolve => resolve(callback.call(context, cookie._node.stats.own))).
+      finally(() => cookie.stop());
+  }
+
+  registerMonitor(name, Schema) {
+    if (name === 'own' || name === 'time') {
+      throw new Error('Cannot register monitor at namespace "' + name + '".  "own" and "time" are reserved');
+    }
+    if (this._session.monitorSchemas.has(name)) {
+      throw new Error('A monitor for "' + name + '" is already registered"');
+    }
+
+    this._session.monitorSchemas.set(name, Schema);
+  }
+
+  statsFor(name) {
+    let stats = this.current.stats;
+    let Schema;
+
+    if (!stats[name]) {
+      Schema = this._session.monitorSchemas.get(name);
+      if (!Schema) {
+        throw new Error('No monitor registered for "' + name + '"');
+      }
+      stats[name] = new Schema();
+    }
+
+    return stats[name];
+  }
+
+  configFor(name) {
+    let config = this._session.configs.get(name);
+
+    if (!config) {
+      config = this._session.configs.set(name, {});
+    }
+
+    return config;
+  }
+
+  toJSON() {
+    return { nodes: this.root.toJSONSubgraph() };
+  }
+
+  visitPreOrder(cb) {
+    return this.root.visitPreOrder(cb);
+  }
+
+  visitPostOrder(cb) {
+    return this.root.visitPostOrder(cb);
+  }
+
+  generateNextId() {
+    return this._session.generateNextId();
+  }
+
+  get stack() {
+    let stack = [];
+    let top = this.current;
+
+    while (top !== undefined && top !== this.root) {
       stack.unshift(top);
       top = top.parent;
     }
 
-    return stack.map(function(node) {
-      return node.id.name;
-    });
+    return stack.map(node => node.id.name);
   }
-});
-
+}
