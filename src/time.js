@@ -2,16 +2,21 @@ let timeNS;
 
 // adapted from
 // https://gist.github.com/paulirish/5438650
-const now = Date.now || function () {
-  return new Date().getTime();
-};
+let now;
+if (typeof performance === 'object' && typeof performance.now === 'function') {
+  now = function () {
+    return performance.now.call(performance);
+  };
+} else {
+  now = Date.now || function () { return new Date().getTime(); };
+}
 
 const dateOffset = now();
 
 export function timeFromDate() {
   let timeMS = now() - dateOffset;
 
-  return timeMS * 1e6;
+  return Math.floor(timeMS * 1e6);
 }
 
 export function timeFromHRTime() {
