@@ -1,3 +1,5 @@
+![build status](https://travis-ci.org/heimdalljs/heimdalljs-lib.svg)
+
 ## Global Session
 
 Heimdall tracks a graph of timing and domain-specific stats for performance.
