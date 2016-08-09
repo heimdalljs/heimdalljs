@@ -1,2 +1,2 @@
-var Heimdall = require('./src/heimdall');;
-module.exports = Heimdall;
+var heimdall = require('.');
+module.exports = heimdall.constructor;

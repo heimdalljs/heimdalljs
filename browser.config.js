@@ -4,7 +4,8 @@ import commonjs from 'rollup-plugin-commonjs';
 
 export default {
   entry: 'src/browser/index.js',
-  moduleName: 'heimdalljs',
+  // module name is really heimdalljs but this is the global name
+  moduleName: 'heimdall',
   plugins: [
     babel({
       exclude: 'node_modules/**'
