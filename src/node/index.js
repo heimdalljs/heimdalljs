@@ -5,4 +5,4 @@ import setupSession from '../setup-session';
 
 setupSession(process);
 
-export default new Heimdall(process._heimdall_session_1);
+export default new Heimdall(process._heimdall_session_2);

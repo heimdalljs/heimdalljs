@@ -8,4 +8,4 @@ setupSession(window);
 // browser equivalent of heimdall.js
 self.Heimdall = Heimdall;
 
-export default new Heimdall(window._heimdall_session_1);
+export default new Heimdall(window._heimdall_session_2);
