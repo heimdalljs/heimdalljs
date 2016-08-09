@@ -20,7 +20,7 @@ export default class HeimdallNode {
   }
 
   get isRoot() {
-    return this.parent === undefined;
+    return this.parent === null;
   }
 
   visitPreOrder(cb) {
@@ -56,8 +56,8 @@ export default class HeimdallNode {
       id: this.id,
       stats: this.stats,
       children: this._children.map(child => child._id ),
-    }
-  };
+    };
+  }
 
   toJSONSubgraph() {
     let nodes = [];
