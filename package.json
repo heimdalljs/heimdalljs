@@ -26,7 +26,8 @@
     "javascript"
   ],
   "files": [
-    "dist"
+    "dist",
+    "heimdall.js"
   ],
   "devDependencies": {
     "babel-preset-es2015": "6.13.0",
