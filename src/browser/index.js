@@ -3,9 +3,9 @@ import Session from '../session';
 
 import setupSession from '../setup-session';
 
-setupSession(window);
+setupSession(self);
 
 // browser equivalent of heimdall.js
 self.Heimdall = Heimdall;
 
-export default new Heimdall(window._heimdall_session_2);
+export default new Heimdall(self._heimdall_session_2);
