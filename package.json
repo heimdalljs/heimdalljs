@@ -26,7 +26,6 @@
     "javascript"
   ],
   "files": [
-    "src",
     "dist"
   ],
   "devDependencies": {
