@@ -1,2 +1,1 @@
-var heimdall = require('.');
-module.exports = heimdall.constructor;
+module.exports = require('./dist/heimdalljs.cjs').constructor;
