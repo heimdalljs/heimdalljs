@@ -39,6 +39,12 @@ export default class HeimdallNode {
     cb(this);
   }
 
+  forEachChild(cb) {
+    for (let i=0; i<this._children.length; ++i) {
+      cb(this._children[i]);
+    }
+  }
+
   remove() {
     if (!this.parent) {
       throw new Error('Cannot remove the root heimdalljs node.');
