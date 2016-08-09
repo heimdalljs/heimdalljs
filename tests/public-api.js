@@ -196,6 +196,28 @@ describe('HeimdallNode', function() {
     });
   });
 
+  describe('isRoot', function() {
+    let heimdall;
+
+    beforeEach( function() {
+      heimdall = new Heimdall();
+    });
+
+    it('is true for the root node only', function() {
+      expect(heimdall.root.isRoot).to.equal(true);
+      expect(heimdall.current.isRoot).to.equal(true);
+
+      let cookie = heimdall.start('child');
+
+      expect(heimdall.root.isRoot).to.equal(true);
+      expect(heimdall.current.isRoot).to.equal(false);
+
+      cookie.stop();
+
+      expect(heimdall.current.isRoot).to.equal(true);
+    });
+  });
+
   describe('parent', function() {
     it('exists on a node', function() {
       let node = new HeimdallNode(mockHeimdall, { name: 'a' }, {}, null);
