@@ -459,5 +459,15 @@ describe('HeimdallNode', function() {
         'a1.b', 'a1', 'a2', 'root',
       ]);
     });
+
+    it('forEachChild visits each child only', function() {
+      let path = [];
+
+      root.forEachChild(node => path.push(node.id.name));
+
+      expect(path).to.eql([
+        'a1', 'a2'
+      ]);
+    });
   });
 });

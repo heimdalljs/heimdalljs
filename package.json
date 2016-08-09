@@ -10,7 +10,7 @@
     "build:browser": "rollup --no-strict -c browser.config.js",
     "build:test": "rollup --no-strict -c test.config.js",
     "test": "npm run build:node && npm run build:test && mocha dist/tests/bundle.cjs",
-    "test:debug": "mocha --no-timeouts debug tests/"
+    "test:debug": "mocha --no-timeouts debug dist/tests/bundle.cjs"
   },
   "repository": {
     "type": "git",

@@ -60,7 +60,7 @@ var myInstance = new Heimdall();
   written via `JSON.stringify` and then consumed by downstream apps (see eg
   [broccoli-viz](https://github.com/stefanpenner/broccoli-viz)).
 - `visitPreOrder(callback)` sugar for `root.visitPreOrder(callback)`
-- `visitPostOrder(callback)`` sugar for `root.visitPostOrder(callback)`
+- `visitPostOrder(callback)` sugar for `root.visitPostOrder(callback)`
 
 
 ### HeimdallNode
@@ -77,6 +77,8 @@ var myInstance = new Heimdall();
   depth-first pre-order traversal.
 - `visitPostOrder(callback)` visit the subtree rooted at this node with a
   depth-first post-order traversal.
+- `forEachChild(callback)` invoke `callback` for each child of this node (but
+  not other descendants).
 - `remove` remove this node from its parent.  May only be called on an inactive,
   non-root node.  Intended for long-running applications to free up memory after
   saving a subgraph via `toJSONSubgraph`.
