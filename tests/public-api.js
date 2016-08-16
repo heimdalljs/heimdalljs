@@ -32,12 +32,6 @@ describe('HeimdallSession', function() {
     });
   });
 
-  describe('previousTimeNS', function() {
-    it('exists on the session', function() {
-      expect(new Session()).to.have.property('previousTimeNS');
-    });
-  });
-
   describe('monitorSchemas', function() {
     it('is a dict on the session', function() {
       let monitorSchemas = new Session().monitorSchemas;
@@ -64,13 +58,11 @@ describe('HeimdallSession', function() {
 
       let current = session.current = {};
       let root = session.root = {};
-      let previousTimeNS = session.previousTimeNS = 10;
 
       session.reset();
 
       expect(session.current).to.not.equal(current);
       expect(session.root).to.not.equal(root);
-      expect(session.previousTimeNS).to.equal(0);
     });
 
     it('resets ids', function() {

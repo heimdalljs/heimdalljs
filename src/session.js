@@ -31,7 +31,6 @@ export default class HeimdallSession {
     this._nextId = 0;
     this.current = undefined;
     this.root = null;
-    this.previousTimeNS = 0;
     this.monitorSchemas = new Dict();
     this.configs = new Dict();
   }

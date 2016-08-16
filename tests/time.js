@@ -2,21 +2,21 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { Promise, defer } from 'rsvp';
 
-import { timeFromDate } from '../src/time';
+import { timeFromPerformanceNow } from '../src/time';
 
 const { expect } = chai;
 
 chai.use(chaiAsPromised);
 
 
-describe('timeFromDate', function() {
+describe('timeFromPerformanceNow', function() {
   it('reports a diff in nanoseconds', function() {
-    const markA = timeFromDate();
+    const markA = timeFromPerformanceNow();
 
     return new Promise((resolve) => {
       setTimeout(resolve, 15);
     }).then(() => {
-      const markB = timeFromDate();
+      const markB = timeFromPerformanceNow();
 
       expect(markB).to.be.gte(15 * 1e6);
       expect(markB - markA).to.be.gte(15 * 1e6);

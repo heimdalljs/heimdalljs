@@ -52,9 +52,8 @@ export default class Heimdall{
       data = {};
     }
 
-    this._recordTime();
-
     let node = new HeimdallNode(this, id, data);
+    node._startTime = timeNS();
     if (this.current) {
       this.current.addChild(node);
     }
@@ -62,17 +61,6 @@ export default class Heimdall{
     this._session.current = node;
 
     return new Cookie(node, this);
-  }
-
-  _recordTime() {
-    let time = timeNS();
-
-    // always true except for root
-    if (this.current) {
-      let delta = time - this._session.previousTimeNS;
-      this.current.stats.time.self += delta;
-    }
-    this._session.previousTimeNS = time;
   }
 
   node(name, Schema, callback, context) {

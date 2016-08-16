@@ -14,6 +14,10 @@ export default class HeimdallNode {
       time: { self: 0 },
     };
 
+    // stores performance.now or equivalent timestamps
+    this._startTime = null;
+    this._endTime = null;
+
     this._children = [];
 
     this.parent = null;
@@ -61,6 +65,8 @@ export default class HeimdallNode {
       _id: this._id,
       id: this.id,
       stats: this.stats,
+      startTime: this._startTime,
+      endTime: this._endTime,
       children: this._children.map(child => child._id ),
     };
   }

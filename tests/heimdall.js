@@ -76,7 +76,7 @@ describe('heimdall', function() {
       process.hrtime = origHRTime;
     });
 
-    it('sets time correctly over shared sessions', function() {
+    it.only('sets time correctly over shared sessions', function() {
       let session = new Session();
       let h1 = new Heimdall(session);
       let h2 = new Heimdall(session);
@@ -92,9 +92,11 @@ describe('heimdall', function() {
       nextTime = [4, 40];
       cookieA.stop();
 
-      expect(cookieB._node.stats.time.self).to.equal(1e9 + 10);
-      // total A self time is time before B and time after B
-      expect(cookieA._node.stats.time.self).to.equal(1e9 + 10 + 2e9 + 20);
+      expect(cookieB._node._startTime).to.equal(1e9 + 10);
+      expect(cookieB._node._endTime).to.equal(2e9 + 20);
+
+      expect(cookieA._node._startTime).to.equal(0);
+      expect(cookieA._node._endTime).to.equal(4e9 + 40);
     });
   });
 

@@ -9,12 +9,14 @@ if (typeof performance === 'object' && typeof performance.now === 'function') {
   };
 } else {
   now = Date.now || function () { return new Date().getTime(); };
+  const offset = new Date().getTime();
+  now = function () {
+    return new Date().getTime() - offset;
+  };
 }
 
-const dateOffset = now();
-
-export function timeFromDate() {
-  let timeMS = now() - dateOffset;
+export function timeFromPerformanceNow() {
+  let timeMS = now();
 
   return Math.floor(timeMS * 1e6);
 }
@@ -27,7 +29,7 @@ export function timeFromHRTime() {
 if (typeof process === 'object' && typeof process.hrtime === 'function') {
   timeNS = timeFromHRTime;
 } else {
-  timeNS = timeFromDate;
+  timeNS = timeFromPerformanceNow;
 }
 
 export default timeNS;

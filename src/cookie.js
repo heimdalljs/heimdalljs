@@ -1,3 +1,5 @@
+import timeNS from './time';
+
 export default class Cookie {
   constructor(node, heimdall) {
     this._node = node;
@@ -20,7 +22,7 @@ export default class Cookie {
     }
 
     this._stopped = true;
-    this._heimdall._recordTime();
+    this._node._endTime = timeNS();
     this._heimdall._session.current = this._restoreNode;
   }
 
