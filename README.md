@@ -100,7 +100,7 @@ var myInstance = new Heimdall();
 ### Simple
 
 ```js
-var heimdall = require('heimdall');
+var heimdall = require('heimdalljs');
 
 function BroccoliNodeSchema() {
   this.builds = 0;
