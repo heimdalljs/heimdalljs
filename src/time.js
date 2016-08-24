@@ -4,19 +4,18 @@ let timeNS;
 // https://gist.github.com/paulirish/5438650
 let now;
 if (typeof performance === 'object' && typeof performance.now === 'function') {
-  now = function () {
+  now = function now() {
     return performance.now.call(performance);
   };
 } else {
-  now = Date.now || function () { return new Date().getTime(); };
+  const dateOffset = new Date().getTime();
+  now = function now() { return new Date().getTime() - dateOffset; };
 }
 
 const dateOffset = now();
 
 export function timeFromDate() {
-  let timeMS = now() - dateOffset;
-
-  return Math.floor(timeMS * 1e6);
+  return Math.floor(now() * 1e6);
 }
 
 export function timeFromHRTime() {
