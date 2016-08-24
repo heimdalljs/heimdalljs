@@ -20,7 +20,7 @@ describe('timeFromDate', function() {
 
       expect(markB).to.be.gte(15 * 1e6);
       expect(markB - markA).to.be.gte(15 * 1e6);
-      expect(markB - markA).to.be.lt(20 * 1e6);
+      expect(markB - markA).to.be.lt(25 * 1e6);
     });
   });
 });
