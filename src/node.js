@@ -1,5 +1,13 @@
+import FastArray from 'perf-primitives/addon/fast-array';
+export const RECYCLE_POOL = new FastArray(500, 'Node Pool');
+
 export default class HeimdallNode {
   constructor(heimdall, id, data) {
+    this._init(heimdall, id, data);
+  }
+
+  _init(heimdall, id, data) {
+    this._isDestroyed = false;
     this._heimdall = heimdall;
 
     this._id = heimdall.generateNextId();
@@ -86,7 +94,6 @@ export default class HeimdallNode {
     node.parent = this;
   }
 
-
   removeChild(child) {
     let index = this._children.indexOf(child);
 
@@ -98,5 +105,28 @@ export default class HeimdallNode {
     child.parent = null;
 
     return child;
+  }
+
+  static create(heimdall, id, data) {
+    let obj = RECYCLE_POOL.pop();
+
+    if (obj) {
+      obj._init(heimdall, id, data);
+      return obj;
+    }
+
+    return new HeimdallNode(heimdall, id, data);
+  }
+
+  destroy() {
+    this._isDestroyed = true;
+    this._heimdall = undefined;
+    this._id = undefined;
+    this.id = undefined;
+    this.stats = undefined;
+    this._children = undefined;
+    this.parent = undefined;
+
+    RECYCLE_POOL.push(this);
   }
 }
