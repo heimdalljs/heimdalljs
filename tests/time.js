@@ -1,6 +1,7 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { Promise, defer } from 'rsvp';
+import sinon from './polyfill/sinon';
 
 import { timeFromDate } from '../src/time';
 
@@ -10,17 +11,23 @@ chai.use(chaiAsPromised);
 
 
 describe('timeFromDate', function() {
+  let clock;
+
+  beforeEach( function() {
+    this.clock = clock = sinon.useFakeTimers();
+  });
+
+  afterEach( function() {
+    clock.restore();
+  });
+
   it('reports a diff in nanoseconds', function() {
-    const markA = timeFromDate();
+    let markA = timeFromDate();
 
-    return new Promise((resolve) => {
-      setTimeout(resolve, 15);
-    }).then(() => {
-      const markB = timeFromDate();
+    clock.tick(15);
 
-      expect(markB).to.be.gte(15 * 1e6);
-      expect(markB - markA).to.be.gte(15 * 1e6);
-      expect(markB - markA).to.be.lt(25 * 1e6);
-    });
+    let markB = timeFromDate();
+
+    expect(Math.floor((markB - markA) / 1e6)).to.equal(15);
   });
 });
