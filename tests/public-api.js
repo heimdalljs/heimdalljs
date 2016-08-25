@@ -207,12 +207,12 @@ describe('HeimdallNode', function() {
       expect(heimdall.root.isRoot).to.equal(true);
       expect(heimdall.current.isRoot).to.equal(true);
 
-      let cookie = heimdall.start('child');
+      let token = heimdall.start('child');
 
       expect(heimdall.root.isRoot).to.equal(true);
       expect(heimdall.current.isRoot).to.equal(false);
 
-      cookie.stop();
+      heimdall.stop(token);
 
       expect(heimdall.current.isRoot).to.equal(true);
     });
@@ -389,13 +389,13 @@ describe('HeimdallNode', function() {
 
       let nodeA = heimdall.current;
 
-      let cookieB = heimdall.start('b');
+      let tokenB = heimdall.start('b');
 
       let nodeB = heimdall.current;
 
       expect(nodeB._id).to.equal(2);
 
-      cookieB.stop();
+      heimdall.stop(tokenB);
 
       expect(heimdall.current).to.equal(nodeA);
 
@@ -421,19 +421,19 @@ describe('HeimdallNode', function() {
     beforeEach( function() {
       heimdall = new Heimdall();
 
-      let cookieRoot = heimdall.start('root');
+      let tokenRoot = heimdall.start('root');
       // root of subtree
       root = heimdall.current;
 
-      let cookieA1 = heimdall.start('a1');
-      let cookieB = heimdall.start('a1.b');
+      let tokenA1 = heimdall.start('a1');
+      let tokenB = heimdall.start('a1.b');
 
-      cookieB.stop();
-      cookieA1.stop();
+      heimdall.stop(tokenB);
+      heimdall.stop(tokenA1);
 
       heimdall.start('a2').stop();
 
-      cookieRoot.stop();
+      heimdall.stop(tokenRoot);
 
       heimdall.start('sibling1').stop();
       heimdall.start('sibling2').stop();
