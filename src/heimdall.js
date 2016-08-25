@@ -1,6 +1,7 @@
 import { Promise } from 'rsvp';
 
 import Token from './token';
+import HashMap from './hash-map';
 import HeimdallNode from './node';
 import Session from './session';
 import timeNS from './time';
@@ -11,7 +12,7 @@ export default class Heimdall{
       session = new Session();
     }
 
-    this._tokenMap = new Map();
+    this._tokenMap = new HashMap();
     this._session = session;
     this._reset(false);
   }
@@ -56,7 +57,7 @@ export default class Heimdall{
     this._recordTime();
 
     let node = new HeimdallNode(this, id, data);
-    let token = new Token(this);
+    let token = new Token(node._id, this);
 
     this._tokenMap.set(token, node);
 

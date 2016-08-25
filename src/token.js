@@ -1,6 +1,7 @@
 export default class Token {
-  constructor(heimdall) {
+  constructor(id, heimdall) {
     this._heimdall = heimdall;
+    this._id = id;
   }
 
   stop() {
