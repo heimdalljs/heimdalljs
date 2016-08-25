@@ -411,6 +411,7 @@ describe('HeimdallNode', function() {
 
   describe('visiting', function() {
     let root;
+    let heimdall;
     // root
     //-  |- a1
     //   |   |- a1.b
@@ -431,12 +432,12 @@ describe('HeimdallNode', function() {
       heimdall.stop(tokenB);
       heimdall.stop(tokenA1);
 
-      heimdall.start('a2').stop();
+      heimdall.stop(heimdall.start('a2'));
 
       heimdall.stop(tokenRoot);
 
-      heimdall.start('sibling1').stop();
-      heimdall.start('sibling2').stop();
+      heimdall.stop(heimdall.start('sibling1'));
+      heimdall.stop(heimdall.start('sibling2'));
     });
 
     it('.visitPreOrder visits nodes depth first pre-order', function() {
