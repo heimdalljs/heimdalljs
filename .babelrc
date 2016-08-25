@@ -1,4 +1,5 @@
 // .babelrc
 {
-  "presets": [ "es2015-rollup" ]
+  "presets": [ "es2015-rollup" ],
+  "plugins": ["./babel-strip-class-call-check"]
 }
