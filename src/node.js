@@ -9,11 +9,13 @@ export default class HeimdallNode {
       throw new TypeError('HeimdallNode#id.name must be a string');
     }
 
+    // lazy vs eager?
     this.stats = {
       own: data,
       time: { self: 0 },
     };
 
+    // lazy vs eager?
     this._children = [];
 
     this.parent = null;
