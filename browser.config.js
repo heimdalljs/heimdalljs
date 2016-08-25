@@ -9,7 +9,7 @@ export default {
   plugins: [
     babel({
       exclude: 'node_modules/(?!perf-primitives)',
-      include: 'node_modules/perf-primitives/addon/**'
+      include: ['tests/**', 'src/**', 'node_modules/perf-primitives/addon/**']
     }),
     nodeResolve({ jsnext: true, main: true }),
     commonjs({ include: 'node_modules/**' }),
