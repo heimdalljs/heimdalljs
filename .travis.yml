@@ -1,5 +1,6 @@
 language: node_js
 node_js:
+  - "0.10"
   - "0.12"
   - "4"
   - "5"
@@ -23,4 +24,5 @@ install:
   - npm install --no-optional
 
 before_script:
+  - npm run build:node && npm run build:test
   - nvm use $TRAVIS_NODE_VERSION
