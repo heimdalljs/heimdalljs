@@ -28,6 +28,6 @@ describe('timeFromDate', function() {
 
     let markB = timeFromDate();
 
-    expect(Math.floor((markB - markA) / 1e6)).to.equal(15);
+    expect(Math.round((markB - markA) / 1e6)).to.equal(15);
   });
 });
