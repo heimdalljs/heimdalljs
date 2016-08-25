@@ -1,6 +1,6 @@
 import { Promise } from 'rsvp';
 
-import Cookie from './cookie';
+import Token from './token';
 import HeimdallNode from './node';
 import Session from './session';
 import timeNS from './time';
@@ -11,6 +11,7 @@ export default class Heimdall{
       session = new Session();
     }
 
+    this._tokenMap = new Map();
     this._session = session;
     this._reset(false);
   }
@@ -55,13 +56,49 @@ export default class Heimdall{
     this._recordTime();
 
     let node = new HeimdallNode(this, id, data);
+    let token = new Token(this);
+
+    this._tokenMap.set(token, node);
+
     if (this.current) {
       this.current.addChild(node);
     }
 
     this._session.current = node;
 
-    return new Cookie(node, this);
+    return token;
+  }
+
+  stop(token) {
+    let node = this._tokenMap.get(token);
+
+    if (node._stopped === true) {
+      throw new TypeError('cannot stop: already stopped');
+    } else if (this.current !== node) {
+      throw new TypeError('cannot stop: not the current node');
+    }
+
+    node._stopped = true;
+    this._recordTime();
+    this._session.current = node._restoreNode;
+  }
+
+  resume(token) {
+    let node = this._tokenMap.get(token);
+
+    if (node._stopped === false) {
+      throw new TypeError('cannot resume: not stopped');
+    }
+
+    node._stopped = false;
+    node._restoreNode = this.current;
+    this._session.current = node;
+  }
+
+  statsForNode(token) {
+    let node = this._tokenMap.get(token);
+
+    return node.stats;
   }
 
   _recordTime() {
@@ -81,13 +118,14 @@ export default class Heimdall{
       Schema = undefined;
     }
 
-    let cookie = this.start(name, Schema);
+    let token = this.start(name, Schema);
+    let node = this._tokenMap.get(token);
 
     // NOTE: only works in very specific scenarios, specifically promises must
     // not escape their parents lifetime. In theory, promises could be augmented
     // to support those more advanced scenarios.
-    return new Promise(resolve => resolve(callback.call(context, cookie._node.stats.own))).
-      finally(() => cookie.stop());
+    return new Promise(resolve => resolve(callback.call(context, node.stats.own))).
+      finally(() => this.stop(token));
   }
 
   registerMonitor(name, Schema) {
