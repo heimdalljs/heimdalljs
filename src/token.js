@@ -1,3 +1,15 @@
+import EmptyObject from './empty-object';
+
+const deprecations = new EmptyObject();
+
+function deprecated(notice) {
+  if (deprecations[notice]) {
+    return;
+  }
+
+  deprecations[notice] = true;
+  console.warn('DEPRECATED!! ' + notice);
+}
 export default class Token {
   constructor(id, heimdall) {
     this._heimdall = heimdall;
@@ -5,17 +17,17 @@ export default class Token {
   }
 
   stop() {
-    console.warn('DEPRECATED!! use of token.stop() should be refactored to heimdall.stop(token);');
+    deprecated('use of token.stop() should be refactored to heimdall.stop(token);');
     this._heimdall.stop(this);
   }
 
   get stats() {
-    console.warn('DEPRECATED!! use of token.stats should be refactored to heimdall.statsForNode(token).own;');
+    deprecated('use of token.stats should be refactored to heimdall.statsForNode(token).own;');
     return this._heimdall.statsForNode(this).own;
   }
 
   resume() {
-    console.warn('DEPRECATED!! use of token.resume() should be refactored to heimdall.resume(token);');
+    deprecated('use of token.resume() should be refactored to heimdall.resume(token);');
     this._heimdall.resume(this);
   }
 }
