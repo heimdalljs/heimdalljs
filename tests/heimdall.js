@@ -5,6 +5,8 @@ import { Promise, defer } from 'rsvp';
 import Session from '../src/session';
 import Heimdall from '../src/heimdall';
 
+import mockHRTime from './mock/hrtime';
+
 const { expect } = chai;
 
 chai.use(chaiAsPromised);
@@ -63,17 +65,14 @@ describe('heimdall', function() {
   });
 
   describe('with nodes from multiple heimdall instances', function() {
-    let origHRTime;
-    let nextTime;
+    let clock;
 
     beforeEach( function() {
-      origHRTime = process.hrtime;
-      nextTime = [0, 0];
-      process.hrtime = function () { return nextTime; };
+      clock = mockHRTime();
     });
 
     afterEach( function() {
-      process.hrtime = origHRTime;
+      clock.restore();
     });
 
     it('sets time correctly over shared sessions', function() {
@@ -83,13 +82,13 @@ describe('heimdall', function() {
 
       let cookieA = h1.start('a');
 
-      nextTime = [1, 10];
+      clock.tick(1, 10);
       let cookieB = h2.start('b');
 
-      nextTime = [2, 20];
+      clock.tick(1, 10);
       cookieB.stop();
 
-      nextTime = [4, 40];
+      clock.tick(2, 20);
       cookieA.stop();
 
       expect(cookieB._node.stats.time.self).to.equal(1e9 + 10);
@@ -153,6 +152,46 @@ describe('heimdall', function() {
   });
 
   describe('.start/stop/resume', function() {
+    describe('timing', function() {
+      let clock;
+
+      beforeEach( function() {
+        clock = mockHRTime();
+      });
+
+      afterEach( function() {
+        clock.restore();
+      });
+
+      it('counts selftime', function() {
+        let A = heimdall.start('A');
+        let B = heimdall.start('B');
+
+        clock.tick(0, 5 * 1e6);
+
+        let C = heimdall.start('C');
+
+        clock.tick(0, 10 * 1e6);
+
+        C.stop();
+        B.stop();
+        A.stop();
+
+        let aNode = heimdall._session.root._children[0];
+        let aTime = aNode.stats.time.self;
+
+        let bNode = aNode._children[0];
+        let bTime = bNode.stats.time.self;
+
+        let cNode = bNode._children[0];
+        let cTime = cNode.stats.time.self;
+
+        expect(Math.floor(aTime / 1e6)).to.equal(0);
+        expect(Math.floor(bTime / 1e6)).to.equal(5);
+        expect(Math.floor(cTime / 1e6)).to.equal(10);
+      });
+    });
+
     it('supports basic start/stop', function() {
       expect(heimdall.stack).to.eql([]);
 
@@ -199,44 +238,6 @@ describe('heimdall', function() {
 
       cookieA.stop();
       expect(heimdall.stack).to.eql([]);
-    });
-
-    it('counts selftime', function() {
-      let A = heimdall.start('A');
-      let B = heimdall.start('B');
-      let C;
-
-      function wait(ms) {
-        return new Promise((resolve, reject) => setTimeout(resolve, ms));
-      }
-
-      return wait(5).
-        then(() => C = heimdall.start('C')).
-        then(() => wait(10)).
-        then(() => C.stop()).
-        then(() => B.stop()).
-        then(() => A.stop()).
-        then(function () {
-          let aNode = heimdall._session.root._children[0];
-          let aTime = aNode.stats.time.self;
-
-          let bNode = aNode._children[0];
-          let bTime = bNode.stats.time.self;
-
-          let cNode = bNode._children[0];
-          let cTime = cNode.stats.time.self;
-
-          // Expected times should be
-          // A - 0 ms
-          // B - 5 ms
-          // C - 10 ms
-          //
-          // Gaps are added b/c of setTimeout, hrtime issues on vm (ie in ci)
-
-          expect(cTime).to.be.within(9.5 * 1e6, 15 * 1e6);
-          expect(bTime).to.be.within(4.5 * 1e6, 10 * 1e6);
-          expect(aTime).to.be.lt(500 * 1e3);
-        });
     });
 
     it('restores the node at time of resume', function () {
