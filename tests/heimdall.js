@@ -88,15 +88,15 @@ describe('heimdall', function() {
       clock.tick(1, 10);
       h2.stop(tokenB);
 
-      clock.tick(2, 20);
+      clock.tick(1, 10);
       h1.stop(tokenA);
 
       let statsA = h1.statsForNode(tokenA);
       let statsB = h2.statsForNode(tokenB);
 
-      expect(statsA.time.self).to.equal(1e9 + 10);
+      expect(statsA.time.self).to.equal(2e9 + 20);
       // total A self time is time before B and time after B
-      expect(statsB.time.self).to.equal(1e9 + 10 + 2e9 + 20);
+      expect(statsB.time.self).to.equal(1e9 + 10);
     });
   });
 
@@ -176,9 +176,9 @@ describe('heimdall', function() {
 
         clock.tick(0, 10 * 1e6);
 
-        C.stop();
-        B.stop();
-        A.stop();
+        heimdall.stop(C);
+        heimdall.stop(B);
+        heimdall.stop(A);
 
         let aNode = heimdall._session.root._children[0];
         let aTime = aNode.stats.time.self;
@@ -241,44 +241,6 @@ describe('heimdall', function() {
 
       heimdall.stop(tokenA);
       expect(heimdall.stack).to.eql([]);
-    });
-
-    it('counts selftime', function() {
-      let A = heimdall.start('A');
-      let B = heimdall.start('B');
-      let C;
-
-      function wait(ms) {
-        return new Promise((resolve, reject) => setTimeout(resolve, ms));
-      }
-
-      return wait(5).
-        then(() => C = heimdall.start('C')).
-        then(() => wait(10)).
-        then(() => heimdall.stop(C)).
-        then(() => heimdall.stop(B)).
-        then(() => heimdall.stop(A)).
-        then(function () {
-          let aNode = heimdall._session.root._children[0];
-          let aTime = aNode.stats.time.self;
-
-          let bNode = aNode._children[0];
-          let bTime = bNode.stats.time.self;
-
-          let cNode = bNode._children[0];
-          let cTime = cNode.stats.time.self;
-
-          // Expected times should be
-          // A - 0 ms
-          // B - 5 ms
-          // C - 10 ms
-          //
-          // Gaps are added b/c of setTimeout, hrtime issues on vm (ie in ci)
-
-          expect(cTime).to.be.within(9.5 * 1e6, 15 * 1e6);
-          expect(bTime).to.be.within(4.5 * 1e6, 10 * 1e6);
-          expect(aTime).to.be.lt(500 * 1e3);
-        });
     });
 
     it('restores the node at time of resume', function () {
