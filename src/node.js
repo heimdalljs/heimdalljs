@@ -5,15 +5,18 @@ export default class HeimdallNode {
     this._id = heimdall.generateNextId();
     this.id = id;
 
+    // TODO: strip for production builds for perfz
     if (!(typeof this.id === 'object' && this.id !== null && typeof this.id.name === 'string')) {
       throw new TypeError('HeimdallNode#id.name must be a string');
-    }
+     }
 
+    // lazy vs eager?
     this.stats = {
       own: data,
       time: { self: 0 },
     };
 
+    // lazy vs eager?
     this._children = [];
 
     this.parent = null;

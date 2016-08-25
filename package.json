@@ -36,6 +36,7 @@
     "chai": "^3.2.0",
     "chai-as-promised": "^5.1.0",
     "chai-files": "^1.2.0",
+    "do-you-even-bench": "^1.0.2",
     "mocha": "^2.2.5",
     "mocha-jshint": "~2.2.3",
     "rollup": "^0.34.1",
