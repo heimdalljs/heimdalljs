@@ -46,6 +46,7 @@
     "rollup-plugin-node-resolve": "^1.7.1"
   },
   "dependencies": {
+    "perf-primitives": "0.0.4",
     "rsvp": "^3.2.1"
   }
 }

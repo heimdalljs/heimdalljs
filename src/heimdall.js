@@ -5,6 +5,19 @@ import HeimdallNode from './node';
 import Session from './session';
 import timeNS from './time';
 
+import { RECYCLE_POOL as NODE_POOL } from './node';
+import { RECYCLE_POOL as COOKIE_POOL } from './cookie';
+
+// pre allocate
+for (let i = 0; i < 500; i++) {
+  COOKIE_POOL.push(new Cookie());
+}
+
+let fakeHeimdall = { generateNextId() { return 0; } };
+for (let i = 0; i < 500; i++) {
+  NODE_POOL.push(new HeimdallNode(fakeHeimdall, { name: 'unallocated-node' }));
+}
+
 export default class Heimdall{
   constructor(session) {
     if (arguments.length < 1) {
@@ -54,14 +67,14 @@ export default class Heimdall{
 
     this._recordTime();
 
-    let node = new HeimdallNode(this, id, data);
+    let node = HeimdallNode.create(this, id, data);
     if (this.current) {
       this.current.addChild(node);
     }
 
     this._session.current = node;
 
-    return new Cookie(node, this);
+    return Cookie.create(node, this);
   }
 
   _recordTime() {

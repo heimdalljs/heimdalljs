@@ -7,7 +7,8 @@ export default {
   moduleName: 'heimdalljs',
   plugins: [
     babel({
-      exclude: 'node_modules/**'
+      exclude: 'node_modules/(?!perf-primitives)',
+      include: ['tests/**', 'src/**', 'node_modules/perf-primitives/addon/**']
     }),
     nodeResolve({ jsnext: true, main: true }),
     commonjs({ include: 'node_modules/**' }),
