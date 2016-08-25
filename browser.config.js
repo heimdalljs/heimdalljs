@@ -3,7 +3,7 @@ import babel from 'rollup-plugin-babel';
 import commonjs from 'rollup-plugin-commonjs';
 
 export default {
-  entry: 'src/browser/index.js',
+  entry: 'src/runtime/browser/index.js',
   // module name is really heimdalljs but this is the global name
   moduleName: 'heimdall',
   plugins: [

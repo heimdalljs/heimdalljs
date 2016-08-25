@@ -1,6 +1,6 @@
 {
   "name": "heimdalljs",
-  "version": "0.2.1",
+  "version": "0.3.0-alpha3",
   "description": "Structured instrumentation library",
   "main": "dist/heimdalljs.cjs.js",
   "jsnext:main": "dist/heimdalljs.es.js",
@@ -11,7 +11,6 @@
     "build:test": "rollup --no-strict -c test.config.js",
     "test": "mocha dist/tests/bundle.cjs",
     "test:debug": "mocha --no-timeouts debug dist/tests/bundle.cjs",
-
     "build_and_test": "npm run build:test && npm run test",
     "trace": "node --trace-hydrogen --trace_phase=Z --trace_deopt --code_comments --hydrogen_track_positions --redirect_code_traces bench/ "
   },

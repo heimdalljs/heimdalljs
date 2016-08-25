@@ -3,7 +3,7 @@ import babel from 'rollup-plugin-babel';
 import commonjs from 'rollup-plugin-commonjs';
 
 export default {
-  entry: 'src/node/index.js',
+  entry: 'src/runtime/node/index.js',
   moduleName: 'heimdalljs',
   plugins: [
     babel({
