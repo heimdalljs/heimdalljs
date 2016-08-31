@@ -1,4 +1,5 @@
 import EmptyObject from './empty-object';
+import console from './log';
 
 const deprecations = new EmptyObject();
 
