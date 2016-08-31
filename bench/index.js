@@ -1,5 +1,7 @@
 var Heimdall = require('../heimdall');
-process.Heimdall = Heimdall;
+var _global = typeof window !== 'undefined' ? window : global;
+
+_global.Heimdall = Heimdall;
 
 require('do-you-even-bench')([
   require('./start-stop'),
@@ -8,5 +10,10 @@ require('do-you-even-bench')([
   require('./start-stop-allstats'),
   require('./node'),
   require('./start'),
-  require('./overall')
+  require('./overall'),
+  require('./now'),
+  require('./new-node'),
+  require('./new-token'),
+  require('./heimdall.start'),
+  require('./comprehensive-start-stop')
 ]);
