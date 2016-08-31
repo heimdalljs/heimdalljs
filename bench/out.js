@@ -213,11 +213,11 @@ var _global = typeof window !== 'undefined' ? window : global;
 _global.Heimdall = Heimdall;
 
 require('do-you-even-bench')([
-  require('./now'),
-  require('./new-node'),
+  require('./test/now'),
+  require('./test/new-node'),
   require('./new-token'),
-  require('./heimdall.start'),
-  require('./comprehensive-start-stop')
+  require('./test/heimdall.start.js'),
+  require('./test/comprehensive-start-stop')
 ]);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})

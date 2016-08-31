@@ -1,18 +1,18 @@
 import { Promise } from 'rsvp';
-
-import Token from './token';
-import HashMap from './hash-map';
+import FastArray from './fast-array';
 import HeimdallNode from './node';
 import Session from './session';
 import timeNS from './time';
 
 export default class Heimdall{
-  constructor(session) {
+  constructor(session, options = {}) {
     if (arguments.length < 1) {
       session = new Session();
     }
 
-    this._tokenMap = new HashMap();
+    this.options = options;
+    this._nodes = new FastArray(options.preallocateCount || 1001);
+
     this._session = session;
     this._reset(false);
   }
@@ -57,9 +57,8 @@ export default class Heimdall{
     this._recordTime();
 
     let node = new HeimdallNode(this, id, data);
-    let token = new Token(node._id, this);
-
-    this._tokenMap.set(token, node);
+    let token = this._nodes.length;
+    this._nodes.push(node);
 
     if (this.current) {
       this.current.addChild(node);
@@ -71,7 +70,7 @@ export default class Heimdall{
   }
 
   stop(token) {
-    let node = this._tokenMap.get(token);
+    let node = this._nodes.get(token);
 
     if (node._stopped === true) {
       throw new TypeError('cannot stop: already stopped');
@@ -85,7 +84,7 @@ export default class Heimdall{
   }
 
   resume(token) {
-    let node = this._tokenMap.get(token);
+    let node = this._nodes.get(token);
 
     if (node._stopped === false) {
       throw new TypeError('cannot resume: not stopped');
@@ -97,7 +96,7 @@ export default class Heimdall{
   }
 
   statsForNode(token) {
-    let node = this._tokenMap.get(token);
+    let node = this._nodes.get(token);
 
     return node.stats;
   }
@@ -120,7 +119,7 @@ export default class Heimdall{
     }
 
     let token = this.start(name, Schema);
-    let node = this._tokenMap.get(token);
+    let node = this._nodes.get(token);
 
     // NOTE: only works in very specific scenarios, specifically promises must
     // not escape their parents lifetime. In theory, promises could be augmented
