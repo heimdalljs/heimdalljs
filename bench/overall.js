@@ -1,8 +1,14 @@
-function overall() {
-  let a = heimdall.start('a');
-  let b = heimdall.start('b');
-  heimdall.stop(b);
-  heimdall.stop(a);
-}
-
-module.exports = overall;
+module.exports = {
+  count: 1000,
+  name: 'Comprehensive',
+  setup: function() {
+    var Heimdall = process.Heimdall;
+    var heimdall = new Heimdall();
+  },
+  fn: function() {
+    var a = heimdall.start('a');
+    var b = heimdall.start('b');
+    heimdall.stop(b);
+    heimdall.stop(a);
+  }
+};
