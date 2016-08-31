@@ -186,13 +186,9 @@ describe('HeimdallNode', function() {
       expect(node).to.have.property('id');
     });
 
-    it('must have a string name', function() {
+    it('has a string name', function() {
       let node = new HeimdallNode(mockHeimdall, { name: 'a' }, {}, null);
       expect(node.id.name).to.equal('a');
-
-      expect(function () {
-        new HeimdallNode(mockHeimdall, {}, {}, null);
-      }).to.throw('HeimdallNode#id.name must be a string');
     });
   });
 
