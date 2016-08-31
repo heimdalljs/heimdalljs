@@ -94,8 +94,8 @@ describe('heimdall', function() {
       let statsA = h1.statsForNode(tokenA);
       let statsB = h2.statsForNode(tokenB);
 
-      expect(statsA.time.self).to.equal(2e9 + 20);
       // total A self time is time before B and time after B
+      expect(statsA.time.self).to.equal(2e9 + 20);
       expect(statsB.time.self).to.equal(1e9 + 10);
     });
   });
