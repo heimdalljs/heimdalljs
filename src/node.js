@@ -81,7 +81,7 @@ export default class HeimdallNode {
     this._children.push(node);
 
     node.parent = this;
-    node._restoreNode = node._restoreNode || this;
+    node._restoreNode = this;
   }
 
 
