@@ -4,7 +4,7 @@ var Node = heimdall.constructor.Node;
 // tests
 module.exports = newNode;
 function newNode() {
-  new Node(heimdall, { name: 'some-node' });
+  return new Node(heimdall, { name: 'some-node' });
 }
 
 // loop is for quick "hot code" testing
