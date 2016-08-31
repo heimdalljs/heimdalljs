@@ -6,7 +6,7 @@ var node = new Node(heimdall, { name: 'some-node' });
 // tests
 module.exports = newCookie;
 function newCookie() {
-  new Cookie(node, heimdall);
+  return new Cookie(node, heimdall);
 }
 
 // loop is for quick "hot code" testing
