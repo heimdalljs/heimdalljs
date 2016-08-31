@@ -1,12 +1,14 @@
 module.exports = {
   count: 1000,
-  name: 'Node',
+  name: 'Start Stop',
   setup: function() {
     var Heimdall = process.Heimdall;
     var heimdall = new Heimdall();
-    var Node = heimdall.constructor.Node;
   },
   fn: function() {
-    new Node(heimdall, { name: 'some-node' });
+    var a = heimdall.start('a');
+    var b = heimdall.start('b');
+    heimdall.stop(b);
+    heimdall.stop(a);
   }
 };

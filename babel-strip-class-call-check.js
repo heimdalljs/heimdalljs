@@ -1,22 +1,26 @@
 /* eslint no-unused-vars:0 */
+let fs = require('fs');
+
 module.exports = function() {
   return {
     visitor: {
-      ExpressionStatement(path) {
+      CallExpression(path) {
         let node = path.node;
 
-        if (node.expression.type === 'CallExpression' &&
-           node.expression.callee &&
-           node.expression.callee.type === 'MemberExpression' &&
-           node.expression.callee.object.name === 'babelHelpers' &&
-           node.expression.callee.property.name === 'classCallCheck') {
+        if (node.callee.type === "MemberExpression" &&
+            node.callee.object.name === 'babelHelpers' &&
+            node.callee.property.name === 'classCallCheck') {
 
-          // TODO this `if` check is magix, we need to know why this makes this work
-          if (path.parent.body.length > 1) {
+          // skip the preflight check in rollup-plugin-babel
+          //   for whatever weird reason that plugin includes
+          //   `transform( 'export default class Foo {}', options )
+
+          let filePath = path.hub.file.parserOpts.filename;
+          if (fs.existsSync(filePath)) {
             path.remove();
           }
-         }
-     }
+        }
+      }
     }
   };
 };
