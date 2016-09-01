@@ -8,6 +8,6 @@ module.exports = {
     var label = { name: 'some-node' };
   },
   fn: function() {
-    new Node(heimdall, label);
+    return new Node(heimdall, label);
   }
 };

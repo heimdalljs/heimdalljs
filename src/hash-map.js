@@ -25,13 +25,17 @@ export default class HashMap {
     return this;
   }
 
-  get({ _id:key }) {
+  has(key) {
+    return key in this._data && this._data[key] !== UNDEFINED_KEY;
+  }
+
+  get(key) {
     let val = this._data[key];
 
     return val === UNDEFINED_KEY ? undefined : val;
   }
 
-  set({ _id:key }, value) {
+  set(key, value) {
     this._data[key] = value;
 
     return this;
@@ -39,8 +43,6 @@ export default class HashMap {
 
   delete(key) {
     this._data[key] = UNDEFINED_KEY;
-
-    return true;
   }
 
 }

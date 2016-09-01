@@ -5,6 +5,6 @@ module.exports = {
     var now = Heimdall.now;
   },
   fn: function() {
-    now();
+    return now();
   }
 };

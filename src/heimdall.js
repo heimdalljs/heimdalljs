@@ -1,134 +1,68 @@
-import { Promise } from 'rsvp';
-import FastArray from './fast-array';
-import HeimdallNode from './node';
 import Session from './session';
-import timeNS from './time';
+import now from './time';
+import EmptyObject from './empty-object';
+
+// op codes
+const OP_START = 0;
+const OP_STOP = 1;
+const OP_RESUME = 2;
+const OP_ARGS = 3;
 
 export default class Heimdall{
-  constructor(session, options = {}) {
+  constructor(session) {
     if (arguments.length < 1) {
       session = new Session();
     }
 
-    this.options = options;
-    this._nodes = new FastArray(options.preallocateCount || 1001);
-
     this._session = session;
-    this._reset(false);
   }
 
-  get current() {
-    return this._session.current;
+  get _events() {
+    return this._session._events;
   }
 
-  get root() {
-    return this._session.root;
+  get _stats() {
+    return this._session.stats;
   }
 
-  _reset(resetSession) {
-    if (resetSession !== false) {
-      this._session.reset();
-    }
-
-    if (!this.root) {
-      // The first heimdall to start will create the session and root.  Subsequent
-      // heimdall instances continue to use the existing graph
-      this.start('heimdall');
-      this._session.root = this._session.current;
-    }
+  set _stats(v) {
+    this._session.stats = v;
   }
 
-  start(name, Schema) {
-    let id;
-    let data;
+  start(name) {
+    this._events.push([OP_START, name, now(), this._stats]);
+    this._stats = null;
 
-    if (typeof name === 'string') {
-      id = { name: name };
-    } else {
-      id = name;
-    }
-
-    if (typeof Schema === 'function') {
-      data = new Schema();
-    } else {
-      data = {};
-    }
-
-    this._recordTime();
-
-    let node = new HeimdallNode(this, id, data);
-    let token = this._nodes.length;
-    this._nodes.push(node);
-
-    if (this.current) {
-      this.current.addChild(node);
-    }
-
-    this._session.current = node;
-
-    return token;
+    return this._events.length - 1;
   }
 
   stop(token) {
-    let node = this._nodes.get(token);
-
-    if (node._stopped === true) {
-      throw new TypeError('cannot stop: already stopped');
-    } else if (this.current !== node) {
-      throw new TypeError('cannot stop: not the current node');
-    }
-
-    node._stopped = true;
-    this._recordTime();
-    this._session.current = node._restoreNode;
+    this._events.push([OP_STOP, token, now(), this._stats]);
+    this._stats = null;
   }
 
   resume(token) {
-    let node = this._nodes.get(token);
+    this._events.push([OP_RESUME, token, now(), this._stats]);
+    this._stats = null;
+  }
 
-    if (node._stopped === false) {
-      throw new TypeError('cannot resume: not stopped');
+  startWithStats(name, ...keys) {
+    if (this._stats === null) {
+      this._stats = new EmptyObject();
     }
 
-    node._stopped = false;
-    node._restoreNode = this.current;
-    this._session.current = node;
+    let stats = this._stats;
+
+
+    throw new Error('NOT IMPLEMENTED');
   }
 
-  statsForNode(token) {
-    let node = this._nodes.get(token);
-
-    return node.stats;
+  setArgs(args) {
+    // This has the side effect of making events heterogenous
+    this._events.push([OP_ARGS, null, null, args]);
   }
 
-  _recordTime() {
-    let time = timeNS();
-
-    // always true except for root
-    if (this.current) {
-      let delta = time - this._session.previousTimeNS;
-      this.current.stats.time.self += delta;
-    }
-    this._session.previousTimeNS = time;
-  }
-
-  node(name, Schema, callback, context) {
-    if (arguments.length < 3) {
-      callback = Schema;
-      Schema = undefined;
-    }
-
-    let token = this.start(name, Schema);
-    let node = this._nodes.get(token);
-
-    // NOTE: only works in very specific scenarios, specifically promises must
-    // not escape their parents lifetime. In theory, promises could be augmented
-    // to support those more advanced scenarios.
-    return new Promise(resolve => resolve(callback.call(context, node.stats.own))).
-      finally(() => this.stop(token));
-  }
-
-  registerMonitor(name, Schema) {
+  registerMonitor(name, ...keys) {
     if (name === 'own' || name === 'time') {
       throw new Error('Cannot register monitor at namespace "' + name + '".  "own" and "time" are reserved');
     }
@@ -136,59 +70,53 @@ export default class Heimdall{
       throw new Error('A monitor for "' + name + '" is already registered"');
     }
 
-    this._session.monitorSchemas.set(name, Schema);
-  }
+    let len = keys.length;
+    let schema = new EmptyObject();
+    let tokens = new Array(len);
 
-  statsFor(name) {
-    let stats = this.current.stats;
-    let Schema;
-
-    if (!stats[name]) {
-      Schema = this._session.monitorSchemas.get(name);
-      if (!Schema) {
-        throw new Error('No monitor registered for "' + name + '"');
-      }
-      stats[name] = new Schema();
+    for (let i = 0; i < len; i++) {
+      let statKey = `${name}.${keys[i]}`;
+      tokens[i] = statKey;
+      schema[keys[i]] = statKey;
+      this._StatSchema.prototype[statKey] = 0;
     }
 
-    return stats[name];
+    new this._StatSchema();
+
+    this._session.monitorSchemas.set(name, schema);
+
+    return tokens;
+  }
+
+  setStat(token, value) {
+    if (this._stats === null) {
+      this._stats = new EmptyObject();
+    }
   }
 
   configFor(name) {
     let config = this._session.configs.get(name);
 
     if (!config) {
-      config = this._session.configs.set(name, {});
+      config = this._session.configs.set(name, new EmptyObject());
     }
 
     return config;
   }
 
   toJSON() {
-    return { nodes: this.root.toJSONSubgraph() };
+    throw new Error('TODO, implement');
   }
 
   visitPreOrder(cb) {
-    return this.root.visitPreOrder(cb);
+    throw new Error('TODO, implement');
   }
 
   visitPostOrder(cb) {
-    return this.root.visitPostOrder(cb);
+    throw new Error('TODO, implement');
   }
 
   generateNextId() {
     return this._session.generateNextId();
-  }
-
-  get stack() {
-    let stack = [];
-    let top = this.current;
-
-    while (top !== undefined && top !== this.root) {
-      stack.unshift(top);
-      top = top.parent;
-    }
-
-    return stack.map(node => node.id.name);
   }
 }

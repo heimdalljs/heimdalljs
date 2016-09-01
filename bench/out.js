@@ -181,6 +181,29 @@ process.chdir = function (dir) {
 process.umask = function() { return 0; };
 
 },{}],2:[function(require,module,exports){
+(function (global){
+var Heimdall = require('../heimdall');
+var _global = typeof window !== 'undefined' ? window : global;
+
+_global.Heimdall = Heimdall;
+
+var benchmarkRunner = require('do-you-even-bench');
+var benchmarks = [
+  // require('./test/now'),
+  // require('./test/new-node'),
+  require('./test/heimdall.start.js'),
+  require('./test/comprehensive-start-stop')
+];
+
+console.profile('benchmarks');
+benchmarkRunner(benchmarks);
+setTimeout(function() {
+  console.profileEnd('benchmarks');
+}, 25000);
+
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../heimdall":6,"./test/comprehensive-start-stop":3,"./test/heimdall.start.js":4,"do-you-even-bench":8}],3:[function(require,module,exports){
 module.exports = {
   count: 1000,
   name: 'Comprehensive Start Stop',
@@ -194,7 +217,7 @@ module.exports = {
     heimdall.stop(a);
   }
 };
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 module.exports = {
   count: 1000,
   name: 'heimdall.start()',
@@ -202,64 +225,10 @@ module.exports = {
     var heimdall = new Heimdall();
   },
   fn: function() {
-    var a = heimdall.start('a');
+    return heimdall.start('a');
   }
 };
-},{}],4:[function(require,module,exports){
-(function (global){
-var Heimdall = require('../heimdall');
-var _global = typeof window !== 'undefined' ? window : global;
-
-_global.Heimdall = Heimdall;
-
-require('do-you-even-bench')([
-  require('./test/now'),
-  require('./test/new-node'),
-  require('./new-token'),
-  require('./test/heimdall.start.js'),
-  require('./test/comprehensive-start-stop')
-]);
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../heimdall":9,"./comprehensive-start-stop":2,"./heimdall.start":3,"./new-node":5,"./new-token":6,"./now":7,"do-you-even-bench":11}],5:[function(require,module,exports){
-
-module.exports = {
-  count: 1000,
-  name: 'new Node()',
-  setup: function() {
-    var heimdall = new Heimdall();
-    var Node = Heimdall.Node;
-    var label = { name: 'some-node' };
-  },
-  fn: function() {
-    new Node(heimdall, label);
-  }
-};
-},{}],6:[function(require,module,exports){
-
-module.exports = {
-  count: 1000,
-  name: 'new Token()',
-  setup: function() {
-    var heimdall = new Heimdall();
-    var Token = Heimdall.Token;
-  },
-  fn: function() {
-    new Token(1, heimdall);
-  }
-};
-},{}],7:[function(require,module,exports){
-module.exports = {
-  count: 1000,
-  name: 'now()',
-  setup: function() {
-    var now = Heimdall.now;
-  },
-  fn: function() {
-    now();
-  }
-};
-},{}],8:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 (function (process){
 function indexOf(callbacks, callback) {
   for (var i=0, l=callbacks.length; i<l; i++) {
@@ -1839,38 +1808,6 @@ if (typeof window !== 'undefined' && typeof window['__PROMISE_INSTRUMENTATION__'
   }
 }
 
-// All Credit for this goes to the Ember.js Core Team
-
-// This exists because `Object.create(null)` is absurdly slow compared
-// to `new EmptyObject()`. In either case, you want a null prototype
-// when you're treating the object instances as arbitrary dictionaries
-// and don't want your keys colliding with build-in methods on the
-// default object prototype.
-
-var proto = Object.create(null, {
-  // without this, we will always still end up with (new
-  // EmptyObject()).constructor === Object
-  constructor: {
-    value: undefined,
-    enumerable: false,
-    writable: true
-  }
-});
-
-function EmptyObject() {}
-EmptyObject.prototype = proto;
-
-var HAS_CONSOLE = typeof console !== 'undefined';
-var K = function K() {};
-
-var warn = HAS_CONSOLE ? function warn() {
-  console.warn.apply(console, arguments);
-} : K;
-
-var console$1 = {
-  warn: warn
-};
-
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
   return typeof obj;
 } : function (obj) {
@@ -1895,97 +1832,110 @@ var createClass = function () {
   };
 }();
 
-var deprecations = new EmptyObject();
+var SMALL_ARRAY_LENGTH = 250;
 
-function deprecated(notice) {
-  if (deprecations[notice]) {
-    return;
+var FastArray = function () {
+  function FastArray() {
+    var length = arguments.length <= 0 || arguments[0] === undefined ? SMALL_ARRAY_LENGTH : arguments[0];
+    var name = arguments.length <= 1 || arguments[1] === undefined ? 'Unknown Pool' : arguments[1];
+
+    this.init(length, name);
   }
 
-  deprecations[notice] = true;
-  console$1.warn('DEPRECATED!! ' + notice);
-}
+  createClass(FastArray, [{
+    key: 'init',
+    value: function init() {
+      var length = arguments.length <= 0 || arguments[0] === undefined ? SMALL_ARRAY_LENGTH : arguments[0];
+      var name = arguments.length <= 1 || arguments[1] === undefined ? 'Unknown Pool' : arguments[1];
 
-var Token = function () {
-  function Token(id, heimdall) {
-    this._heimdall = heimdall;
-    this._id = id;
-  }
-
-  createClass(Token, [{
-    key: 'stop',
-    value: function stop() {
-      deprecated('use of token.stop() should be refactored to heimdall.stop(token);');
-      this._heimdall.stop(this);
-    }
-  }, {
-    key: 'resume',
-    value: function resume() {
-      deprecated('use of token.resume() should be refactored to heimdall.resume(token);');
-      this._heimdall.resume(this);
-    }
-  }, {
-    key: 'stats',
-    get: function get() {
-      deprecated('use of token.stats should be refactored to heimdall.statsForNode(token).own;');
-      return this._heimdall.statsForNode(this).own;
-    }
-  }]);
-  return Token;
-}();
-
-var UNDEFINED_KEY = Object.create(null);
-
-var HashMap = function () {
-  function HashMap(entries) {
-    this._data = new EmptyObject();
-
-    if (entries) {
-      for (var i = 0; i < entries.length; i++) {
-        this.data[entries[i][0]] = entries[i][1];
-      }
-    }
-  }
-
-  createClass(HashMap, [{
-    key: 'forEach',
-    value: function forEach(cb) {
-      for (var key in this._data) {
-        // skip undefined
-        if (this._data[key] !== UNDEFINED_KEY) {
-          cb(this._data[key], key);
-        }
-      }
-
-      return this;
+      this.name = name;
+      this.length = 0;
+      this._length = length;
+      this._data = new Array(length);
     }
   }, {
     key: 'get',
-    value: function get(_ref) {
-      var key = _ref._id;
+    value: function get(index) {
+      if (index >= 0 && index < this.length) {
+        return this._data[index];
+      }
 
-      var val = this._data[key];
-
-      return val === UNDEFINED_KEY ? undefined : val;
+      return undefined;
     }
   }, {
     key: 'set',
-    value: function set(_ref2, value) {
-      var key = _ref2._id;
+    value: function set(index, value) {
+      if (index > this.length) {
+        throw new Error("Index is out of array bounds.");
+      }
 
-      this._data[key] = value;
+      if (index === this.length) {
+        this.length++;
+      }
 
-      return this;
+      this._data[index] = value;
     }
   }, {
-    key: 'delete',
-    value: function _delete(key) {
-      this._data[key] = UNDEFINED_KEY;
+    key: 'forEach',
+    value: function forEach(cb) {
+      for (var i = 0; i < this.length; i++) {
+        cb(this._data[i], i);
+      }
+    }
+  }, {
+    key: 'emptyEach',
+    value: function emptyEach(cb) {
+      for (var i = 0; i < this.length; i++) {
+        cb(this._data[i], i);
+        this._data[i] = undefined;
+      }
 
-      return true;
+      this.length = 0;
+    }
+  }, {
+    key: 'mapInPlace',
+    value: function mapInPlace(cb) {
+      for (var i = 0; i < this.length; i++) {
+        this._data[i] = cb(this._data[i], i);
+      }
+    }
+  }, {
+    key: 'map',
+    value: function map(cb) {
+      var arr = new FastArray(this._length, this.name);
+
+      for (var i = 0; i < this.length; i++) {
+        arr._data[i] = cb(this._data[i], i);
+      }
+
+      return arr;
+    }
+  }, {
+    key: 'push',
+    value: function push(item) {
+      var index = this.length++;
+
+      if (index === this._length) {
+        this._length *= 2;
+        this._data.length = this._length;
+      }
+
+      this._data[index] = item;
+    }
+  }, {
+    key: 'pop',
+    value: function pop() {
+      var index = --this.length;
+
+      if (index < 0) {
+        this.length = 0;
+        return undefined;
+      }
+
+      return this._data[index];
     }
   }]);
-  return HashMap;
+  return FastArray;
 }();
 
 var HeimdallNode = function () {
@@ -2178,11 +2128,15 @@ var timeNS = now$1;
 
 var Heimdall = function () {
   function Heimdall(session) {
+    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
     if (arguments.length < 1) {
       session = new HeimdallSession();
     }
 
-    this._tokenMap = new HashMap();
+    this.options = options;
+    this._nodes = new FastArray(options.preallocateCount || 1001);
+
     this._session = session;
     this._reset(false);
   }
@@ -2222,9 +2176,8 @@ var Heimdall = function () {
       this._recordTime();
 
       var node = new HeimdallNode(this, id, data);
-      var token = new Token(node._id, this);
-
-      this._tokenMap.set(token, node);
+      var token = this._nodes.length;
+      this._nodes.push(node);
 
       if (this.current) {
         this.current.addChild(node);
@@ -2237,7 +2190,7 @@ var Heimdall = function () {
   }, {
     key: 'stop',
     value: function stop(token) {
-      var node = this._tokenMap.get(token);
+      var node = this._nodes.get(token);
 
       if (node._stopped === true) {
         throw new TypeError('cannot stop: already stopped');
@@ -2252,7 +2205,7 @@ var Heimdall = function () {
   }, {
     key: 'resume',
     value: function resume(token) {
-      var node = this._tokenMap.get(token);
+      var node = this._nodes.get(token);
 
       if (node._stopped === false) {
         throw new TypeError('cannot resume: not stopped');
@@ -2265,7 +2218,7 @@ var Heimdall = function () {
   }, {
     key: 'statsForNode',
     value: function statsForNode(token) {
-      var node = this._tokenMap.get(token);
+      var node = this._nodes.get(token);
 
       return node.stats;
     }
@@ -2292,7 +2245,7 @@ var Heimdall = function () {
       }
 
       var token = this.start(name, Schema);
-      var node = this._tokenMap.get(token);
+      var node = this._nodes.get(token);
 
       // NOTE: only works in very specific scenarios, specifically promises must
       // not escape their parents lifetime. In theory, promises could be augmented
@@ -2402,17 +2355,16 @@ function setupSession(global) {
 setupSession(process);
 
 Heimdall.Node = HeimdallNode;
-Heimdall.Token = Token;
 Heimdall.now = timeNS;
 
 var index = new Heimdall(process._heimdall_session_2);
 
 module.exports = index;
 }).call(this,require('_process'))
-},{"_process":1}],9:[function(require,module,exports){
+},{"_process":1}],6:[function(require,module,exports){
 module.exports = require('./dist/heimdalljs.cjs').constructor;
 
-},{"./dist/heimdalljs.cjs":8}],10:[function(require,module,exports){
+},{"./dist/heimdalljs.cjs":5}],7:[function(require,module,exports){
 (function (process,global){
 /*!
  * Benchmark.js v1.0.0 <http://benchmarkjs.com/>
@@ -6334,7 +6286,7 @@ module.exports = require('./dist/heimdalljs.cjs').constructor;
 }(this));
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":1}],11:[function(require,module,exports){
+},{"_process":1}],8:[function(require,module,exports){
 var Benchmark = require('benchmark');
 
 function log(message) {
@@ -6403,4 +6355,4 @@ module.exports = function(suites) {
   }, 1000);
 }
 
-},{"benchmark":10}]},{},[4]);
+},{"benchmark":7}]},{},[2]);

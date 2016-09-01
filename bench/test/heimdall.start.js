@@ -5,6 +5,6 @@ module.exports = {
     var heimdall = new Heimdall();
   },
   fn: function() {
-    var a = heimdall.start('a');
+    return heimdall.start('a');
   }
 };
