@@ -1,8 +1,8 @@
 import EmptyObject from '../empty-object';
-
 const MAP_INDEX = '__COUNTER-STORE-INDEX';
-const STORE_SIZE = 1e6;
+const STORE_SIZE = 1e3;
 const HUGE_NUMBER = STORE_SIZE + 1;
+const LOB = (1 << 16) - 1;
 
 function grow(arr, amount, fill) {
   let a = new Uint32Array(arr.length + amount);
@@ -20,51 +20,27 @@ export default class CounterStore {
     this._store = new Uint32Array(STORE_SIZE);
     this._currentCachePosition = 0;
     this._currentCacheLength = 0;
-    this._config = new Uint32Array();
+    this._config = [];
     this._cache = null;
     this._cacheSeries = [];
-    this._pointerCache = new EmptyObject();
     this._labelCache = new EmptyObject();
   }
 
   registerGroup(name, counters) {
     let tokens = [];
-    let map = new EmptyObject();
     let labelMap = new EmptyObject();
     let mapIndex = this._config.length;
-    let pointers = this._pointerCache;
 
-    map[MAP_INDEX] = mapIndex;
     labelMap[MAP_INDEX] = mapIndex;
 
     this._config.push(counters.length);
     this._labelCache[name] = labelMap;
 
     for (let i = 0; i < counters.length; i++) {
+      let token = (mapIndex << 16) + i;
       let label = counters[i];
-      let token = `${name}:${label}`;
       labelMap[label] = i;
 
-      /*
-        `map` and `pointers` are a less efficient way of doing what
-        we think we're capable of doing with a single integer.  All
-        keys for a map point to the map, which has it's own
-        index, and from which the same key will point to the
-        child index.
-
-        e.g. given a token `A`
-
-        `let a = pointers[A][MAP_INDEX];` is the index within view/cache/config
-        of this counter group, while
-
-        `let b = pointers[A][A];` is the index within the counter group
-
-        It may be possible to refactor this to a single TypedArray with keys
-        as numbers where the first half the bytes reference the group and the
-        second half reference the offset.
-       */
-      map[token] = i;
-      pointers[token] = map;
       tokens.push(token);
     }
 
@@ -92,23 +68,22 @@ export default class CounterStore {
   }
 
   increment(counter) {
-    let map = this._pointerCache[counter];
-    let mapIndex = map[MAP_INDEX];
-    let counterIndex = map[counter];
+    let namespaceIndex = counter >> 16;
+    let counterIndex = counter & LOB;
 
     if (this._currentCacheLength === 0) {
       let len = this._config.length;
       this._cache = new Uint32Array(len).fill(HUGE_NUMBER);
     }
 
-    if (this._cache[mapIndex] === HUGE_NUMBER) {
-      let counterCount = this._config[mapIndex];
-      this._cache[mapIndex] = this._currentCachePosition + this._currentCacheLength;
+    if (this._cache[namespaceIndex] === HUGE_NUMBER) {
+      let counterCount = this._config[namespaceIndex];
+      this._cache[namespaceIndex] = this._currentCachePosition + this._currentCacheLength;
 
       this._currentCacheLength += counterCount;
     }
 
-    let storeIndex = this._cache[mapIndex] + counterIndex;
+    let storeIndex = this._cache[namespaceIndex] + counterIndex;
     this._store[storeIndex]++;
   }
 
