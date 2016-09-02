@@ -66,20 +66,6 @@ export default class CounterStore {
     }
   }
 
-  _initializeStoreIfNeeded() {
-    if (this._storeInitialized === false) {
-      this._store = new FastIntArray(opts.storeSize || DEFAULT_STORE_SIZE);
-      this._storeInitialized = true;
-    }
-  }
-
-  cache() {
-    let cache = this._cache;
-    this._cache = null;
-
-    return cache;
-  }
-
   increment(counter) {
     let namespaceIndex = counter >> 16;
     let counterIndex = counter & LOB;
@@ -100,4 +86,17 @@ export default class CounterStore {
     this._store.increment(storeIndex);
   }
 
+  _initializeStoreIfNeeded() {
+    if (this._storeInitialized === false) {
+      this._store = new FastIntArray(opts.storeSize || DEFAULT_STORE_SIZE);
+      this._storeInitialized = true;
+    }
+  }
+
+  cache() {
+    let cache = this._cache;
+    this._cache = null;
+
+    return cache;
+  }
 }
