@@ -2,12 +2,12 @@ import Session from './session';
 import now from '../shared/time';
 import EmptyObject from '../shared/empty-object';
 import { NULL_NUMBER } from '../shared/counter-store';
-
-// op codes
-const OP_START = 0;
-const OP_STOP = 1;
-const OP_RESUME = 2;
-const OP_ANNOTATE = 3;
+import {
+  OP_START,
+  OP_STOP,
+  OP_RESUME,
+  OP_ANNOTATE
+} from '../shared/op-codes';
 
 export default class Heimdall{
   constructor(session) {
