@@ -19,7 +19,7 @@ export default class Heimdall{
   }
 
   get _monitors() {
-    return this._session._monitors;
+    return this._session.monitors;
   }
 
   get _events() {
