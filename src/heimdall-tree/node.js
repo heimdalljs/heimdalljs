@@ -1,8 +1,8 @@
 export default class HeimdallNode {
-  constructor(name, id, parent) {
+  constructor(name, id) {
     this._id = id;
-    this.parent = parent;
-    this.resumeNode = parent;
+    this.parent = null;
+    this.resumeNode = null;
     this.name = name;
     this.stopped = false;
     this.leaves = [];
@@ -31,8 +31,12 @@ export default class HeimdallNode {
     this.children.push(leaf);
   }
 
-  addChild(node) {
+  addNode(node) {
+    if (node.parent) {
+      throw new Error(`Cannot set parent of node '${node.name}', node already has a parent!`);
+    }
     node.parent = this;
+    node.resumeNode = this;
     this.nodes.push(node);
     this.children.push(node);
   }
@@ -44,22 +48,34 @@ export default class HeimdallNode {
   visitPreOrder(cb) {
     cb(this);
 
-    for (let i = 0; i < this.children.length; i++) {
-      this.children[i].visitPreOrder(cb);
+    for (let i = 0; i < this.nodes.length; i++) {
+      this.nodes[i].visitPreOrder(cb);
     }
   }
 
   visitPostOrder(cb) {
-    for (let i = 0; i < this.children.length; i++) {
-      this.children[i].visitPostOrder(cb);
+    for (let i = 0; i < this.nodes.length; i++) {
+      this.nodes[i].visitPostOrder(cb);
     }
 
     cb(this);
   }
 
+  forEachNode(cb) {
+    for (let i=0; i<this.nodes.length; ++i) {
+      cb(this.nodes[i]);
+    }
+  }
+
+  forEachLeaf(cb) {
+    for (let i=0; i<this.leaves.length; ++i) {
+      cb(this.leaves[i]);
+    }
+  }
+
   forEachChild(cb) {
-    for (let i=0; i<this._children.length; ++i) {
-      cb(this._children[i]);
+    for (let i=0; i<this.children.length; ++i) {
+      cb(this.children[i]);
     }
   }
 
@@ -69,7 +85,7 @@ export default class HeimdallNode {
       name: this.name,
       leaves: this.leaves.map(leaf => leaf.toJSON()),
       nodes: this.nodes.map(child => child._id),
-      children: this._children.map(child => child._id )
+      children: this.children.map(child => child._id )
     };
   }
 

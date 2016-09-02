@@ -45,7 +45,7 @@ export default class HeimdallTree {
   construct() {
     let events = this._heimdall._events;
     let currentLeaf = null;
-    let root = new HeimdallNode('---system', 1e9, null);
+    let root = new HeimdallNode('---system', 1e9);
     let currentNode = root;
     let nodeMap = new HashMap();
     let node;
@@ -57,9 +57,9 @@ export default class HeimdallTree {
 
       switch (op) {
         case OP_START:
-          node = new HeimdallNode(name, i, currentNode);
+          node = new HeimdallNode(name, i);
           nodeMap.set(i, node);
-          currentNode.addChild(node);
+          currentNode.addNode(node);
           currentNode = node;
 
           if (currentLeaf) {
@@ -71,9 +71,10 @@ export default class HeimdallTree {
           break;
 
         case OP_STOP:
+          node = nodeMap.get(name);
+
           if (name !== currentNode._id) {
-            // lookup the node to potentially throw the correct error (already stopped)
-            node = nodeMap.get(name);
+            // potentially throw the correct error (already stopped)
             if (node) {
               node.stop();
             } else {
@@ -85,9 +86,9 @@ export default class HeimdallTree {
           currentNode.stop();
           currentNode = currentNode.resumeNode;
 
-          currentLeaf.stop(name, time, counters);
+          currentLeaf.stop(node.name, time, counters);
           currentLeaf = new HeimdallLeaf();
-          currentLeaf.start(currentNode, name, time);
+          currentLeaf.start(currentNode, node.name, time);
           currentNode.addLeaf(currentLeaf);
           break;
 
@@ -97,10 +98,10 @@ export default class HeimdallTree {
           currentNode = node;
 
           if (currentLeaf) {
-            currentLeaf.stop(name, time, counters);
+            currentLeaf.stop(node.name, time, counters);
           }
           currentLeaf = new HeimdallLeaf();
-          currentLeaf.start(currentNode, name, time);
+          currentLeaf.start(currentNode, node.name, time);
           currentNode.addLeaf(currentLeaf);
           break;
 
