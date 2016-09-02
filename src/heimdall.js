@@ -1,6 +1,7 @@
 import Session from './session';
 import now from './time';
 import EmptyObject from './empty-object';
+import { NULL_NUMBER } from './counter-store';
 
 // op codes
 const OP_START = 0;
@@ -44,8 +45,9 @@ export default class Heimdall{
   }
 
   annotate(info) {
-    // This has the side effect of making events heterogenous
-    this._events.push([OP_ANNOTATE, null, null, info]);
+    // This has the side effect of making events heterogenous, as info is an object
+    // while counters will always be `null` or an `Array`
+    this._events.push([OP_ANNOTATE, NULL_NUMBER, NULL_NUMBER, info]);
   }
 
   registerMonitor(name, ...keys) {

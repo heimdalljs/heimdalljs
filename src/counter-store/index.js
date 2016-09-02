@@ -7,7 +7,7 @@ const DEFAULT_NAMESPACE_SIZE = 10;
 // NULL_NUMBER is a number larger than the largest
 // index we are capable of utilizing in the store.
 // if an index is this number, we know that it is null.
-const NULL_NUMBER = MAX_ARRAY_LENGTH + 1;
+export const NULL_NUMBER = MAX_ARRAY_LENGTH + 1;
 const LOB = (1 << 16) - 1;
 
 export default class CounterStore {
