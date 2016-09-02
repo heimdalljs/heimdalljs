@@ -1,4 +1,4 @@
-// import HeimdallNode from './node';
+import HeimdallNode from './node';
 import HeimdallLeaf from './leaf';
 import HashMap from '../shared/hash-map';
 import {
@@ -36,48 +36,6 @@ A <- node
  |_ BA
 
 */
-
-class HeimdallNode {
-  constructor(name, id, parent) {
-    this._id = id;
-    this.parent = parent;
-    this.resumeNode = parent;
-    this.name = name;
-    this.stopped = false;
-    this.leaves = [];
-    this.nodes = [];
-    this.children = [];
-  }
-
-  stop() {
-    if (this.stopped) {
-      throw new Error('Cannot Stop node, already stopped!');
-    }
-    this.stopped = true;
-  }
-
-  resume(resumeNode) {
-    if (!this.stopped) {
-      throw new Error('Cannot Resume node, already running!');
-    }
-    this.resumeNode = resumeNode;
-    this.stopped = false;
-  }
-
-  addLeaf(leaf) {
-    leaf.owner = this;
-    this.leaves.push(leaf);
-    this.children.push(leaf);
-  }
-
-  addChild(node) {
-    node.parent = this;
-    this.nodes.push(node);
-    this.children.push(node);
-  }
-}
-
-
 export default class HeimdallTree {
   constructor(heimdall) {
     this._heimdall = heimdall;
@@ -90,6 +48,8 @@ export default class HeimdallTree {
     let root = new HeimdallNode('---system', 1e9, null);
     let currentNode = root;
     let nodeMap = new HashMap();
+
+    this.root = root;
 
     for (let i = 0; i < events.length; i++) {
       let [op, name, time, counters] = events[i];
@@ -147,11 +107,15 @@ export default class HeimdallTree {
     }
   }
 
+  toJSON() {
+    return { nodes: this.root.toJSONSubgraph() };
+  }
+
   visitPreOrder(cb) {
-    throw new Error('TODO, implement');
+    return this.root.visitPreOrder(cb);
   }
 
   visitPostOrder(cb) {
-    throw new Error('TODO, implement');
+    return this.root.visitPostOrder(cb);
   }
 }

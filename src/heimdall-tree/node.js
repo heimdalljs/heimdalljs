@@ -1,22 +1,40 @@
 export default class HeimdallNode {
-  constructor(heimdall, id, data) {
-    this._heimdall = heimdall;
-    this._stopped = false;
+  constructor(name, id, parent) {
+    this._id = id;
+    this.parent = parent;
+    this.resumeNode = parent;
+    this.name = name;
+    this.stopped = false;
+    this.leaves = [];
+    this.nodes = [];
+    this.children = [];
+  }
 
-    this._id = heimdall.generateNextId();
-    this.id = id;
+  stop() {
+    if (this.stopped) {
+      throw new Error('Cannot Stop node, already stopped!');
+    }
+    this.stopped = true;
+  }
 
-    // lazy vs eager?
-    this.stats = {
-      own: data,
-      time: { self: 0 },
-    };
+  resume(resumeNode) {
+    if (!this.stopped) {
+      throw new Error('Cannot Resume node, already running!');
+    }
+    this.resumeNode = resumeNode;
+    this.stopped = false;
+  }
 
-    // lazy vs eager?
-    this._children = [];
+  addLeaf(leaf) {
+    leaf.owner = this;
+    this.leaves.push(leaf);
+    this.children.push(leaf);
+  }
 
-    this.parent = null;
-    this._restoreNode = null;
+  addChild(node) {
+    node.parent = this;
+    this.nodes.push(node);
+    this.children.push(node);
   }
 
   get isRoot() {
@@ -45,17 +63,6 @@ export default class HeimdallNode {
     }
   }
 
-  remove() {
-    if (!this.parent) {
-      throw new Error('Cannot remove the root heimdalljs node.');
-    }
-    if (this._heimdall.current === this) {
-      throw new Error('Cannot remove an active heimdalljs node.');
-    }
-
-    return this.parent.removeChild(this);
-  }
-
   toJSON() {
     return {
       _id: this._id,
@@ -71,30 +78,5 @@ export default class HeimdallNode {
     this.visitPreOrder(node => nodes.push(node.toJSON()));
 
     return nodes;
-  }
-
-  addChild(node) {
-    if (node.parent) {
-      throw new TypeError('Node ' + node._id + ' already has a parent.  Cannot add to ' + this._id);
-    }
-
-    this._children.push(node);
-
-    node.parent = this;
-    node._restoreNode = node._restoreNode || this;
-  }
-
-
-  removeChild(child) {
-    let index = this._children.indexOf(child);
-
-    if (index < 0) {
-      throw new Error('Child(' + child._id + ') not found in Parent(' + this._id + ').  Something is very wrong.');
-    }
-    this._children.splice(index, 1);
-
-    child.parent = null;
-
-    return child;
   }
 }
