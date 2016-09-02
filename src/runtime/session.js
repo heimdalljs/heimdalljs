@@ -1,7 +1,7 @@
 // provides easily interceptable indirection.
-import HashMap from './hash-map';
-import FastArray from './fast-array';
-import CounterStore from './counter-store';
+import HashMap from '../shared/hash-map';
+import FastArray from '../shared/fast-array';
+import CounterStore from '../shared/counter-store';
 
 export default class HeimdallSession {
   constructor(options = {}) {

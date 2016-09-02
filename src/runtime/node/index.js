@@ -1,6 +1,6 @@
 import Heimdall from '../';
 import Session from '../session';
-import now from '../time';
+import now from '../../shared/time';
 import Node from '../node';
 import setupSession from '../setup-session';
 

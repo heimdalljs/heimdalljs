@@ -1,7 +1,7 @@
 import Session from './session';
-import now from './time';
-import EmptyObject from './empty-object';
-import { NULL_NUMBER } from './counter-store';
+import now from '../shared/time';
+import EmptyObject from '../shared/empty-object';
+import { NULL_NUMBER } from '../shared/counter-store';
 
 // op codes
 const OP_START = 0;
