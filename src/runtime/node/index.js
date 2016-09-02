@@ -1,4 +1,4 @@
-import Heimdall from '../heimdall';
+import Heimdall from '../';
 import Session from '../session';
 import now from '../time';
 import Node from '../node';
