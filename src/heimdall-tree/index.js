@@ -53,7 +53,8 @@ export default class HeimdallTree {
     this.root = root;
 
     for (let i = 0; i < events.length; i++) {
-      let [op, name, time, counters] = events[i];
+      console.log('event-' + i, events._data[i]);
+      let [op, name, time, counters] = events._data[i];
 
       switch (op) {
         case OP_START:
