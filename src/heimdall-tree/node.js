@@ -44,14 +44,14 @@ export default class HeimdallNode {
   visitPreOrder(cb) {
     cb(this);
 
-    for (let i = 0; i < this._children.length; i++) {
-      this._children[i].visitPreOrder(cb);
+    for (let i = 0; i < this.children.length; i++) {
+      this.children[i].visitPreOrder(cb);
     }
   }
 
   visitPostOrder(cb) {
-    for (let i = 0; i < this._children.length; i++) {
-      this._children[i].visitPostOrder(cb);
+    for (let i = 0; i < this.children.length; i++) {
+      this.children[i].visitPostOrder(cb);
     }
 
     cb(this);
@@ -66,9 +66,10 @@ export default class HeimdallNode {
   toJSON() {
     return {
       _id: this._id,
-      id: this.id,
-      stats: this.stats,
-      children: this._children.map(child => child._id ),
+      name: this.name,
+      leaves: this.leaves.map(leaf => leaf.toJSON()),
+      nodes: this.nodes.map(child => child._id),
+      children: this._children.map(child => child._id )
     };
   }
 

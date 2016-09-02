@@ -1,5 +1,11 @@
-import Heimdall from '../../src/runtime';
-
+import HeimdallNode from '../../src/heimdall-tree/node';
+import HeimdallTree from '../../src/heimdall-tree';
+import {
+  OP_START,
+  OP_STOP,
+  OP_RESUME,
+  OP_ANNOTATE
+} from '../../src/shared/op-codes';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { Promise, defer } from 'rsvp';
@@ -7,6 +13,17 @@ import { Promise, defer } from 'rsvp';
 const { expect } = chai;
 
 chai.use(chaiAsPromised);
+
+const NICE_OP_TREE = [
+  [OP_START, 'A', 0, null],
+  [OP_START, 'B', 1, null],
+  [OP_START, 'C', 2, null],
+  [OP_STOP, 2, 3, null],  // stop C
+  [OP_STOP, 1, 4, null],  // stop B
+  [OP_START, 'D', 5, null],
+  [OP_STOP, 5, 6, null],  // stop D
+  [OP_STOP, 0, 7, null]  // stop A
+];
 
 describe('HeimdallNode', function() {
   describe('_id', function() {
@@ -18,46 +35,42 @@ describe('HeimdallNode', function() {
 
   describe('isRoot', function() {
     let heimdall;
+    let tree;
 
     beforeEach( function() {
-      heimdall = new Heimdall();
+      heimdall = { _events: NICE_OP_TREE };
+      tree = new HeimdallTree(heimdall);
+      tree.construct();
     });
 
     it('is true for the root node only', function() {
-      expect(heimdall.root.isRoot).to.equal(true);
-      expect(heimdall.current.isRoot).to.equal(true);
-
-      let token = heimdall.start('child');
-
-      expect(heimdall.root.isRoot).to.equal(true);
-      expect(heimdall.current.isRoot).to.equal(false);
-
-      heimdall.stop(token);
-
-      expect(heimdall.current.isRoot).to.equal(true);
+      expect(tree.root.isRoot).to.equal(true);
+      expect(tree.root.nodes[0].isRoot).to.equal(false);
     });
   });
 
   describe('parent', function() {
     it('exists on a node', function() {
-      let node = new HeimdallNode(mockHeimdall, { name: 'a' }, {}, null);
+      let node = new HeimdallNode('a', 0, null);
       expect(node).to.have.property('parent');
     });
   });
 
   describe('toJSON', function() {
     it('must return the minimum json properties', function() {
-      let node = new HeimdallNode(mockHeimdall, { name: 'a' }, { foo: 'foo' });
-      let child1 = new HeimdallNode(mockHeimdall, { name: 'b1' }, {});
+      let node = new HeimdallNode('a', 0, null);
+      let child1 = new HeimdallNode('b1', 1);
       node.addChild(child1);
-      let child2 = new HeimdallNode(mockHeimdall, { name: 'b2' }, {});
+      let child2 = new HeimdallNode('b2', 2, null);
       node.addChild(child2);
+
+      console.log(node.toJSON());
 
       expect(node.toJSON()).to.eql({
         _id: 1,
-        id: { name: 'a' },
-        stats: { time: { self: 0 }, own: { foo: 'foo' }},
-        children: [2, 3],
+        name: 'a',
+        leaves: [],
+        children: [1, 2],
       });
     });
   });
@@ -125,107 +138,6 @@ describe('HeimdallNode', function() {
       parent.addChild(node);
 
       expect(node.parent).to.equal(parent);
-    });
-  });
-
-  describe('removeChild', function() {
-    it("errors if child is not one of this node's children", function() {
-      let node = new HeimdallNode(mockHeimdall, { name: 'a' }, {});
-      let stranger = new HeimdallNode(mockHeimdall, { name: 'p' }, {});
-
-      expect(function () {
-        stranger.removeChild(node);
-      }).to.throw(/not found/);
-    });
-
-    it("removes the child from this node's children", function() {
-      let node = new HeimdallNode(mockHeimdall, { name: 'a' }, {});
-      let child = new HeimdallNode(mockHeimdall, { name: 'b' }, {});
-
-      node.addChild(child);
-
-      expect(child._id).to.equal(2);
-      expect(node.toJSON().children).to.eql([2]);
-
-      node.removeChild(child);
-      expect(node.toJSON().children).to.eql([]);
-    });
-
-    it("clears the child's parent", function() {
-      let node = new HeimdallNode(mockHeimdall, { name: 'a' }, {});
-      let child = new HeimdallNode(mockHeimdall, { name: 'b' }, {});
-
-      expect(child.parent).to.equal(null);
-
-      node.addChild(child);
-
-      expect(child.parent).to.equal(node);
-
-      node.removeChild(child);
-
-      expect(child.parent).to.equal(null);
-    });
-  });
-
-  describe('remove', function() {
-    // Really this should error if called on any active node, ie any node from
-    // current to root
-    it('errors if called on the current node', function() {
-      let heimdall = new Heimdall();
-
-      heimdall.start('a');
-
-      let nodeA = heimdall.current;
-
-      expect(function () {
-        nodeA.remove();
-      }).to.throw('Cannot remove an active heimdalljs node.');
-    });
-
-    it('errors if called on nodes without a parent', function() {
-      let orphanNode = new HeimdallNode({ generateNextId: function () { return 1; }}, { name: 'a' }, {});
-
-      expect(function () {
-        orphanNode.remove();
-      }).to.throw(/Cannot remove/);
-    });
-
-    it('errors if called on the root node', function() {
-      let heimdall = new Heimdall();
-
-      heimdall.start('a');
-
-      let root = heimdall.root;
-
-      expect(function () {
-        heimdall.root.remove();
-      }).to.throw('Cannot remove the root heimdalljs node.');
-    });
-
-    it('calls removeChild on its parent', function() {
-      let heimdall = new Heimdall();
-
-      heimdall.start('a');
-
-      let nodeA = heimdall.current;
-
-      let tokenB = heimdall.start('b');
-
-      let nodeB = heimdall.current;
-
-      expect(nodeB._id).to.equal(2);
-
-      heimdall.stop(tokenB);
-
-      expect(heimdall.current).to.equal(nodeA);
-
-      expect(nodeB.parent).to.equal(nodeA);
-      expect(nodeA.toJSON().children).to.eql([2]);
-
-      nodeB.remove();
-
-      expect(nodeB.parent).to.equal(null);
-      expect(nodeA.toJSON().children).to.eql([]);
     });
   });
 

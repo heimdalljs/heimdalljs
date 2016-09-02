@@ -1,6 +1,7 @@
 export default class HeimdallLeaf {
   constructor() {
     // set on start
+    this._id = null;
     this.owner = null;
     this.previousOp = null;
     this.startTime = 0;
@@ -38,6 +39,17 @@ export default class HeimdallLeaf {
     this.nextOp = nextOp;
     this.endTime = time;
     this.counters = counters;
-    this.name = `[${this.owner.name}]#${this.previousOp}:${nextOp}`;
+    this._id = this.name = `[${this.owner.name}]#${this.previousOp}:${nextOp}`;
+  }
+
+  toJSON() {
+    return {
+      _id: this._id,
+      name: this.name,
+      startTime: this.startTime,
+      endTime: this.endTime,
+      counters: this.counters,
+      annotations: this.annotations
+    };
   }
 }
