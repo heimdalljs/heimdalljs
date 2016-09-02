@@ -58,9 +58,7 @@ export default class CounterStore {
 
   _initializeIfNeeded() {
     if (this.initialized === false) {
-      let opts = this.options;
-      this._store = new FastIntArray(opts.storeSize || DEFAULT_STORE_SIZE);
-      this._config = new FastIntArray(opts.namespaceAllocation || DEFAULT_NAMESPACE_SIZE);
+      this._config = new FastIntArray(this.options.namespaceAllocation || DEFAULT_NAMESPACE_SIZE);
       this._labelCache = new EmptyObject();
       this.initialized = true;
     }
@@ -88,7 +86,7 @@ export default class CounterStore {
 
   _initializeStoreIfNeeded() {
     if (this._storeInitialized === false) {
-      this._store = new FastIntArray(opts.storeSize || DEFAULT_STORE_SIZE);
+      this._store = new FastIntArray(this.options.storeSize || DEFAULT_STORE_SIZE);
       this._storeInitialized = true;
     }
   }
