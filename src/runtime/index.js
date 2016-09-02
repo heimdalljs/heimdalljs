@@ -23,7 +23,7 @@ export default class Heimdall{
   }
 
   get _events() {
-    return this._session._events;
+    return this._session.events;
   }
 
   _retrieveCounters() {

@@ -1,3 +1,3 @@
-import './global';
-import './public-api';
-import './heimdall';
+import './shared-tests';
+import './runtime-tests';
+import './heimdall-tree-tests';

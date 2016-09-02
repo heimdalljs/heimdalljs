@@ -7,6 +7,6 @@ export default class HeimdallSession {
   constructor(options = {}) {
     this.monitors = new CounterStore();
     this.configs = new HashMap();
-    this._events = new FastArray((options.preallocateCount || 1000) + 1);
+    this.events = new FastArray((options.preallocateCount || 1000) + 1);
   }
 }

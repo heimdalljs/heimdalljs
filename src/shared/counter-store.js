@@ -1,4 +1,4 @@
-import EmptyObject from '../empty-object';
+import EmptyObject from './empty-object';
 import { MAX_ARRAY_LENGTH, FastIntArray } from './fast-int-array';
 const NAMESPACE_INDEX_KEY = '__COUNTER-STORE-INDEX';
 const DEFAULT_STORE_SIZE = 1e3;

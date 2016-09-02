@@ -2,10 +2,10 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { Promise, defer } from 'rsvp';
 
-import Session from '../src/runtime/session';
-import Heimdall from '../src/runtime';
+import Session from '../../src/runtime/session';
+import Heimdall from '../../src/runtime';
 
-import mockHRTime from './mock/hrtime';
+import mockHRTime from '../mock/hrtime';
 
 const { expect } = chai;
 
