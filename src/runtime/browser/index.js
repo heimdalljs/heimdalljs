@@ -1,6 +1,6 @@
 import Heimdall from '../';
 import Session from '../session';
-import Node from '../node';
+import Node from '../../heimdall-tree/node';
 
 import setupSession from '../setup-session';
 

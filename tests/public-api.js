@@ -12,8 +12,8 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { Promise, defer } from 'rsvp';
 import Session from '../src/runtime/session';
-import Heimdall from '../src/runtime/heimdall';
-import HeimdallNode from '../src/runtime/node';
+import Heimdall from '../src/runtime';
+import HeimdallNode from '../src/heimdall-tree/node';
 
 const { expect } = chai;
 

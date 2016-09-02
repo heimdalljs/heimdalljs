@@ -75,19 +75,12 @@ export default class Heimdall{
     return config;
   }
 
+  /*
+    Ideally, this method should only be used for serializing
+    session data for transfer. Heimdall-tree can load time
+    data from this format or out of `getSessionData`.
+   */
   toJSON() {
     throw new Error('TODO, implement');
-  }
-
-  visitPreOrder(cb) {
-    throw new Error('TODO, implement');
-  }
-
-  visitPostOrder(cb) {
-    throw new Error('TODO, implement');
-  }
-
-  generateNextId() {
-    return this._session.generateNextId();
   }
 }
