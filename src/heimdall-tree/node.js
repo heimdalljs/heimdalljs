@@ -11,7 +11,7 @@ export default class HeimdallNode {
   }
 
   stop() {
-    if (this.stopped) {
+    if (this.stopped === true) {
       throw new Error('Cannot Stop node, already stopped!');
     }
     this.stopped = true;

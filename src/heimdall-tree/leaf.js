@@ -38,6 +38,6 @@ export default class HeimdallLeaf {
     this.nextOp = nextOp;
     this.endTime = time;
     this.counters = counters;
-    this.name = `[${owner.name}]#${this.previousOp}:${nextOp}`;
+    this.name = `[${this.owner.name}]#${this.previousOp}:${nextOp}`;
   }
 }

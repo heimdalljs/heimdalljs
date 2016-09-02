@@ -48,6 +48,7 @@ export default class HeimdallTree {
     let root = new HeimdallNode('---system', 1e9, null);
     let currentNode = root;
     let nodeMap = new HashMap();
+    let node;
 
     this.root = root;
 
@@ -56,7 +57,7 @@ export default class HeimdallTree {
 
       switch (op) {
         case OP_START:
-          let node = new HeimdallNode(name, i, currentNode);
+          node = new HeimdallNode(name, i, currentNode);
           nodeMap.set(i, node);
           currentNode.addChild(node);
           currentNode = node;
@@ -70,12 +71,17 @@ export default class HeimdallTree {
           break;
 
         case OP_STOP:
-          if (!currentNode) {
-            throw new Error("Cannot Stop, There is no active node!");
-          }
           if (name !== currentNode._id) {
+            // lookup the node to potentially throw the correct error (already stopped)
+            node = nodeMap.get(name);
+            if (node) {
+              node.stop();
+            } else {
+              throw new Error("Cannot Stop, Attempting to stop a non-existent node!");
+            }
             throw new Error("Cannot Stop, Attempting to stop a node with an active child!");
           }
+
           currentNode.stop();
           currentNode = currentNode.resumeNode;
 
@@ -86,7 +92,7 @@ export default class HeimdallTree {
           break;
 
         case OP_RESUME:
-          let node = nodeMap.get(name);
+          node = nodeMap.get(name);
           node.resume(currentNode);
           currentNode = node;
 
@@ -104,6 +110,13 @@ export default class HeimdallTree {
         default:
           throw new Error(`HeimdallTree encountered an unknown OpCode '${op}' during tree construction.`);
       }
+    }
+
+    if (currentLeaf) {
+      root.leaves.splice(root.leaves.indexOf(currentLeaf), 1);
+      root.children.splice(root.children.indexOf(currentLeaf), 1);
+      currentLeaf.owner = null;
+      currentLeaf = null;
     }
   }
 
