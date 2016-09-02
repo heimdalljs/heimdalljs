@@ -9,4 +9,4 @@ setupSession(process);
 Heimdall.Node = Node;
 Heimdall.now = now;
 
-export default new Heimdall(process._heimdall_session_2);
+export default new Heimdall(process._heimdall_session_3);
