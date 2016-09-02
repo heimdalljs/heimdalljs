@@ -93,6 +93,10 @@ export default class CounterStore {
     }
   }
 
+  has(name) {
+    return name in this._labelCache;
+  }
+
   cache() {
     let cache = this._cache;
     this._cache = null;
