@@ -1,7 +1,7 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import Session from '../src/session';
-import setupSession from '../src/setup-session';
+import Session from '../src/runtime/session';
+import setupSession from '../src/runtime/setup-session';
 
 const { expect } = chai;
 
