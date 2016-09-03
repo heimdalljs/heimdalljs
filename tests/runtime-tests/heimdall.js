@@ -107,6 +107,9 @@ describe('heimdall', function() {
       let clock;
 
       beforeEach( function() {
+        heimdall._session.reset();
+        tree.root = null;
+        tree._heimdall = heimdall;
         clock = mockHRTime();
       });
 
@@ -128,14 +131,16 @@ describe('heimdall', function() {
         heimdall.stop(B);
         heimdall.stop(A);
 
-        let aNode = heimdall._session.root._children[0];
-        let aTime = aNode.stats.time.self;
+        tree.construct();
 
-        let bNode = aNode._children[0];
-        let bTime = bNode.stats.time.self;
+        let aNode = tree.root.children[0];
+        let aTime = aNode.stats.time.selfTime;
 
-        let cNode = bNode._children[0];
-        let cTime = cNode.stats.time.self;
+        let bNode = aNode.children[0];
+        let bTime = bNode.stats.time.selfTime;
+
+        let cNode = bNode.children[0];
+        let cTime = cNode.stats.time.selfTime;
 
         expect(Math.floor(aTime / 1e6)).to.equal(0);
         expect(Math.floor(bTime / 1e6)).to.equal(5);
@@ -144,79 +149,69 @@ describe('heimdall', function() {
     });
 
     it('supports basic start/stop', function() {
-      expect(heimdall.stack).to.eql([]);
-
-      let tokenA = heimdall.start({ name: 'node-a' });
-      expect(heimdall.stack).to.eql(['node-a']);
-
-      let tokenB = heimdall.start({ name: 'node-b'});
-      expect(heimdall.stack).to.eql(['node-a', 'node-b']);
-
-      heimdall.stop(tokenB);
-      expect(heimdall.stack).to.eql(['node-a']);
-
-      heimdall.stop(tokenA);
-      expect(heimdall.stack).to.eql([]);
-    });
-
-    it('supports simple name shorthand', function () {
-      expect(heimdall.stack).to.eql([]);
+      expect(tree.stack).to.eql([]);
 
       let tokenA = heimdall.start('node-a');
-      expect(heimdall.stack).to.eql(['node-a']);
+      expect(tree.stack).to.eql(['node-a']);
+
+      let tokenB = heimdall.start('node-b');
+      expect(tree.stack).to.eql(['node-a', 'node-b']);
+
+      heimdall.stop(tokenB);
+      expect(tree.stack).to.eql(['node-a']);
 
       heimdall.stop(tokenA);
-      expect(heimdall.stack).to.eql([]);
+      expect(tree.stack).to.eql([]);
     });
 
     it('supports resume', function () {
-      expect(heimdall.stack).to.eql([]);
+      expect(tree.stack).to.eql([]);
 
       let tokenA = heimdall.start({ name: 'node-a' });
-      expect(heimdall.stack).to.eql(['node-a']);
+      expect(tree.stack).to.eql(['node-a']);
 
       let tokenB = heimdall.start({ name: 'node-b'});
-      expect(heimdall.stack).to.eql(['node-a', 'node-b']);
+      expect(tree.stack).to.eql(['node-a', 'node-b']);
 
       heimdall.stop(tokenB);
-      expect(heimdall.stack).to.eql(['node-a']);
+      expect(tree.stack).to.eql(['node-a']);
 
       heimdall.resume(tokenB);
-      expect(heimdall.stack).to.eql(['node-a', 'node-b']);
+      expect(tree.stack).to.eql(['node-a', 'node-b']);
 
       heimdall.stop(tokenB);
-      expect(heimdall.stack).to.eql(['node-a']);
+      expect(tree.stack).to.eql(['node-a']);
 
       heimdall.stop(tokenA);
-      expect(heimdall.stack).to.eql([]);
+      expect(tree.stack).to.eql([]);
     });
 
     it('restores the node at time of resume', function () {
-      expect(heimdall.stack).to.eql([]);
+      expect(tree.stack).to.eql([]);
 
       let tokenA = heimdall.start('node-a');
-      expect(heimdall.stack).to.eql(['node-a']);
+      expect(tree.stack).to.eql(['node-a']);
 
       let tokenB = heimdall.start('node-b');
-      expect(heimdall.stack).to.eql(['node-a', 'node-b']);
+      expect(tree.stack).to.eql(['node-a', 'node-b']);
 
       heimdall.stop(tokenB);
-      expect(heimdall.stack).to.eql(['node-a']);
+      expect(tree.stack).to.eql(['node-a']);
 
       let tokenC = heimdall.start('node-c');
-      expect(heimdall.stack).to.eql(['node-a', 'node-c']);
+      expect(tree.stack).to.eql(['node-a', 'node-c']);
 
       heimdall.resume(tokenB);
-      expect(heimdall.stack).to.eql(['node-a', 'node-b']);
+      expect(tree.stack).to.eql(['node-a', 'node-b']);
 
       heimdall.stop(tokenB);
-      expect(heimdall.stack).to.eql(['node-a', 'node-c']);
+      expect(tree.stack).to.eql(['node-a', 'node-c']);
 
       heimdall.stop(tokenC);
-      expect(heimdall.stack).to.eql(['node-a']);
+      expect(tree.stack).to.eql(['node-a']);
 
       heimdall.stop(tokenA);
-      expect(heimdall.stack).to.eql([]);
+      expect(tree.stack).to.eql([]);
     });
   });
 

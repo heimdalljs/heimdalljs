@@ -43,6 +43,33 @@ export default class HeimdallTree {
     this.root = null;
   }
 
+  // primarily a test helper, you can get this at any time
+  // to get an array representing the "stack" of open node names.
+  get stack() {
+    let events = this._heimdall._events;
+    let stack = [];
+    let nodeMap = new HashMap();
+
+    for (let i = 0; i < events.length; i++) {
+      let [op, name] = events._data[i];
+
+      if (op === OP_START) {
+        stack.push(name);
+        nodeMap.set(i, name);
+      } else if (op === OP_STOP) {
+        let n = nodeMap.get(name);
+
+        if (n !== stack[stack.length -1]) {
+          throw new Error('Invalid Stack!');
+        }
+
+        stack.pop();
+      }
+    }
+
+    return stack;
+  }
+
   construct() {
     let events = this._heimdall._events;
     let currentLeaf = null;
