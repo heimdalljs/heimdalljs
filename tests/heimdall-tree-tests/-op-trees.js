@@ -4,6 +4,28 @@ import {
   OP_RESUME,
   OP_ANNOTATE
 } from '../../src/shared/op-codes';
+import { format, ORIGIN_TIME } from '../../src/shared/time';
+
+/*
+  Creates a fake time signature from the number of milliseconds provided
+  since system time began.
+ */
+function fT(milliseconds) {
+  switch (format) {
+    case 'milli':
+      return milliseconds;
+    case 'hrtime':
+      let seconds = Math.floor(milliseconds / 1000);
+      let ms = milliseconds - (seconds * 1000);
+      let nanoseconds = ms * 1e6;
+
+      return [seconds, nanoseconds];
+    case 'timestamp':
+      return ORIGIN_TIME + milliseconds;
+    default:
+      return milliseconds;
+  }
+}
 
 /*
  This results in the node tree.
@@ -31,41 +53,41 @@ import {
 export const NICE_OP_TREE = {
   length: 9,
   _data: [
-    [OP_START, 'A', 0, null],
-    [OP_START, 'B', 1, null],
-    [OP_START, 'C', 2, null],
-    [OP_STOP, 2, 3, null],  // stop C
-    [OP_STOP, 1, 4, null],  // stop B
-    [OP_START, 'D', 5, null],
+    [OP_START, 'A', fT(0), null],
+    [OP_START, 'B', fT(1), null],
+    [OP_START, 'C', fT(2), null],
+    [OP_STOP, 2, fT(3), null],  // stop C
+    [OP_STOP, 1, fT(4), null],  // stop B
+    [OP_START, 'D', fT(5), null],
     [OP_ANNOTATE, null, null, { foo: 'bar' }],
-    [OP_STOP, 5, 6, null],  // stop D
-    [OP_STOP, 0, 7, null]  // stop A
+    [OP_STOP, 5, fT(6), null],  // stop D
+    [OP_STOP, 0, fT(7), null]  // stop A
   ]
 };
 
 export const BAD_OP_TREE_INACTIVE_STOPPED = {
   length: 3,
   _data: [
-    [OP_START, 'A', 0, null],
-    [OP_STOP, 0, 1, null], // stop A
-    [OP_STOP, 0, 3, null]  // stop A again
+    [OP_START, 'A', fT(0), null],
+    [OP_STOP, 0, fT(1), null], // stop A
+    [OP_STOP, 0, fT(3), null]  // stop A again
   ]
 };
 
 export const BAD_OP_TREE_ACTIVE_CHILD_STOPPED = {
   length: 3,
   _data: [
-      [OP_START, 'A', 0, null],
-      [OP_START, 'B', 1, null],
-      [OP_STOP, 0, 1, null] // stop A while B is active
+      [OP_START, 'A', fT(0), null],
+      [OP_START, 'B', fT(1), null],
+      [OP_STOP, 0, fT(1), null] // stop A while B is active
     ]
 };
 
 export const BAD_OP_TREE_ACTIVE_RESUMED = {
   length: 2,
   _data: [
-    [OP_START, 'A', 0, null],
-    [OP_RESUME, 0, 1, null] // restart A
+    [OP_START, 'A', fT(0), null],
+    [OP_RESUME, 0, fT(1), null] // restart A
   ]
 };
 

@@ -10,6 +10,32 @@ export default class HeimdallNode {
     this.children = [];
   }
 
+  get stats() {
+    let own = {
+      selfTime: 0,
+      duration: 0,
+      startTime: this.leaves[0].startTime,
+      endTime: this.leaves[this.leaves.length - 1].endTime
+    };
+    own.duration = own.endTime - own.startTime;
+
+    let counters = [];
+    let annotations = [];
+    let stats = {
+      self: own,
+      annotations,
+      counters
+    };
+
+    this.forEachLeaf((leaf) => {
+      own.selfTime += leaf.selfTime;
+      annotations.push(leaf.annotations);
+      counters.push(leaf.counters);
+    });
+
+    return stats;
+  }
+
   stop() {
     if (this.stopped === true) {
       throw new Error('Cannot Stop node, already stopped!');

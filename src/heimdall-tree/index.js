@@ -1,6 +1,7 @@
 import HeimdallNode from './node';
 import HeimdallLeaf from './leaf';
 import HashMap from '../shared/hash-map';
+import { normalizeTime } from '../shared/time';
 import {
   OP_START,
   OP_STOP,
@@ -53,8 +54,11 @@ export default class HeimdallTree {
     this.root = root;
 
     for (let i = 0; i < events.length; i++) {
-      console.log('event-' + i, events._data[i]);
       let [op, name, time, counters] = events._data[i];
+
+      if (op !== OP_ANNOTATE) {
+        time = normalizeTime(time);
+      }
 
       switch (op) {
         case OP_START:

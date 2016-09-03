@@ -14,7 +14,11 @@ export default class HeimdallLeaf {
     this.endTime = 0;
     this.counters = null;
     this.name= null;
-    this.selfTime = 0;
+  }
+
+  get selfTime() {
+    console.log('leaf selfTime', this.endTime, this.startTime, this.endTime - this.startTime);
+    return this.endTime - this.startTime;
   }
 
   get isStopped() {
