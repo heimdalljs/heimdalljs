@@ -17,7 +17,6 @@ export default class HeimdallLeaf {
   }
 
   get selfTime() {
-    console.log('leaf selfTime', this.endTime, this.startTime, this.endTime - this.startTime);
     return this.endTime - this.startTime;
   }
 

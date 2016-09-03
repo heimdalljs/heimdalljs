@@ -4,6 +4,7 @@ import { Promise, defer } from 'rsvp';
 
 import Session from '../../src/runtime/session';
 import Heimdall from '../../src/runtime';
+import Tree from '../../src/heimdall-tree';
 
 import mockHRTime from '../mock/hrtime';
 
@@ -12,9 +13,10 @@ const { expect } = chai;
 chai.use(chaiAsPromised);
 
 let heimdall;
+let tree;
 
 function getJSONSansTime() {
-  let json = heimdall.toJSON();
+  let json = tree.toJSON();
   for (let i=0; i<json.nodes.length; ++i) {
     delete json.nodes[i].stats.time;
   }
@@ -22,8 +24,10 @@ function getJSONSansTime() {
 }
 
 describe('heimdall', function() {
+
   beforeEach(function () {
     heimdall = new Heimdall();
+    tree = new Tree(heimdall);
   });
 
   it('creates a new session if none is provided', function() {
@@ -71,6 +75,7 @@ describe('heimdall', function() {
       let session = new Session();
       let h1 = new Heimdall(session);
       let h2 = new Heimdall(session);
+      tree._heimdall = h1;
 
       let tokenA = h1.start('a');
 
@@ -83,12 +88,17 @@ describe('heimdall', function() {
       clock.tick(1, 10);
       h1.stop(tokenA);
 
-      let statsA = h1.statsForNode(tokenA);
-      let statsB = h2.statsForNode(tokenB);
+      tree.construct();
+
+      let nodeA = tree.root.nodes[0];
+      let nodeB = nodeA.nodes[0];
+
+      let statsA = nodeA.stats;
+      let statsB = nodeB.stats;
 
       // total A self time is time before B and time after B
-      expect(statsA.time.self).to.equal(2e9 + 20);
-      expect(statsB.time.self).to.equal(1e9 + 10);
+      expect(statsA.self.selfTime).to.equal(2e9 + 20);
+      expect(statsB.self.selfTime).to.equal(1e9 + 10);
     });
   });
 
