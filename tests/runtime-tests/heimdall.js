@@ -279,12 +279,12 @@ describe('heimdall', function() {
       tree.construct();
 
       let nodeA = tree.root.nodes[0];
-      let nodeB = tree.root.nodes[1];
+      let nodeB = nodeA.nodes[0];
       let statsA = nodeA.stats;
       let statsB = nodeB.stats;
 
       expect(statsA['my-monitor']['a']).to.equal(2);
-      expect(statsB['my-monitor']['a']).to.equal(2);
+      expect(statsB['my-monitor']['a']).to.equal(1);
     });
   });
 });

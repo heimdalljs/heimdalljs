@@ -23,13 +23,26 @@ export default class HeimdallNode {
     let annotations = [];
     let stats = {
       self: own,
-      annotations,
-      counters
+      // _annotations: annotations,
+      // _counters: counters
     };
 
     this.forEachLeaf((leaf) => {
       own.selfTime += leaf.selfTime;
       annotations.push(leaf.annotations);
+
+      for (let namespace in leaf.counters) {
+        let value = leaf.counters[namespace];
+
+        if (!stats.hasOwnProperty(namespace)) {
+          stats[namespace] = value;
+        } else {
+          for (let label in value) {
+            stats[namespace][label] += value[label];
+          }
+        }
+      }
+
       counters.push(leaf.counters);
     });
 

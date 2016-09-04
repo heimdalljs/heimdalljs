@@ -2,6 +2,7 @@ import HeimdallNode from './node';
 import HeimdallLeaf from './leaf';
 import HashMap from '../shared/hash-map';
 import { normalizeTime } from '../shared/time';
+import { NULL_NUMBER } from '../shared/counter-store';
 import {
   OP_START,
   OP_STOP,
@@ -37,6 +38,15 @@ A <- node
  |_ BA
 
 */
+
+function statsFromCounters(counterStore, counterCache) {
+  if (!counterStore || !counterCache) {
+    return null;
+  }
+
+  return counterStore.restoreFromCache(counterCache);
+}
+
 export default class HeimdallTree {
   constructor(heimdall) {
     this._heimdall = heimdall;
@@ -141,6 +151,7 @@ export default class HeimdallTree {
     let currentNode = root;
     let nodeMap = new HashMap();
     let node;
+    let counterStore = this._heimdall._monitors;
 
     this.root = root;
 
@@ -149,6 +160,7 @@ export default class HeimdallTree {
 
       if (op !== OP_ANNOTATE) {
         time = normalizeTime(time);
+        counters = statsFromCounters(counterStore, counters);
       }
 
       switch (op) {

@@ -1,6 +1,5 @@
 import EmptyObject from './empty-object';
 import { MAX_ARRAY_LENGTH, FastIntArray } from './fast-int-array';
-const NAMESPACE_INDEX_KEY = '__COUNTER-STORE-INDEX';
 const DEFAULT_STORE_SIZE = 1e3;
 const DEFAULT_NAMESPACE_SIZE = 10;
 
@@ -14,11 +13,13 @@ export default class CounterStore {
   constructor(options = {}) {
     this.options = options;
     this.initialized = false;
+    this._storeInitialized = false;
     this._store = null;
     this._namespaceCount = 0;
     this._config = null;
     this._cache = null;
     this._labelCache = null;
+    this._nameCache = null;
   }
 
   registerNamespace(name, labels) {
@@ -32,10 +33,8 @@ export default class CounterStore {
     // we also generate a map between the counters
     // and these labels so that we can reconstruct
     // a meaningful structure later.
-    let labelMap = new EmptyObject();
-
-    labelMap[NAMESPACE_INDEX_KEY] = namespaceIndex;
-    this._labelCache[name] = labelMap;
+    this._nameCache[namespaceIndex] = name;
+    this._labelCache[name] = labels;
 
     // grow the existing config and cache to account
     // for the new namespace
@@ -46,11 +45,7 @@ export default class CounterStore {
     }
 
     for (let i = 0; i < numCounters; i++) {
-      let counter = bitNamespaceIndex + i;
-      let label = counters[i];
-      labelMap[label] = i;
-
-      counters[i] = counter;
+      counters[i] = bitNamespaceIndex + i;
     }
 
     return counters;
@@ -60,8 +55,32 @@ export default class CounterStore {
     if (this.initialized === false) {
       this._config = new FastIntArray(this.options.namespaceAllocation || DEFAULT_NAMESPACE_SIZE);
       this._labelCache = new EmptyObject();
+      this._nameCache = new EmptyObject();
       this.initialized = true;
     }
+  }
+
+  restoreFromCache(cache) {
+    let stats = new EmptyObject();
+
+    for (let i = 0; i < cache.length; i++) {
+      if (cache[i] !== NULL_NUMBER) {
+        let startIndex = cache[i];
+        let namespace = this._nameCache[i];
+        let counterCount = this._config.get(i);
+
+        stats[namespace] = new EmptyObject();
+
+        for (let j = 0; j < counterCount; j++) {
+          let storeIndex = startIndex + j;
+          let label = this._labelCache[namespace][j];
+
+          stats[namespace][label] = this._store.get(storeIndex);
+        }
+      }
+    }
+
+    return stats;
   }
 
   increment(counter) {
@@ -74,7 +93,7 @@ export default class CounterStore {
     }
 
     if (this._cache[namespaceIndex] === NULL_NUMBER) {
-      let counterCount = this._config[namespaceIndex];
+      let counterCount = this._config.get(namespaceIndex);
 
       this._cache[namespaceIndex] = this._store.length;
       this._store.claim(counterCount);
