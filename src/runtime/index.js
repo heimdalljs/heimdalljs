@@ -69,7 +69,8 @@ export default class Heimdall{
     let config = this._session.configs.get(name);
 
     if (!config) {
-      config = this._session.configs.set(name, new EmptyObject());
+      config = new EmptyObject();
+      this._session.configs.set(name, config);
     }
 
     return config;

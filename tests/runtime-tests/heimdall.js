@@ -107,7 +107,7 @@ describe('heimdall', function() {
       let clock;
 
       beforeEach( function() {
-        heimdall._session.reset();
+        heimdall._session.init();
         tree.root = null;
         tree._heimdall = heimdall;
         clock = mockHRTime();
@@ -117,7 +117,7 @@ describe('heimdall', function() {
         clock.restore();
       });
 
-      it('counts selftime', function() {
+      it('counts selfTime', function() {
         let A = heimdall.start('A');
         let B = heimdall.start('B');
 
@@ -133,14 +133,14 @@ describe('heimdall', function() {
 
         tree.construct();
 
-        let aNode = tree.root.children[0];
-        let aTime = aNode.stats.time.selfTime;
+        let aNode = tree.root.nodes[0];
+        let aTime = aNode.stats.self.selfTime;
 
-        let bNode = aNode.children[0];
-        let bTime = bNode.stats.time.selfTime;
+        let bNode = aNode.nodes[0];
+        let bTime = bNode.stats.self.selfTime;
 
-        let cNode = bNode.children[0];
-        let cTime = cNode.stats.time.selfTime;
+        let cNode = bNode.nodes[0];
+        let cTime = cNode.stats.self.selfTime;
 
         expect(Math.floor(aTime / 1e6)).to.equal(0);
         expect(Math.floor(bTime / 1e6)).to.equal(5);
@@ -149,69 +149,69 @@ describe('heimdall', function() {
     });
 
     it('supports basic start/stop', function() {
-      expect(tree.stack).to.eql([]);
+      expect(tree.path).to.eql([]);
 
       let tokenA = heimdall.start('node-a');
-      expect(tree.stack).to.eql(['node-a']);
+      expect(tree.path).to.eql(['node-a']);
 
       let tokenB = heimdall.start('node-b');
-      expect(tree.stack).to.eql(['node-a', 'node-b']);
+      expect(tree.path).to.eql(['node-a', 'node-b']);
 
       heimdall.stop(tokenB);
-      expect(tree.stack).to.eql(['node-a']);
+      expect(tree.path).to.eql(['node-a']);
 
       heimdall.stop(tokenA);
-      expect(tree.stack).to.eql([]);
+      expect(tree.path).to.eql([]);
     });
 
     it('supports resume', function () {
-      expect(tree.stack).to.eql([]);
+      expect(tree.path).to.eql([]);
 
-      let tokenA = heimdall.start({ name: 'node-a' });
-      expect(tree.stack).to.eql(['node-a']);
+      let tokenA = heimdall.start('node-a');
+      expect(tree.path).to.eql(['node-a']);
 
-      let tokenB = heimdall.start({ name: 'node-b'});
-      expect(tree.stack).to.eql(['node-a', 'node-b']);
+      let tokenB = heimdall.start('node-b');
+      expect(tree.path).to.eql(['node-a', 'node-b']);
 
       heimdall.stop(tokenB);
-      expect(tree.stack).to.eql(['node-a']);
+      expect(tree.path).to.eql(['node-a']);
 
       heimdall.resume(tokenB);
-      expect(tree.stack).to.eql(['node-a', 'node-b']);
+      expect(tree.path).to.eql(['node-a', 'node-b']);
 
       heimdall.stop(tokenB);
-      expect(tree.stack).to.eql(['node-a']);
+      expect(tree.path).to.eql(['node-a']);
 
       heimdall.stop(tokenA);
-      expect(tree.stack).to.eql([]);
+      expect(tree.path).to.eql([]);
     });
 
     it('restores the node at time of resume', function () {
-      expect(tree.stack).to.eql([]);
+      expect(tree.path).to.eql([]);
 
       let tokenA = heimdall.start('node-a');
-      expect(tree.stack).to.eql(['node-a']);
+      expect(tree.path).to.eql(['node-a']);
 
       let tokenB = heimdall.start('node-b');
-      expect(tree.stack).to.eql(['node-a', 'node-b']);
+      expect(tree.path).to.eql(['node-a', 'node-b']);
 
       heimdall.stop(tokenB);
-      expect(tree.stack).to.eql(['node-a']);
+      expect(tree.path).to.eql(['node-a']);
 
       let tokenC = heimdall.start('node-c');
-      expect(tree.stack).to.eql(['node-a', 'node-c']);
+      expect(tree.path).to.eql(['node-a', 'node-c']);
 
       heimdall.resume(tokenB);
-      expect(tree.stack).to.eql(['node-a', 'node-b']);
+      expect(tree.path).to.eql(['node-a', 'node-b']);
 
       heimdall.stop(tokenB);
-      expect(tree.stack).to.eql(['node-a', 'node-c']);
+      expect(tree.path).to.eql(['node-a', 'node-c']);
 
       heimdall.stop(tokenC);
-      expect(tree.stack).to.eql(['node-a']);
+      expect(tree.path).to.eql(['node-a']);
 
       heimdall.stop(tokenA);
-      expect(tree.stack).to.eql([]);
+      expect(tree.path).to.eql([]);
     });
   });
 
@@ -231,98 +231,60 @@ describe('heimdall', function() {
   });
 
   describe('monitors', function() {
-    class MonitorSchema {
-      constructor() {
-        this.mstatA = 0;
-        this.mstatB = 0;
-      }
-    }
-
+    let trueCount;
     let counter;
+    let tree = new Tree();
 
     function monitorEvent() {
-      counter++;
-      let stats = heimdall.statsFor('my-monitor');
-
-      stats.mstatA = counter;
-      stats.mstatB = counter * 10;
+      trueCount++;
+      heimdall.increment(counter);
     }
 
     beforeEach(function () {
-      counter = 0;
+      heimdall._session.init();
+      tree.root = null;
+      tree._heimdall = heimdall;
+      counter = null;
+      trueCount = 0;
     });
 
     it('throws if another schema is registered at the given namespace', function () {
-      class MySchema {}
-
-      heimdall.registerMonitor('some-monitor', MySchema);
+      let [a] = heimdall.registerMonitor('some-monitor', 'a');
       expect(function () {
-        heimdall.registerMonitor('some-monitor', MySchema);
+        heimdall.registerMonitor('some-monitor', 'a');
       }).to.throw('A monitor for "some-monitor" is already registered');
     });
 
     it('throws if using the reserved namespaces own or time', function() {
       expect(function () {
-        heimdall.registerMonitor('own', function MySchema() {});
+        heimdall.registerMonitor('own', 'a');
       }).to.throw('Cannot register monitor at namespace "own".  "own" and "time" are reserved');
 
       expect(function () {
-        heimdall.registerMonitor('time', function MySchema() {});
+        heimdall.registerMonitor('time', 'a');
       }).to.throw('Cannot register monitor at namespace "time".  "own" and "time" are reserved');
     });
 
     it('records stats for each node', function() {
-      heimdall.registerMonitor('my-monitor', MonitorSchema);
+      [counter] = heimdall.registerMonitor('my-monitor','a');
 
-      return expect(heimdall.node('node-a', function () {
-        return heimdall.node('node-b', function () {
-          monitorEvent();
-        }).then(monitorEvent);
-      }).then(function () {
-        return heimdall.node('node-c', function () {
-          monitorEvent();
-        });
-      }).then(getJSONSansTime)).to.eventually.deep.equal({
-        nodes: [{
-          _id: 0,
-          id: { name: 'heimdall' },
-          stats: { own: {}, },
-          children: [1, 3],
-        }, {
-          _id: 1,
-          id: { name: 'node-a' },
-          stats: {
-            own: {},
-            'my-monitor': {
-              mstatA: 2,
-              mstatB: 20,
-            },
-          },
-          children: [2],
-        }, {
-          _id: 2,
-          id: { name: 'node-b' },
-          stats: {
-            own: {},
-            'my-monitor': {
-              mstatA: 1,
-              mstatB: 10,
-            },
-          },
-          children: [],
-        }, {
-          _id: 3,
-          id: { name: 'node-c' },
-          stats: {
-            own: {},
-            'my-monitor': {
-              mstatA: 3,
-              mstatB: 30,
-            },
-          },
-          children: [],
-        }],
-      });
+      let a = heimdall.start('a');
+      monitorEvent();
+      let b = heimdall.start('b');
+      monitorEvent();
+      heimdall.stop(b);
+      monitorEvent();
+      heimdall.stop(a);
+
+      tree.construct();
+
+      let nodeA = tree.root.nodes[0];
+      let nodeB = tree.root.nodes[1];
+      let statsA = nodeA.stats;
+      let statsB = nodeB.stats;
+
+      expect(statsA['my-monitor']['a']).to.equal(2);
+      expect(statsB['my-monitor']['a']).to.equal(2);
     });
   });
 });

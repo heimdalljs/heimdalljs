@@ -44,6 +44,67 @@ export default class HeimdallTree {
   }
 
   // primarily a test helper, you can get this at any time
+  // to get an array representing the path of open node names
+  // from "root" to the last open node.
+  get path() {
+    let events = this._heimdall._events;
+    let root = new HeimdallNode('---system', 1e9);
+    let currentNode = root;
+    let nodeMap = new HashMap();
+    let node;
+    let top;
+    let path = [];
+
+    for (let i = 0; i < events.length; i++) {
+      let [op, name] = events._data[i];
+
+      switch (op) {
+        case OP_START:
+          node = new HeimdallNode(name, i);
+          nodeMap.set(i, node);
+          currentNode.addNode(node);
+          currentNode = node;
+          break;
+
+        case OP_STOP:
+          node = nodeMap.get(name);
+
+          if (name !== currentNode._id) {
+            // potentially throw the correct error (already stopped)
+            if (node) {
+              node.stop();
+            } else {
+              throw new Error("Cannot Stop, Attempting to stop a non-existent node!");
+            }
+            throw new Error("Cannot Stop, Attempting to stop a node with an active child!");
+          }
+
+          currentNode.stop();
+          currentNode = currentNode.resumeNode;
+          break;
+
+        case OP_RESUME:
+          node = nodeMap.get(name);
+          node.resume(currentNode);
+          currentNode = node;
+          break;
+
+        default:
+          throw new Error(`HeimdallTree encountered an unknown OpCode '${op}' during path construction.`);
+      }
+    }
+
+    top = currentNode;
+
+    while (top !== undefined && top !== root) {
+      path.unshift(top.name);
+      top = top.parent;
+    }
+
+    return path;
+  }
+
+  // primarily a test helper, you can get this at any time
   // to get an array representing the "stack" of open node names.
   get stack() {
     let events = this._heimdall._events;
@@ -56,6 +117,9 @@ export default class HeimdallTree {
       if (op === OP_START) {
         stack.push(name);
         nodeMap.set(i, name);
+      } else if (op === OP_RESUME) {
+        let n = nodeMap.get(name);
+        stack.push(n);
       } else if (op === OP_STOP) {
         let n = nodeMap.get(name);
 

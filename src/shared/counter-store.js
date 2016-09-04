@@ -92,7 +92,7 @@ export default class CounterStore {
   }
 
   has(name) {
-    return name in this._labelCache;
+    return this._labelCache && name in this._labelCache;
   }
 
   cache() {
