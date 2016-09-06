@@ -1,6 +1,6 @@
 // provides easily interceptable indirection.
 import HashMap from '../shared/hash-map';
-import FastArray from '../shared/fast-array';
+import EventArray from '../shared/event-array';
 import CounterStore from '../shared/counter-store';
 
 export default class HeimdallSession {
@@ -9,9 +9,9 @@ export default class HeimdallSession {
   }
 
   // separate from constructor mostly for testing purposes
-  init(options = {}) {
+  init() {
     this.monitors = new CounterStore();
     this.configs = new HashMap();
-    this.events = new FastArray((options.preallocateCount || 1000) + 1);
+    this.events = new EventArray(640000 * 4);
   }
 }

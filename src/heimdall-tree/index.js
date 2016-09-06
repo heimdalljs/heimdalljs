@@ -65,9 +65,7 @@ export default class HeimdallTree {
     let top;
     let path = [];
 
-    for (let i = 0; i < events.length; i++) {
-      let [op, name] = events._data[i];
-
+    events.forEach(([op, name], i) => {
       switch (op) {
         case OP_START:
           node = new HeimdallNode(name, i);
@@ -102,7 +100,7 @@ export default class HeimdallTree {
         default:
           throw new Error(`HeimdallTree encountered an unknown OpCode '${op}' during path construction.`);
       }
-    }
+    });
 
     top = currentNode;
 
@@ -121,9 +119,7 @@ export default class HeimdallTree {
     let stack = [];
     let nodeMap = new HashMap();
 
-    for (let i = 0; i < events.length; i++) {
-      let [op, name] = events._data[i];
-
+    events.forEach(([op, name], i) => {
       if (op === OP_START) {
         stack.push(name);
         nodeMap.set(i, name);
@@ -139,7 +135,7 @@ export default class HeimdallTree {
 
         stack.pop();
       }
-    }
+    });
 
     return stack;
   }
@@ -155,9 +151,11 @@ export default class HeimdallTree {
 
     this.root = root;
 
-    for (let i = 0; i < events.length; i++) {
-      let [op, name, time, counters] = events._data[i];
+    if (!!events && !events.forEach) {
+      console.log(this._heimdall);
+    }
 
+    events.forEach(([op, name, time, counters], i) => {
       if (op !== OP_ANNOTATE) {
         time = normalizeTime(time);
         counters = statsFromCounters(counterStore, counters);
@@ -186,6 +184,7 @@ export default class HeimdallTree {
             if (node) {
               node.stop();
             } else {
+              console.log(op, name, time, counters, i);
               throw new Error("Cannot Stop, Attempting to stop a non-existent node!");
             }
             throw new Error("Cannot Stop, Attempting to stop a node with an active child!");
@@ -219,7 +218,7 @@ export default class HeimdallTree {
         default:
           throw new Error(`HeimdallTree encountered an unknown OpCode '${op}' during tree construction.`);
       }
-    }
+    });
 
     if (currentLeaf) {
       root.leaves.splice(root.leaves.indexOf(currentLeaf), 1);

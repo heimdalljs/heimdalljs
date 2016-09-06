@@ -57,7 +57,7 @@ describe('heimdall', function() {
     expect(h1._monitors).to.equal(h2._monitors);
 
     expect(h1._events.get(0)[1]).to.eql('a');
-    expect(h1._events.get(1)[1]).to.eql('b');
+    expect(h1._events.get(4)[1]).to.eql('b');
   });
 
   describe('with nodes from multiple heimdall instances', function() {

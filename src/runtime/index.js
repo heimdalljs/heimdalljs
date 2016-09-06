@@ -31,23 +31,21 @@ export default class Heimdall{
   }
 
   start(name) {
-    this._events.push([OP_START, name, now(), this._retrieveCounters()]);
-
-    return this._events.length - 1;
+    return this._session.events.push(OP_START, name, now(), this._retrieveCounters());
   }
 
   stop(token) {
-    this._events.push([OP_STOP, token, now(), this._retrieveCounters()]);
+    this._session.events.push(OP_STOP, token, now(), this._retrieveCounters());
   }
 
   resume(token) {
-    this._events.push([OP_RESUME, token, now(), this._retrieveCounters()]);
+    this._session.events.push(OP_RESUME, token, now(), this._retrieveCounters());
   }
 
   annotate(info) {
     // This has the side effect of making events heterogenous, as info is an object
     // while counters will always be `null` or an `Array`
-    this._events.push([OP_ANNOTATE, NULL_NUMBER, NULL_NUMBER, info]);
+    this._session.events.push(OP_ANNOTATE, NULL_NUMBER, NULL_NUMBER, info);
   }
 
   registerMonitor(name, ...keys) {
@@ -62,7 +60,7 @@ export default class Heimdall{
   }
 
   increment(token) {
-    this._monitors.increment(token);
+    this._session.monitors.increment(token);
   }
 
   configFor(name) {

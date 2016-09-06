@@ -5,14 +5,9 @@ var benchmarkRunner = require('do-you-even-bench');
 _global.Heimdall = Heimdall;
 
 var benchmarks = [
-  require('./start-stop'),
-  require('./start-stop-ownstats'),
-  require('./start-stop-monitor'),
-  require('./start-stop-allstats'),
   require('./test/now'),
-  require('./test/new-node'),
-  require('./test/heimdall.start.js'),
-  require('./test/comprehensive-start-stop')
+  require('./test/start-stop'),
+  require('./test/start-stop-monitor')
 ];
 
 // console.profile('benchmarks');

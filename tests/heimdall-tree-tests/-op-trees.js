@@ -5,6 +5,7 @@ import {
   OP_ANNOTATE
 } from '../../src/shared/op-codes';
 import { format, ORIGIN_TIME } from '../../src/shared/time';
+import EventArray from '../../src/shared/event-array';
 
 /*
   Creates a fake time signature from the number of milliseconds provided
@@ -50,46 +51,38 @@ function fT(milliseconds) {
  |_ DA
 
  */
-export const NICE_OP_TREE = {
-  length: 9,
-  _data: [
-    [OP_START, 'A', fT(0), null],
-    [OP_START, 'B', fT(1), null],
-    [OP_START, 'C', fT(2), null],
-    [OP_STOP, 2, fT(3), null],  // stop C
-    [OP_STOP, 1, fT(4), null],  // stop B
-    [OP_START, 'D', fT(5), null],
-    [OP_ANNOTATE, null, null, { foo: 'bar' }],
-    [OP_STOP, 5, fT(6), null],  // stop D
-    [OP_STOP, 0, fT(7), null]  // stop A
-  ]
-};
+export const NICE_OP_TREE = new EventArray(undefined,
+ [
+    OP_START, 'A', fT(0), null,
+    OP_START, 'B', fT(1), null,
+    OP_START, 'C', fT(2), null,
+    OP_STOP, 8, fT(3), null,  // stop C
+    OP_STOP, 4, fT(4), null,  // stop B
+    OP_START, 'D', fT(5), null,
+    OP_ANNOTATE, null, null, { foo: 'bar' },
+    OP_STOP, 20, fT(6), null,  // stop D
+    OP_STOP, 0, fT(7), null  // stop A
+  ]);
 
-export const BAD_OP_TREE_INACTIVE_STOPPED = {
-  length: 3,
-  _data: [
-    [OP_START, 'A', fT(0), null],
-    [OP_STOP, 0, fT(1), null], // stop A
-    [OP_STOP, 0, fT(3), null]  // stop A again
-  ]
-};
+export const BAD_OP_TREE_INACTIVE_STOPPED = new EventArray(undefined,
+  [
+    OP_START, 'A', fT(0), null,
+    OP_STOP, 0, fT(1), null, // stop A
+    OP_STOP, 0, fT(3), null  // stop A again
+  ]);
 
-export const BAD_OP_TREE_ACTIVE_CHILD_STOPPED = {
-  length: 3,
-  _data: [
-      [OP_START, 'A', fT(0), null],
-      [OP_START, 'B', fT(1), null],
-      [OP_STOP, 0, fT(1), null] // stop A while B is active
-    ]
-};
+export const BAD_OP_TREE_ACTIVE_CHILD_STOPPED = new EventArray(undefined,
+  [
+      OP_START, 'A', fT(0), null,
+      OP_START, 'B', fT(1), null,
+      OP_STOP, 0, fT(1), null // stop A while B is active
+    ]);
 
-export const BAD_OP_TREE_ACTIVE_RESUMED = {
-  length: 2,
-  _data: [
-    [OP_START, 'A', fT(0), null],
-    [OP_RESUME, 0, fT(1), null] // restart A
-  ]
-};
+export const BAD_OP_TREE_ACTIVE_RESUMED = new EventArray(undefined,
+  [
+    OP_START, 'A', fT(0), null,
+    OP_RESUME, 0, fT(1), null // restart A
+  ]);
 
 export default {
   NICE_OP_TREE,

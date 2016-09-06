@@ -13,7 +13,7 @@ import chaiAsPromised from 'chai-as-promised';
 import Session from '../../src/runtime/session';
 import CounterStore from '../../src/shared/counter-store';
 import HashMap from '../../src/shared/hash-map';
-import FastArray from '../../src/shared/fast-array';
+import EventArray from '../../src/shared/event-array';
 
 const { expect } = chai;
 
@@ -37,10 +37,10 @@ describe('HeimdallSession', function() {
   });
 
   describe('events', function() {
-    it('is a FastArray on the session', function() {
+    it('is a EventArray on the session', function() {
       let events = new Session().events;
 
-      expect(events instanceof FastArray).to.equal(true);
+      expect(events instanceof EventArray).to.equal(true);
     });
   });
 });
