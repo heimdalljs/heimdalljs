@@ -7,7 +7,8 @@ _global.Heimdall = Heimdall;
 var benchmarks = [
   require('./test/now'),
   require('./test/start-stop'),
-  require('./test/start-stop-monitor')
+  require('./test/start-stop-monitor'),
+  require('./test/monitor')
 ];
 
 // console.profile('benchmarks');

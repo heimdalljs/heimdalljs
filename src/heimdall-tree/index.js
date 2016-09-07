@@ -229,6 +229,9 @@ export default class HeimdallTree {
   }
 
   toJSON() {
+    if (!this.root) {
+      this.construct();
+    }
     return { nodes: this.root.toJSONSubgraph() };
   }
 

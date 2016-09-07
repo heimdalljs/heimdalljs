@@ -80,6 +80,13 @@ export default class Heimdall{
     data from this format or out of `getSessionData`.
    */
   toJSON() {
-    throw new Error('TODO, implement');
+    return {
+      monitors: this._monitors.toJSON(),
+      events: this._events.toJSON()
+    };
+  }
+
+  toString() {
+    return JSON.stringify(this.toJSON(), null, 2);
   }
 }

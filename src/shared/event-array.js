@@ -5,6 +5,10 @@ export default class EventArray {
     this.init(length, initialData);
   }
 
+  toJSON() {
+    return this._data.slice(0, this.length);
+  }
+
   init(length = SMALL_ARRAY_LENGTH, initialData) {
     this.length = 0;
     this._length = length;

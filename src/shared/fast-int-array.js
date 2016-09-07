@@ -13,6 +13,10 @@ export class FastIntArray {
     this._data = new Uint32Array(length);
   }
 
+  toJSON() {
+    return this._data.slice(0, this.length);
+  }
+
   get(index) {
     if (index >= 0 && index < this.length) {
       return this._data[index];

@@ -22,6 +22,16 @@ export default class CounterStore {
     this._nameCache = null;
   }
 
+  toJSON() {
+    return {
+      _namespaceCount: this._namespaceCount,
+      _config: this._config,
+      _labelCache: this._labelCache,
+      _nameCache: this._nameCache,
+      _store: this._store
+    }
+  }
+
   registerNamespace(name, labels) {
     this._initializeIfNeeded();
 
