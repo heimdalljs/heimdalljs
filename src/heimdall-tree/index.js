@@ -52,7 +52,7 @@ export default class HeimdallTree {
   constructor(heimdall) {
     this._heimdall = heimdall;
     this.root = null;
-    this.format = heimdall._timeFormat || format;
+    this.format = heimdall && heimdall._timeFormat ? heimdall._timeFormat : format;
   }
 
   static fromJSON(json) {
