@@ -32,6 +32,21 @@ export default class CounterStore {
     }
   }
 
+  static fromJSON(json) {
+    let store = new CounterStore();
+    store._namespaceCount = json._namespaceCount;
+    store._labelCache = json._labelCache;
+    store._nameCache = json._nameCache;
+
+    if (json._store) {
+      store._store = new FastIntArray(json._store.length, json._store);
+    }
+
+    if (json._config) {
+      store._config = new FastIntArray(json._config.length, json._config);
+    }
+  }
+
   registerNamespace(name, labels) {
     this._initializeIfNeeded();
 

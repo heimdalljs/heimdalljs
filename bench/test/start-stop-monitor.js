@@ -2,7 +2,8 @@ module.exports = {
   name: 'Start Stop (with monitor)',
   setup: function() {
     var heimdall = new Heimdall();
-    var x = heimdall.registerMonitor('mon', 'x');
+    var schema = heimdall.registerMonitor('mon', 'x');
+    var x = schema[0];
   },
   fn: function() {
     var a = heimdall.start('a');

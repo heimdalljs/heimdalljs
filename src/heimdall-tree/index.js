@@ -1,8 +1,9 @@
 import HeimdallNode from './node';
 import HeimdallLeaf from './leaf';
+import EventArray from '../shared/event-array';
+import CounterStore from '../shared/counter-store';
 import HashMap from '../shared/hash-map';
-import { normalizeTime } from '../shared/time';
-import { NULL_NUMBER } from '../shared/counter-store';
+import { format, normalizeTime } from '../shared/time';
 import {
   OP_START,
   OP_STOP,
@@ -51,6 +52,18 @@ export default class HeimdallTree {
   constructor(heimdall) {
     this._heimdall = heimdall;
     this.root = null;
+    this.format = heimdall._timeFormat || format;
+  }
+
+  static fromJSON(json) {
+    let events = json.events || [];
+    let heimdall = {
+      _timeFormat: json.format || format,
+      _events: new EventArray(events.length, events),
+      _monitors: CounterStore.fromJSON(json.monitors)
+    };
+
+    return new HeimdallTree(heimdall);
   }
 
   // primarily a test helper, you can get this at any time
@@ -58,7 +71,7 @@ export default class HeimdallTree {
   // from "root" to the last open node.
   get path() {
     let events = this._heimdall._events;
-    let root = new HeimdallNode('---system', 1e9);
+    let root = new HeimdallNode('root', 1e9);
     let currentNode = root;
     let nodeMap = new HashMap();
     let node;
@@ -143,21 +156,18 @@ export default class HeimdallTree {
   construct() {
     let events = this._heimdall._events;
     let currentLeaf = null;
-    let root = new HeimdallNode('---system', 1e9);
+    let root = new HeimdallNode('root', 1e9);
     let currentNode = root;
     let nodeMap = new HashMap();
     let node;
+    let format = this.format;
     let counterStore = this._heimdall._monitors;
 
     this.root = root;
 
-    if (!!events && !events.forEach) {
-      console.log(this._heimdall);
-    }
-
     events.forEach(([op, name, time, counters], i) => {
       if (op !== OP_ANNOTATE) {
-        time = normalizeTime(time);
+        time = normalizeTime(time, format);
         counters = statsFromCounters(counterStore, counters);
       }
 
@@ -184,7 +194,6 @@ export default class HeimdallTree {
             if (node) {
               node.stop();
             } else {
-              console.log(op, name, time, counters, i);
               throw new Error("Cannot Stop, Attempting to stop a non-existent node!");
             }
             throw new Error("Cannot Stop, Attempting to stop a node with an active child!");

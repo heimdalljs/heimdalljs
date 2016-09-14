@@ -2,15 +2,28 @@ export const SMALL_ARRAY_LENGTH = 250;
 export const MAX_ARRAY_LENGTH = 1e6;
 
 export class FastIntArray {
-  constructor(length = SMALL_ARRAY_LENGTH) {
-    this.init(length);
+  constructor(length = SMALL_ARRAY_LENGTH, initialData) {
+    this.init(length, initialData);
   }
 
-  init(length = SMALL_ARRAY_LENGTH) {
+  init(length = SMALL_ARRAY_LENGTH, initialData) {
     this.length = 0;
     this._length = length;
     this._fill = 0;
     this._data = new Uint32Array(length);
+
+    if (initialData) {
+      if (initialData.length > length) {
+        length = initialData.length;
+
+        this.grow(length);
+      }
+
+      for (let j = 0; j < initialData.length; j++) {
+        this._data[j] = initialData[j];
+        this.length++;
+      }
+    }
   }
 
   toJSON() {

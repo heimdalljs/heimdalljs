@@ -20,7 +20,7 @@ if (typeof performance === 'object' && typeof performance.now === 'function') {
   format = 'timestamp';
 }
 
-export function normalizeTime(time) {
+export function normalizeTime(time, format = format) {
   switch (format) {
     case 'milli':
       return milliToNano(time);

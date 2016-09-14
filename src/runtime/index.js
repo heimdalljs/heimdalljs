@@ -1,5 +1,6 @@
 import Session from './session';
 import now from '../shared/time';
+import { format } from '../shared/time';
 import EmptyObject from '../shared/empty-object';
 import { NULL_NUMBER } from '../shared/counter-store';
 import {
@@ -9,7 +10,7 @@ import {
   OP_ANNOTATE
 } from '../shared/op-codes';
 
-export default class Heimdall{
+export default class Heimdall {
   constructor(session) {
     if (arguments.length < 1) {
       session = new Session();
@@ -81,12 +82,13 @@ export default class Heimdall{
    */
   toJSON() {
     return {
+      format,
       monitors: this._monitors.toJSON(),
       events: this._events.toJSON()
     };
   }
 
   toString() {
-    return JSON.stringify(this.toJSON(), null, 2);
+    return JSON.stringify(this.toJSON());
   }
 }
