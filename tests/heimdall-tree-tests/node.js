@@ -145,7 +145,7 @@ describe('HeimdallNode', function() {
       root.visitPreOrder(node => path.push(node.name));
 
       expect(path).to.eql([
-        '---system', 'A', 'B', 'C', 'D'
+        'root', 'A', 'B', 'C', 'D'
       ]);
     });
 
@@ -156,7 +156,7 @@ describe('HeimdallNode', function() {
       root.visitPostOrder(node => path.push(node.name));
 
       expect(path).to.eql([
-        'C', 'B', 'D', 'A', '---system'
+        'C', 'B', 'D', 'A', 'root'
       ]);
     });
 

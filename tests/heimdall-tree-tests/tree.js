@@ -24,11 +24,11 @@ describe('HeimdallTree', function() {
       tree = new Tree(heimdall);
     });
 
-    it('sets the root node to ---system', function() {
+    it('sets the root node to "root"', function() {
       tree.construct();
 
       expect(tree.root instanceof Node).to.equal(true);
-      expect(tree.root.name).to.equal('---system');
+      expect(tree.root.name).to.equal('root');
       expect(tree.root.children.length).to.equal(0);
     });
 
