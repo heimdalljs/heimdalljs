@@ -66,7 +66,11 @@ export default class CounterStore {
     this._config.push(numCounters);
 
     if (this._cache !== null) {
-      this._cache.push(NULL_NUMBER);
+      let cache = this._cache;
+
+      this._cache = new Uint32Array(this._namespaceCount);
+      this._cache.set(cache);
+      this._cache[namespaceIndex] = NULL_NUMBER;
     }
 
     for (let i = 0; i < numCounters; i++) {
