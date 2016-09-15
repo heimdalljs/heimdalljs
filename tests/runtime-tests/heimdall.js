@@ -249,7 +249,7 @@ describe('heimdall', function() {
     });
 
     it('throws if another schema is registered at the given namespace', function () {
-      let [a] = heimdall.registerMonitor('some-monitor', 'a');
+      let  { a } = heimdall.registerMonitor('some-monitor', 'a');
       expect(function () {
         heimdall.registerMonitor('some-monitor', 'a');
       }).to.throw('A monitor for "some-monitor" is already registered');
@@ -266,24 +266,24 @@ describe('heimdall', function() {
     });
 
     it('records stats for each node', function() {
-      [counter] = heimdall.registerMonitor('my-monitor','a');
+      let { a } = heimdall.registerMonitor('my-monitor','a');
 
-      let a = heimdall.start('a');
+      let c = heimdall.start('c');
       monitorEvent();
       let b = heimdall.start('b');
       monitorEvent();
       heimdall.stop(b);
       monitorEvent();
-      heimdall.stop(a);
+      heimdall.stop(c);
 
       tree.construct();
 
-      let nodeA = tree.root.nodes[0];
-      let nodeB = nodeA.nodes[0];
-      let statsA = nodeA.stats;
+      let nodeC = tree.root.nodes[0];
+      let nodeB = nodeC.nodes[0];
+      let statsC = nodeC.stats;
       let statsB = nodeB.stats;
 
-      expect(statsA['my-monitor']['a']).to.equal(2);
+      expect(statsC['my-monitor']['a']).to.equal(2);
       expect(statsB['my-monitor']['a']).to.equal(1);
     });
   });
