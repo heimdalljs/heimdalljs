@@ -51,9 +51,9 @@ export default class CounterStore {
     this._initializeIfNeeded();
 
     let numCounters = labels.length;
-    let counters = new Array(numCounters);
     let namespaceIndex = this._namespaceCount++;
     let bitNamespaceIndex = namespaceIndex << 16;
+    let namespace = new EmptyObject();
 
     // we also generate a map between the counters
     // and these labels so that we can reconstruct
@@ -74,10 +74,10 @@ export default class CounterStore {
     }
 
     for (let i = 0; i < numCounters; i++) {
-      counters[i] = bitNamespaceIndex + i;
+      namespace[labels[i]] = bitNamespaceIndex + i;
     }
 
-    return counters;
+    return namespace;
   }
 
   _initializeIfNeeded() {
