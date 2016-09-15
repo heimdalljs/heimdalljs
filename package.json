@@ -1,6 +1,6 @@
 {
   "name": "heimdalljs",
-  "version": "0.3.0-alpha2",
+  "version": "0.3.0-alpha3",
   "description": "Structured instrumentation library",
   "main": "dist/heimdalljs.cjs.js",
   "jsnext:main": "dist/heimdalljs.es.js",
