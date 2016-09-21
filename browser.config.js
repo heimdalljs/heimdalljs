@@ -11,7 +11,7 @@ export default {
       exclude: 'node_modules/**'
     }),
     nodeResolve({ jsnext: true, main: true }),
-    commonjs({ include: 'node_modules/**' }),
+    commonjs({ include: 'node_modules/**', ignoreGlobal: true }),
   ],
   targets: [
     { dest: 'dist/heimdalljs.umd.js', format: 'umd' },

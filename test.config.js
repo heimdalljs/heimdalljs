@@ -10,11 +10,11 @@ export default {
       exclude: 'node_modules/**'
     }),
     nodeResolve({ jsnext: true, main: true }),
-    commonjs({ include: 'node_modules/**' })
+    commonjs({ include: 'node_modules/**', ignoreGlobal: true })
   ],
   targets: [
     { dest: 'dist/tests/bundle.cjs.js', format: 'cjs' },
     { dest: 'dist/tests/bundle.umd.js', format: 'umd' },
     { dest: 'dist/tests/bundle.es.js', format: 'es' },
   ]
-}
+};
