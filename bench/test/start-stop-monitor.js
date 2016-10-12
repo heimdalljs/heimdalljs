@@ -5,12 +5,12 @@ module.exports = {
     function MonitorSchema() {
       this.x = 0;
     }
-    heimdall.registerMonitor('mon', MonitorSchema);
+    var x = heimdall.registerMonitor('mon', 'x').x;
   },
   fn: function() {
     var a = heimdall.start('a');
     var b = heimdall.start('b');
-    heimdall.statsFor('mon').x++;
+    heimdall.increment(x);
     heimdall.stop(b);
     heimdall.stop(a);
   }
