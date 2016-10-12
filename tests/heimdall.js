@@ -80,25 +80,28 @@ describe('heimdall', function() {
       let h1 = new Heimdall(session);
       let h2 = new Heimdall(session);
 
-      let cookieA = h1.start('a');
+      let tokenA = h1.start('a');
 
       clock.tick(1, 10);
-      let cookieB = h2.start('b');
+      let tokenB = h2.start('b');
 
       clock.tick(1, 10);
-      cookieB.stop();
+      h2.stop(tokenB);
 
-      clock.tick(2, 20);
-      cookieA.stop();
+      clock.tick(1, 10);
+      h1.stop(tokenA);
 
-      expect(cookieB._node.stats.time.self).to.equal(1e9 + 10);
+      let statsA = h1.statsForNode(tokenA);
+      let statsB = h2.statsForNode(tokenB);
+
       // total A self time is time before B and time after B
-      expect(cookieA._node.stats.time.self).to.equal(1e9 + 10 + 2e9 + 20);
+      expect(statsA.time.self).to.equal(2e9 + 20);
+      expect(statsB.time.self).to.equal(1e9 + 10);
     });
   });
 
   describe('.node', function() {
-    it('implicitly stops the cookie when the promise resolves', function () {
+    it('implicitly stops the token when the promise resolves', function () {
       let callbackInvoked = false;
 
       expect(heimdall.stack).to.eql([]);
@@ -112,7 +115,7 @@ describe('heimdall', function() {
       });
     });
 
-    it('implicitly stops the cookie when the promise resolves for a nested graph', function () {
+    it('implicitly stops the token when the promise resolves for a nested graph', function () {
       expect(heimdall.stack).to.eql([]);
 
       return heimdall.node('node-a', function () {
@@ -173,9 +176,9 @@ describe('heimdall', function() {
 
         clock.tick(0, 10 * 1e6);
 
-        C.stop();
-        B.stop();
-        A.stop();
+        heimdall.stop(C);
+        heimdall.stop(B);
+        heimdall.stop(A);
 
         let aNode = heimdall._session.root._children[0];
         let aTime = aNode.stats.time.self;
@@ -195,94 +198,103 @@ describe('heimdall', function() {
     it('supports basic start/stop', function() {
       expect(heimdall.stack).to.eql([]);
 
-      let cookieA = heimdall.start({ name: 'node-a' });
+      let tokenA = heimdall.start({ name: 'node-a' });
       expect(heimdall.stack).to.eql(['node-a']);
 
-      let cookieB = heimdall.start({ name: 'node-b'});
+      let tokenB = heimdall.start({ name: 'node-b'});
       expect(heimdall.stack).to.eql(['node-a', 'node-b']);
 
-      cookieB.stop();
+      heimdall.stop(tokenB);
       expect(heimdall.stack).to.eql(['node-a']);
 
-      cookieA.stop();
+      heimdall.stop(tokenA);
       expect(heimdall.stack).to.eql([]);
     });
 
     it('supports simple name shorthand', function () {
       expect(heimdall.stack).to.eql([]);
 
-      let cookieA = heimdall.start('node-a');
+      let tokenA = heimdall.start('node-a');
       expect(heimdall.stack).to.eql(['node-a']);
 
-      cookieA.stop();
+      heimdall.stop(tokenA);
       expect(heimdall.stack).to.eql([]);
     });
 
     it('supports resume', function () {
       expect(heimdall.stack).to.eql([]);
 
-      let cookieA = heimdall.start({ name: 'node-a' });
+      let tokenA = heimdall.start({ name: 'node-a' });
       expect(heimdall.stack).to.eql(['node-a']);
 
-      let cookieB = heimdall.start({ name: 'node-b'});
+      let tokenB = heimdall.start({ name: 'node-b'});
       expect(heimdall.stack).to.eql(['node-a', 'node-b']);
 
-      cookieB.stop();
+      heimdall.stop(tokenB);
       expect(heimdall.stack).to.eql(['node-a']);
 
-      cookieB.resume();
+      heimdall.resume(tokenB);
       expect(heimdall.stack).to.eql(['node-a', 'node-b']);
 
-      cookieB.stop();
+      heimdall.stop(tokenB);
       expect(heimdall.stack).to.eql(['node-a']);
 
-      cookieA.stop();
+      heimdall.stop(tokenA);
       expect(heimdall.stack).to.eql([]);
     });
 
     it('restores the node at time of resume', function () {
       expect(heimdall.stack).to.eql([]);
 
-      let cookieA = heimdall.start('node-a');
+      let tokenA = heimdall.start('node-a');
       expect(heimdall.stack).to.eql(['node-a']);
 
-      let cookieB = heimdall.start('node-b');
+      let tokenB = heimdall.start('node-b');
       expect(heimdall.stack).to.eql(['node-a', 'node-b']);
 
-      cookieB.stop();
+      heimdall.stop(tokenB);
       expect(heimdall.stack).to.eql(['node-a']);
 
-      let cookieC = heimdall.start('node-c');
+      let tokenC = heimdall.start('node-c');
       expect(heimdall.stack).to.eql(['node-a', 'node-c']);
 
-      cookieB.resume();
+      heimdall.resume(tokenB);
       expect(heimdall.stack).to.eql(['node-a', 'node-b']);
 
-      cookieB.stop();
+      heimdall.stop(tokenB);
       expect(heimdall.stack).to.eql(['node-a', 'node-c']);
 
-      cookieC.stop();
+      heimdall.stop(tokenC);
       expect(heimdall.stack).to.eql(['node-a']);
 
-      cookieA.stop();
+      heimdall.stop(tokenA);
       expect(heimdall.stack).to.eql([]);
     });
 
     it('throws if stop is called when stopped', function () {
-      let cookieA = heimdall.start({ name: 'node-a' });
+      let tokenA = heimdall.start({ name: 'node-a' });
 
-      cookieA.stop();
+      heimdall.stop(tokenA);
 
       expect(function () {
-        cookieA.stop();
+        heimdall.stop(tokenA);
+      }).to.throw('cannot stop: already stopped');
+    });
+
+    it('throws if stop is called when not the current node', function () {
+      let tokenA = heimdall.start({ name: 'node-a' });
+      let tokenB = heimdall.start({ name: 'node-b' });
+
+      expect(function () {
+        heimdall.stop(tokenA);
       }).to.throw('cannot stop: not the current node');
     });
 
     it('throws if resume is called when not stopped', function () {
-      let cookieA = heimdall.start({ name: 'node-a' });
+      let tokenA = heimdall.start({ name: 'node-a' });
 
       expect(function () {
-        cookieA.resume();
+        heimdall.resume(tokenA);
       }).to.throw('cannot resume: not stopped');
     });
   });

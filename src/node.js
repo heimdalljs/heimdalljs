@@ -1,14 +1,10 @@
 export default class HeimdallNode {
   constructor(heimdall, id, data) {
     this._heimdall = heimdall;
+    this._stopped = false;
 
     this._id = heimdall.generateNextId();
     this.id = id;
-
-    // TODO: strip for production builds for perfz
-    if (!(typeof this.id === 'object' && this.id !== null && typeof this.id.name === 'string')) {
-      throw new TypeError('HeimdallNode#id.name must be a string');
-     }
 
     // lazy vs eager?
     this.stats = {
@@ -20,6 +16,7 @@ export default class HeimdallNode {
     this._children = [];
 
     this.parent = null;
+    this._restoreNode = null;
   }
 
   get isRoot() {
@@ -84,6 +81,7 @@ export default class HeimdallNode {
     this._children.push(node);
 
     node.parent = this;
+    node._restoreNode = this;
   }
 
 

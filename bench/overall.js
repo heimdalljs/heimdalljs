@@ -1,6 +1,6 @@
 module.exports = {
   count: 1000,
-  name: 'Start Stop',
+  name: 'Comprehensive',
   setup: function() {
     var Heimdall = process.Heimdall;
     var heimdall = new Heimdall();

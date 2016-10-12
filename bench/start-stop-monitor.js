@@ -13,7 +13,7 @@ module.exports = {
     var a = heimdall.start('a');
     var b = heimdall.start('b');
     heimdall.statsFor('mon').x++;
-    b.stop();
-    a.stop();
+    heimdall.stop(b);
+    heimdall.stop(a);
   }
 };

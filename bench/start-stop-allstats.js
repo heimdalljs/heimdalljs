@@ -15,10 +15,10 @@ module.exports = {
   fn: function() {
     var a = heimdall.start('a');
     var b = heimdall.start('b', MySchema);
-    b.stats.x++;
+    heimdall.statsForNode(b).x++;
     heimdall.statsFor('mon').x++;
-    b.stop();
-    a.stop();
+    heimdall.stop(b);
+    heimdall.stop(a);
   }
 };
 

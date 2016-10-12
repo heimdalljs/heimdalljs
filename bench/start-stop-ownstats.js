@@ -11,8 +11,8 @@ module.exports = {
   fn: function() {
     var a = heimdall.start('a');
     var b = heimdall.start('b', MySchema);
-    b.stats.x++;
-    b.stop();
-    a.stop();
+    heimdall.statsForNode(b).x++;
+    heimdall.stop(b);
+    heimdall.start(a);
   }
 };
