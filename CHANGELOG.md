@@ -2,7 +2,7 @@
 
 # 0.2.2
 
-* Add API `heimdall.hasMonitor` (#37) (thanks @zachthehuman)
+* Add API `heimdall.hasMonitor` (#37) (thanks @zackthehuman)
 
 # 0.2.1
 
