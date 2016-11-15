@@ -12,7 +12,8 @@
     "test": "mocha dist/tests/bundle.cjs",
     "test:debug": "mocha --no-timeouts debug dist/tests/bundle.cjs",
     "build_and_test": "npm run build:test && npm run test",
-    "trace": "node --trace-hydrogen --trace_phase=Z --trace_deopt --code_comments --hydrogen_track_positions --redirect_code_traces bench/ "
+    "trace": "node --trace-hydrogen --trace_phase=Z --trace_deopt --code_comments --hydrogen_track_positions --redirect_code_traces bench/ ",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
