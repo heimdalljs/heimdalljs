@@ -1,8 +1,14 @@
 # master
 
+# 0.2.3
+
+* Fixed publish of v0.2.2
+
 # 0.2.2
 
 * Add API `heimdall.hasMonitor` (#37) (thanks @zackthehuman)
+
+DO NOT USE THIS VERSION.  publishing error.
 
 # 0.2.1
 
