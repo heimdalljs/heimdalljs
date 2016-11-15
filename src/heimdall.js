@@ -98,7 +98,7 @@ export default class Heimdall{
     if (name === 'own' || name === 'time') {
       throw new Error('Cannot register monitor at namespace "' + name + '".  "own" and "time" are reserved');
     }
-    if (this._session.monitorSchemas.has(name)) {
+    if (this.hasMonitor(name)) {
       throw new Error('A monitor for "' + name + '" is already registered"');
     }
 
