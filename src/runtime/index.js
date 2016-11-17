@@ -49,11 +49,15 @@ export default class Heimdall {
     this._session.events.push(OP_ANNOTATE, NULL_NUMBER, NULL_NUMBER, info);
   }
 
+  hasMonitor(name) {
+    return this._monitors.has(name);
+  }
+
   registerMonitor(name, ...keys) {
     if (name === 'own' || name === 'time') {
       throw new Error('Cannot register monitor at namespace "' + name + '".  "own" and "time" are reserved');
     }
-    if (this._monitors.has(name)) {
+    if (this.hasMonitor(name)) {
       throw new Error('A monitor for "' + name + '" is already registered"');
     }
 
