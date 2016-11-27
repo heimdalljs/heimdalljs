@@ -18,16 +18,16 @@ based.
 
 The overhead of time based stat collection is the cost of allocating a
  tiny `TypedArray`, a four element `Array`, and `performance.now()`. On
-Desktop Chrome on a 2015 era MacBook Pro this amounts to roughly 200 
+Desktop Chrome on a 2015 era MacBook Pro this amounts to roughly 200
 nano seconds. You can easily run the benchmarks on devices you care about
  to see what the cost will be for you.
- 
+
 The overhead of counter based collection is the cost of a method call
  with two bitwise operations and an integer increment.  An occasional
  Uint32Array allocation is thrown in when more space is needed. The cost
  here is pragmatically negligible, and counters are ideal for situations
  in which the overhead of a timer is enough to significantly alter stats.
- 
+
 ## Usage
 
 **instantiate**
@@ -40,13 +40,18 @@ const heimdall = new Heimdall();
 ```js
 const token = heimdall.start('<label>');
 ```
- 
+
 **stop timing something**
 ```js
 heimdall.stop(token);
 ```
 
 ### Monitors
+
+**querying**
+```js
+let condition = heimdall.hasMonitor('<name>');
+```
 
 **register**
 ```js
@@ -80,7 +85,7 @@ For the documentation for `HeimdallTree` see []().
 
 If desired, heimdall can be stripped from production builds using
 [this plugin](https://github.com/heimdalljs/babel5-plugin-strip-heimdall) for Babel5 or [this plugin]() for Babel6.
- 
+
 ## Global Session
 
 Heimdall tracks a graph of timing and domain-specific stats for performance.
