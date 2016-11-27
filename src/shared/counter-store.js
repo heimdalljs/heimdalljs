@@ -1,5 +1,8 @@
 import EmptyObject from './empty-object';
-import { MAX_ARRAY_LENGTH, FastIntArray } from './fast-int-array';
+import { MAX_ARRAY_LENGTH, default as FastIntArray } from './fast-int-array';
+import A from './a';
+import fill from './fill';
+
 const DEFAULT_STORE_SIZE = 1e3;
 const DEFAULT_NAMESPACE_SIZE = 10;
 
@@ -68,7 +71,7 @@ export default class CounterStore {
     if (this._cache !== null) {
       let cache = this._cache;
 
-      this._cache = new Uint32Array(this._namespaceCount);
+      this._cache = new A(this._namespaceCount);
       this._cache.set(cache);
       this._cache[namespaceIndex] = NULL_NUMBER;
     }
@@ -118,7 +121,7 @@ export default class CounterStore {
 
     if (this._cache === null) {
       this._initializeStoreIfNeeded();
-      this._cache = new Uint32Array(this._namespaceCount).fill(NULL_NUMBER);
+      this._cache = fill(new A(this._namespaceCount), NULL_NUMBER);
     }
 
     if (this._cache[namespaceIndex] === NULL_NUMBER) {
