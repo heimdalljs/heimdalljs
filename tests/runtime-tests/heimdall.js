@@ -249,7 +249,7 @@ describe('heimdall', function() {
     });
 
     it('hasMonitor returns false if a given namespace is not being used', function () {
-      expect(heimdall.hasMonitor('some-monitor')).to.not.be.ok;
+      expect(heimdall.hasMonitor('some-monitor')).to.eql(false);
     });
 
     it('hasMonitor returns true if a given namespace is being used', function () {
@@ -257,7 +257,7 @@ describe('heimdall', function() {
 
       heimdall.registerMonitor('some-monitor', MySchema);
 
-      expect(heimdall.hasMonitor('some-monitor')).to.be.ok;
+      expect(heimdall.hasMonitor('some-monitor')).to.eql(true);
     });
 
     it('throws if another schema is registered at the given namespace', function () {
