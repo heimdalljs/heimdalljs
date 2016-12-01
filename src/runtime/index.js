@@ -50,7 +50,7 @@ export default class Heimdall {
   }
 
   hasMonitor(name) {
-    return this._monitors.has(name);
+    return !!this._monitors.has(name);
   }
 
   registerMonitor(name, ...keys) {
