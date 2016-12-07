@@ -4,14 +4,19 @@ import EventArray from '../shared/event-array';
 import CounterStore from '../shared/counter-store';
 
 export default class HeimdallSession {
-  constructor(options) {
-    this.init(options);
+  constructor() {
+    this.init();
   }
 
-  // separate from constructor mostly for testing purposes
   init() {
     this.monitors = new CounterStore();
     this.configs = new HashMap();
     this.events = new EventArray(640000 * 4);
+  }
+
+  // mostly for test helper purposes
+  reset() {
+    this.monitors.clean();
+    this.events.length = 0;
   }
 }

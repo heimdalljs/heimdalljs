@@ -25,6 +25,12 @@ export default class CounterStore {
     this._nameCache = null;
   }
 
+  clean() {
+    this._storeInitialized = false;
+    this._store = null;
+    this._cache = null;
+  }
+
   toJSON() {
     return {
       _namespaceCount: this._namespaceCount,
