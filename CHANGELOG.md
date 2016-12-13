@@ -6,7 +6,7 @@
 
 # 0.2.2
 
-* Add API `heimdall.hasMonitor` (#37) (thanks @zackthehuman)
+* Add API `heimdall.hasMonitor` (#37) (thanks @zachthehuman)
 
 DO NOT USE THIS VERSION.  publishing error.
 
