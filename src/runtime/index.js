@@ -13,10 +13,11 @@ import {
 export default class Heimdall {
   constructor(session) {
     if (arguments.length < 1) {
-      session = new Session();
+      this._session = new Session();
+      this.start('session-root');
+    } else {
+      this._session = session;
     }
-
-    this._session = session;
   }
 
   get _monitors() {
@@ -88,7 +89,8 @@ export default class Heimdall {
     return {
       format,
       monitors: this._monitors.toJSON(),
-      events: this._events.toJSON()
+      events: this._events.toJSON(),
+      serializationTime: now()
     };
   }
 

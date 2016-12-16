@@ -4,7 +4,7 @@ import EventArray from '../shared/event-array';
 import CounterStore from '../shared/counter-store';
 import HashMap from '../shared/hash-map';
 import EmptyObject from '../shared/empty-object';
-import { format, normalizeTime } from '../shared/time';
+import { format, normalizeTime, default as now } from '../shared/time';
 import {
   OP_START,
   OP_STOP,
@@ -50,10 +50,11 @@ function statsFromCounters(counterStore, counterCache) {
 }
 
 export default class HeimdallTree {
-  constructor(heimdall) {
+  constructor(heimdall, lastKnownTime) {
     this._heimdall = heimdall;
     this.root = null;
     this.format = heimdall && heimdall._timeFormat ? heimdall._timeFormat : format;
+    this.lastKnownTime = lastKnownTime;
   }
 
   static fromJSON(json) {
@@ -64,7 +65,7 @@ export default class HeimdallTree {
       _monitors: CounterStore.fromJSON(json.monitors)
     };
 
-    return new HeimdallTree(heimdall);
+    return new HeimdallTree(heimdall, json.serializationTime);
   }
 
   // primarily a test helper, you can get this at any time
@@ -154,17 +155,47 @@ export default class HeimdallTree {
     return stack;
   }
 
+  _createLeaf(currentNode, time) {
+    let leaf = new HeimdallLeaf();
+    leaf.start(currentNode, currentNode.name, time);
+    currentNode.addLeaf(leaf);
+    return leaf;
+  }
+
+  _chainLeaf(currentNode, incomingNode, time) {
+    let leaf = new HeimdallLeaf();
+    leaf.start(currentNode, incomingNode.name, time);
+    currentNode.addLeaf(leaf);
+    return leaf;
+  }
+
+  _createNode(nodeName, index, nodeMap) {
+    let node = new HeimdallNode(nodeName, index);
+    nodeMap.set(index, node);
+    return node;
+  }
+
+  _chainNode(currentNode, nodeName, index, nodeMap) {
+    let node = this._createNode(nodeName, index, nodeMap);
+    currentNode.addNode(node);
+    return node;
+  }
+
   construct() {
     let events = this._heimdall._events;
     let currentLeaf = null;
-    let root = new HeimdallNode('root', 1e9);
-    let currentNode = root;
+    let currentNode = null;
     let nodeMap = new HashMap();
+    let openNodes = [];
     let node;
     let format = this.format;
     let counterStore = this._heimdall._monitors;
+    let stopTime = this.lastKnownTime ? normalizeTime(this.lastKnownTime) : now();
+    let pageRootIndex = events._length + 1;
 
-    this.root = root;
+    currentNode = this.root = this._createNode('page-root', pageRootIndex, nodeMap);
+    currentLeaf = this._createLeaf(currentNode, 0);
+    openNodes.push(node);
 
     events.forEach(([op, name, time, counters], i) => {
       if (op !== OP_ANNOTATE) {
@@ -174,17 +205,13 @@ export default class HeimdallTree {
 
       switch (op) {
         case OP_START:
-          node = new HeimdallNode(name, i);
-          nodeMap.set(i, node);
-          currentNode.addNode(node);
-          currentNode = node;
+          currentNode = this._chainNode(currentNode, name, i, nodeMap);
+          openNodes.push(currentNode);
 
           if (currentLeaf) {
             currentLeaf.stop(name, time, counters);
           }
-          currentLeaf = new HeimdallLeaf();
-          currentLeaf.start(currentNode, name, time);
-          currentNode.addLeaf(currentLeaf);
+          currentLeaf = this._createLeaf(currentNode, time);
           break;
 
         case OP_STOP:
@@ -201,25 +228,23 @@ export default class HeimdallTree {
           }
 
           currentNode.stop();
+          openNodes.splice(openNodes.indexOf(currentNode), 1);
           currentNode = currentNode.resumeNode;
 
           currentLeaf.stop(node.name, time, counters);
-          currentLeaf = new HeimdallLeaf();
-          currentLeaf.start(currentNode, node.name, time);
-          currentNode.addLeaf(currentLeaf);
+          currentLeaf = this._chainLeaf(currentNode, node, time);
           break;
 
         case OP_RESUME:
           node = nodeMap.get(name);
           node.resume(currentNode);
           currentNode = node;
+          openNodes.push(node);
 
           if (currentLeaf) {
             currentLeaf.stop(node.name, time, counters);
           }
-          currentLeaf = new HeimdallLeaf();
-          currentLeaf.start(currentNode, node.name, time);
-          currentNode.addLeaf(currentLeaf);
+          currentLeaf = this._chainLeaf(currentNode, node, time);
           break;
 
         case OP_ANNOTATE:
@@ -230,11 +255,17 @@ export default class HeimdallTree {
       }
     });
 
-    if (currentLeaf) {
-      root.leaves.splice(root.leaves.indexOf(currentLeaf), 1);
-      root.children.splice(root.children.indexOf(currentLeaf), 1);
-      currentLeaf.owner = null;
-      currentLeaf = null;
+    while (currentNode && !currentNode.stopped) {
+      let name = currentNode.name;
+      let node = currentNode;
+
+      currentNode.stop();
+      currentNode = currentNode.resumeNode;
+      currentLeaf.stop(node.name, stopTime, null);
+
+      if (currentNode) {
+        currentLeaf = this._chainLeaf(currentNode, node, stopTime);
+      }
     }
   }
 

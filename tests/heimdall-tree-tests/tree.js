@@ -24,23 +24,23 @@ describe('HeimdallTree', function() {
       tree = new Tree(heimdall);
     });
 
-    it('sets the root node to "root"', function() {
+    it('sets the root node to "page-root"', function() {
       tree.construct();
 
       expect(tree.root instanceof Node).to.equal(true);
-      expect(tree.root.name).to.equal('root');
-      expect(tree.root.children.length).to.equal(0);
+      expect(tree.root.name).to.equal('page-root');
+      expect(tree.root.children.length).to.equal(1);
     });
 
     it('properly adds children', function() {
       heimdall._events = NICE_OP_TREE;
       tree.construct();
 
-      expect(tree.root.leaves.length).to.equal(0);
+      expect(tree.root.leaves.length).to.equal(2);
       expect(tree.root.nodes.length).to.equal(1);
-      expect(tree.root.children.length).to.equal(1);
+      expect(tree.root.children.length).to.equal(3);
 
-      let child = tree.root.children[0];
+      let child = tree.root.nodes[0];
 
       expect(child.leaves.length).to.equal(3);
       expect(child.nodes.length).to.equal(2);

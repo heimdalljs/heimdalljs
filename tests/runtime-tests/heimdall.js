@@ -40,8 +40,8 @@ describe('heimdall', function() {
     expect(h1._session).to.not.equal(h2._session);
     expect(h1._events).to.not.equal(h2._events);
     expect(h1._monitors).to.not.equal(h2._monitors);
-    expect(h1._events.get(0)[1]).to.equal('a');
-    expect(h2._events.get(0)[1]).to.equal('b');
+    expect(h1._events.get(4)[1]).to.equal('a');
+    expect(h2._events.get(4)[1]).to.equal('b');
   });
 
   it('uses a provided session', function() {
@@ -149,69 +149,69 @@ describe('heimdall', function() {
     });
 
     it('supports basic start/stop', function() {
-      expect(tree.path).to.eql([]);
+      expect(tree.path).to.eql(['session-root']);
 
       let tokenA = heimdall.start('node-a');
-      expect(tree.path).to.eql(['node-a']);
+      expect(tree.path).to.eql(['session-root', 'node-a']);
 
       let tokenB = heimdall.start('node-b');
-      expect(tree.path).to.eql(['node-a', 'node-b']);
+      expect(tree.path).to.eql(['session-root', 'node-a', 'node-b']);
 
       heimdall.stop(tokenB);
-      expect(tree.path).to.eql(['node-a']);
+      expect(tree.path).to.eql(['session-root', 'node-a']);
 
       heimdall.stop(tokenA);
-      expect(tree.path).to.eql([]);
+      expect(tree.path).to.eql(['session-root']);
     });
 
     it('supports resume', function () {
-      expect(tree.path).to.eql([]);
+      expect(tree.path).to.eql(['session-root']);
 
       let tokenA = heimdall.start('node-a');
-      expect(tree.path).to.eql(['node-a']);
+      expect(tree.path).to.eql(['session-root', 'node-a']);
 
       let tokenB = heimdall.start('node-b');
-      expect(tree.path).to.eql(['node-a', 'node-b']);
+      expect(tree.path).to.eql(['session-root', 'node-a', 'node-b']);
 
       heimdall.stop(tokenB);
-      expect(tree.path).to.eql(['node-a']);
+      expect(tree.path).to.eql(['session-root', 'node-a']);
 
       heimdall.resume(tokenB);
-      expect(tree.path).to.eql(['node-a', 'node-b']);
+      expect(tree.path).to.eql(['session-root', 'node-a', 'node-b']);
 
       heimdall.stop(tokenB);
-      expect(tree.path).to.eql(['node-a']);
+      expect(tree.path).to.eql(['session-root', 'node-a']);
 
       heimdall.stop(tokenA);
-      expect(tree.path).to.eql([]);
+      expect(tree.path).to.eql(['session-root']);
     });
 
     it('restores the node at time of resume', function () {
-      expect(tree.path).to.eql([]);
+      expect(tree.path).to.eql(['session-root']);
 
       let tokenA = heimdall.start('node-a');
-      expect(tree.path).to.eql(['node-a']);
+      expect(tree.path).to.eql(['session-root', 'node-a']);
 
       let tokenB = heimdall.start('node-b');
-      expect(tree.path).to.eql(['node-a', 'node-b']);
+      expect(tree.path).to.eql(['session-root', 'node-a', 'node-b']);
 
       heimdall.stop(tokenB);
-      expect(tree.path).to.eql(['node-a']);
+      expect(tree.path).to.eql(['session-root', 'node-a']);
 
       let tokenC = heimdall.start('node-c');
-      expect(tree.path).to.eql(['node-a', 'node-c']);
+      expect(tree.path).to.eql(['session-root', 'node-a', 'node-c']);
 
       heimdall.resume(tokenB);
-      expect(tree.path).to.eql(['node-a', 'node-b']);
+      expect(tree.path).to.eql(['session-root', 'node-a', 'node-b']);
 
       heimdall.stop(tokenB);
-      expect(tree.path).to.eql(['node-a', 'node-c']);
+      expect(tree.path).to.eql(['session-root', 'node-a', 'node-c']);
 
       heimdall.stop(tokenC);
-      expect(tree.path).to.eql(['node-a']);
+      expect(tree.path).to.eql(['session-root', 'node-a']);
 
       heimdall.stop(tokenA);
-      expect(tree.path).to.eql([]);
+      expect(tree.path).to.eql(['session-root']);
     });
   });
 

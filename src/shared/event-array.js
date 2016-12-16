@@ -28,6 +28,8 @@ export default class EventArray {
     }
   }
 
+  // TODO this should probably multiple index by 4 to hide
+  // that we store in a flat array
   get(index) {
     if (index >= 0 && index < this.length) {
       return this._data.slice(index, index + 4);
