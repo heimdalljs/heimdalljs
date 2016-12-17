@@ -11,6 +11,19 @@ import {
 
 const VERSION = 'VERSION_STRING_PLACEHOLDER';
 
+function splitFirstColon(str) {
+  let i = str.indexOf(':');
+  let first = str;
+  let rest = '*';
+
+  if (i !== -1) {
+    first = str.substr(0, i);
+    rest = str.substr(i + 1);
+  }
+
+  return [first, rest];
+}
+
 export default class Heimdall {
   static get VERSION() {
     return VERSION;
@@ -22,6 +35,67 @@ export default class Heimdall {
       this.start('session-root');
     } else {
       this._session = session;
+    }
+
+    this._enableTimelineFeatures = false;
+    this.__timelineInfo = null;
+  }
+
+  get _timelineInfo() {
+    if (!this.__timelineInfo) {
+      this.__timelineInfo = {
+        timers: Object.create(null),
+        namespaces: Object.create(null)
+      };
+    }
+
+    return this.__timelineInfo;
+  }
+
+  enableTimelineFeatures(matchQuery) {
+    this._enableTimelineFeatures = true;
+    let info = this._timelineInfo;
+
+    if (matchQuery) {
+      let namespaces = matchQuery.split(',');
+      namespaces.forEach((str) => {
+        let [namespaceKey, section] = splitFirstColon(str);
+        let namespace = info.namespaces[namespaceKey] = info.namespaces[namespaceKey] || Object.create(null);
+
+        namespace[section] = true;
+      });
+    } else {
+      info.namespaces['*'] = true;
+    }
+  }
+
+  _checkTimelineEnabledForNode(name) {
+    let [namespace, section] = splitFirstColon(name);
+    let enabledNamespaces = this._timelineInfo.namespaces;
+    let globalEnabled = !!enabledNamespaces['*'];
+    let namespaceGlobalEnabled = enabledNamespaces[namespace] && !!enabledNamespaces[namespace]['*'];
+    let namespaceSectionEnabled = enabledNamespaces[namespace] && !!enabledNamespaces[namespace][section];
+
+    return globalEnabled || namespaceGlobalEnabled || namespaceSectionEnabled;
+  }
+
+  _timelineTimerStart(name, token) {
+    if (this._enableTimelineFeatures) {
+      if (this._checkTimelineEnabledForNode(name)) {
+        let label = `${name}--:${token}`;
+        this._timelineInfo.timers[token] = label;
+        console.time(label);
+      }
+    }
+  }
+
+  _timelineTimerEnd(token) {
+    if (this._enableTimelineFeatures) {
+      let label = this._timelineInfo.timers[token];
+
+      if (label) {
+        console.timeEnd(label);
+      }
     }
   }
 
@@ -42,10 +116,13 @@ export default class Heimdall {
   }
 
   start(name) {
-    return this._session.events.push(OP_START, name, now(), this._retrieveCounters());
+    let token = this._session.events.push(OP_START, name, now(), this._retrieveCounters());
+    this._timelineTimerStart(name, token);
+    return token;
   }
 
   stop(token) {
+    this._timelineTimerEnd(token);
     this._session.events.push(OP_STOP, token, now(), this._retrieveCounters());
   }
 
