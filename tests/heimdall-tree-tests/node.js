@@ -145,7 +145,7 @@ describe('HeimdallNode', function() {
       root.visitPreOrder(node => path.push(node.name));
 
       expect(path).to.eql([
-        'root', 'A', 'B', 'C', 'D'
+        'page-root', 'A', 'B', 'C', 'D'
       ]);
     });
 
@@ -156,13 +156,13 @@ describe('HeimdallNode', function() {
       root.visitPostOrder(node => path.push(node.name));
 
       expect(path).to.eql([
-        'C', 'B', 'D', 'A', 'root'
+        'C', 'B', 'D', 'A', 'page-root'
       ]);
     });
 
     it('forEachNode visits each child node only', function() {
       let path = [];
-      let baseNode = root.children[0];
+      let baseNode = root.nodes[0];
 
       baseNode.forEachNode(node => path.push(node.name));
 
@@ -173,7 +173,7 @@ describe('HeimdallNode', function() {
 
     it('forEachLeaf visits each child leaf only', function() {
       let path = [];
-      let baseNode = root.children[0];
+      let baseNode = root.nodes[0];
 
       // formula: `[${this.owner.name}]#${this.previousOp}:${nextOp}`
       // leaves: AB BD DA
@@ -189,7 +189,7 @@ describe('HeimdallNode', function() {
 
     it('forEachChild visits each child only', function() {
       let path = [];
-      let baseNode = root.children[0];
+      let baseNode = root.nodes[0];
       let children = [
         '[A]#A:B',
         'B',

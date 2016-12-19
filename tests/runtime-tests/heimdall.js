@@ -15,6 +15,27 @@ chai.use(chaiAsPromised);
 let heimdall;
 let tree;
 
+function statsForMonitor(monitor, tree) {
+  var stats = {};
+
+  tree.construct();
+  tree.visitPreOrder(function(node) {
+    if (node.stats[monitor]) {
+      var mStats = node.stats[monitor];
+      var statKeys = Object.keys(mStats);
+      statKeys.forEach(function(key) {
+        if (stats[key] === undefined) {
+          stats[key] = mStats[key];
+        } else {
+          stats[key] += mStats[key];
+        }
+      });
+    }
+  });
+
+  return stats;
+}
+
 function getJSONSansTime() {
   let json = tree.toJSON();
   for (let i=0; i<json.nodes.length; ++i) {
@@ -40,8 +61,8 @@ describe('heimdall', function() {
     expect(h1._session).to.not.equal(h2._session);
     expect(h1._events).to.not.equal(h2._events);
     expect(h1._monitors).to.not.equal(h2._monitors);
-    expect(h1._events.get(0)[1]).to.equal('a');
-    expect(h2._events.get(0)[1]).to.equal('b');
+    expect(h1._events.get(4)[1]).to.equal('a');
+    expect(h2._events.get(4)[1]).to.equal('b');
   });
 
   it('uses a provided session', function() {
@@ -149,69 +170,69 @@ describe('heimdall', function() {
     });
 
     it('supports basic start/stop', function() {
-      expect(tree.path).to.eql([]);
+      expect(tree.path).to.eql(['session-root']);
 
       let tokenA = heimdall.start('node-a');
-      expect(tree.path).to.eql(['node-a']);
+      expect(tree.path).to.eql(['session-root', 'node-a']);
 
       let tokenB = heimdall.start('node-b');
-      expect(tree.path).to.eql(['node-a', 'node-b']);
+      expect(tree.path).to.eql(['session-root', 'node-a', 'node-b']);
 
       heimdall.stop(tokenB);
-      expect(tree.path).to.eql(['node-a']);
+      expect(tree.path).to.eql(['session-root', 'node-a']);
 
       heimdall.stop(tokenA);
-      expect(tree.path).to.eql([]);
+      expect(tree.path).to.eql(['session-root']);
     });
 
     it('supports resume', function () {
-      expect(tree.path).to.eql([]);
+      expect(tree.path).to.eql(['session-root']);
 
       let tokenA = heimdall.start('node-a');
-      expect(tree.path).to.eql(['node-a']);
+      expect(tree.path).to.eql(['session-root', 'node-a']);
 
       let tokenB = heimdall.start('node-b');
-      expect(tree.path).to.eql(['node-a', 'node-b']);
+      expect(tree.path).to.eql(['session-root', 'node-a', 'node-b']);
 
       heimdall.stop(tokenB);
-      expect(tree.path).to.eql(['node-a']);
+      expect(tree.path).to.eql(['session-root', 'node-a']);
 
       heimdall.resume(tokenB);
-      expect(tree.path).to.eql(['node-a', 'node-b']);
+      expect(tree.path).to.eql(['session-root', 'node-a', 'node-b']);
 
       heimdall.stop(tokenB);
-      expect(tree.path).to.eql(['node-a']);
+      expect(tree.path).to.eql(['session-root', 'node-a']);
 
       heimdall.stop(tokenA);
-      expect(tree.path).to.eql([]);
+      expect(tree.path).to.eql(['session-root']);
     });
 
     it('restores the node at time of resume', function () {
-      expect(tree.path).to.eql([]);
+      expect(tree.path).to.eql(['session-root']);
 
       let tokenA = heimdall.start('node-a');
-      expect(tree.path).to.eql(['node-a']);
+      expect(tree.path).to.eql(['session-root', 'node-a']);
 
       let tokenB = heimdall.start('node-b');
-      expect(tree.path).to.eql(['node-a', 'node-b']);
+      expect(tree.path).to.eql(['session-root', 'node-a', 'node-b']);
 
       heimdall.stop(tokenB);
-      expect(tree.path).to.eql(['node-a']);
+      expect(tree.path).to.eql(['session-root', 'node-a']);
 
       let tokenC = heimdall.start('node-c');
-      expect(tree.path).to.eql(['node-a', 'node-c']);
+      expect(tree.path).to.eql(['session-root', 'node-a', 'node-c']);
 
       heimdall.resume(tokenB);
-      expect(tree.path).to.eql(['node-a', 'node-b']);
+      expect(tree.path).to.eql(['session-root', 'node-a', 'node-b']);
 
       heimdall.stop(tokenB);
-      expect(tree.path).to.eql(['node-a', 'node-c']);
+      expect(tree.path).to.eql(['session-root', 'node-a', 'node-c']);
 
       heimdall.stop(tokenC);
-      expect(tree.path).to.eql(['node-a']);
+      expect(tree.path).to.eql(['session-root', 'node-a']);
 
       heimdall.stop(tokenA);
-      expect(tree.path).to.eql([]);
+      expect(tree.path).to.eql(['session-root']);
     });
   });
 
@@ -297,6 +318,39 @@ describe('heimdall', function() {
 
       expect(statsC['my-monitor']['a']).to.equal(2);
       expect(statsB['my-monitor']['a']).to.equal(1);
+    });
+
+    it('should allow to aggregate stats', function() {
+      let { a, b } = heimdall.registerMonitor('my-monitor', 'a', 'b');
+      let token;
+      let stats;
+      token = heimdall.start('my-node');
+      heimdall.increment(a);
+      heimdall.increment(a);
+      heimdall.increment(b);
+      heimdall.stop(token);
+
+      stats = statsForMonitor('my-monitor', tree);
+
+      expect(stats).to.deep.equal({
+        a: 2,
+        b: 1
+      });
+
+      token = heimdall.start('my-node');
+      heimdall.increment(a);
+      heimdall.increment(a);
+      heimdall.increment(b);
+      heimdall.increment(b);
+      heimdall.increment(b);
+      heimdall.stop(token);
+
+      stats = statsForMonitor('my-monitor', tree);
+
+      expect(stats).to.deep.equal({
+        a: 4,
+        b: 4
+      });
     });
   });
 });
