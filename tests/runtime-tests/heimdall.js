@@ -15,6 +15,27 @@ chai.use(chaiAsPromised);
 let heimdall;
 let tree;
 
+function statsForMonitor(monitor, tree) {
+  var stats = {};
+
+  tree.construct();
+  tree.visitPreOrder(function(node) {
+    if (node.stats[monitor]) {
+      var mStats = node.stats[monitor];
+      var statKeys = Object.keys(mStats);
+      statKeys.forEach(function(key) {
+        if (stats[key] === undefined) {
+          stats[key] = mStats[key];
+        } else {
+          stats[key] += mStats[key];
+        }
+      });
+    }
+  });
+
+  return stats;
+}
+
 function getJSONSansTime() {
   let json = tree.toJSON();
   for (let i=0; i<json.nodes.length; ++i) {
@@ -297,6 +318,39 @@ describe('heimdall', function() {
 
       expect(statsC['my-monitor']['a']).to.equal(2);
       expect(statsB['my-monitor']['a']).to.equal(1);
+    });
+
+    it('should allow to aggregate stats', function() {
+      let { a, b } = heimdall.registerMonitor('my-monitor', 'a', 'b');
+      let token;
+      let stats;
+      token = heimdall.start('my-node');
+      heimdall.increment(a);
+      heimdall.increment(a);
+      heimdall.increment(b);
+      heimdall.stop(token);
+
+      stats = statsForMonitor('my-monitor', tree);
+
+      expect(stats).to.deep.equal({
+        a: 2,
+        b: 1
+      });
+
+      token = heimdall.start('my-node');
+      heimdall.increment(a);
+      heimdall.increment(a);
+      heimdall.increment(b);
+      heimdall.increment(b);
+      heimdall.increment(b);
+      heimdall.stop(token);
+
+      stats = statsForMonitor('my-monitor', tree);
+
+      expect(stats).to.deep.equal({
+        a: 4,
+        b: 4
+      });
     });
   });
 });
