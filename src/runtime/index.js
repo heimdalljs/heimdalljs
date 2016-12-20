@@ -24,6 +24,31 @@ function splitFirstColon(str) {
   return [first, rest];
 }
 
+const HAS_MEASURE_API = typeof performance !== 'undefined' && performance.mark && performance.measure;
+
+function markStart(label) {
+  if (HAS_MEASURE_API) {
+    performance.mark(`${label}:start`);
+  } else {
+    console.time(label);
+  }
+}
+
+function markEnd(label) {
+  if (HAS_MEASURE_API) {
+    performance.mark(`${label}:end`);
+    flushTimelineMeasurement(label);
+  } else {
+    console.timeEnd(label);
+  }
+}
+
+function flushTimelineMeasurement(label) {
+  if (HAS_MEASURE_API) {
+    performance.measure(label, `${label}:start`, `${label}:end`);
+  }
+}
+
 export default class Heimdall {
   static get VERSION() {
     return VERSION;
@@ -84,7 +109,8 @@ export default class Heimdall {
       if (this._checkTimelineEnabledForNode(name)) {
         let label = `${name}--:${token}`;
         this._timelineInfo.timers[token] = label;
-        console.time(label);
+
+        markStart(label);
       }
     }
   }
@@ -94,7 +120,7 @@ export default class Heimdall {
       let label = this._timelineInfo.timers[token];
 
       if (label) {
-        console.timeEnd(label);
+        markEnd(label);
       }
     }
   }
