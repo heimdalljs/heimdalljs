@@ -25,29 +25,7 @@ function splitFirstColon(str) {
 }
 
 const HAS_MEASURE_API = typeof performance !== 'undefined' && performance.mark && performance.measure;
-
-function markStart(label) {
-  if (HAS_MEASURE_API) {
-    performance.mark(`${label}:start`);
-  } else {
-    console.time(label);
-  }
-}
-
-function markEnd(label) {
-  if (HAS_MEASURE_API) {
-    performance.mark(`${label}:end`);
-    flushTimelineMeasurement(label);
-  } else {
-    console.timeEnd(label);
-  }
-}
-
-function flushTimelineMeasurement(label) {
-  if (HAS_MEASURE_API) {
-    performance.measure(label, `${label}:start`, `${label}:end`);
-  }
-}
+let TRACE_ID = 1;
 
 export default class Heimdall {
   static get VERSION() {
@@ -141,19 +119,72 @@ export default class Heimdall {
     return this._monitors.cache();
   }
 
+  _measureMarks(traceId, id, opCode, name) {
+    if (!this._enableTimelineFeatures) {
+      return;
+    }
+
+    let info = this._timelineInfo.timers;
+
+    if (opCode === OP_STOP) {
+      let mark = info[id];
+
+      if (mark) {
+        let [startMark, label] = mark;
+
+        if (HAS_MEASURE_API) {
+          performance.measure(label, startMark, traceId);
+        } else {
+          console.timeEnd(label);
+        }
+      }
+    } else if (opCode === OP_START) {
+      let label = `${name}-:${id}`;
+      info[id] = [traceId, label];
+
+      if (!HAS_MEASURE_API) {
+        console.time(label);
+      }
+    } else if (opCode === OP_RESUME) {
+      let label = info[id][1];
+
+      info[id][0] = traceId;
+      info[id][1] = label = `${label}:${traceId}`;
+      if (!HAS_MEASURE_API) {
+        console.time(label);
+      }
+    }
+  }
+
+  _mark(id, opCode, name) {
+    let traceId = TRACE_ID++;
+
+    if (HAS_MEASURE_API) {
+      performance.mark(traceId);
+      this._measureMarks(traceId, id, opCode, name);
+      return traceId;
+    } else {
+      this._measureMarks(traceId, id, opCode, name);
+      return now();
+    }
+  }
+
   start(name) {
-    let token = this._session.events.push(OP_START, name, now(), this._retrieveCounters());
-    this._timelineTimerStart(name, token);
+    let token = this._session.events.length;
+    let tracer = this._mark(token, OP_START, name);
+    this._session.events.push(OP_START, name, tracer, this._retrieveCounters());
+
     return token;
   }
 
   stop(token) {
-    this._timelineTimerEnd(token);
-    this._session.events.push(OP_STOP, token, now(), this._retrieveCounters());
+    let tracer = this._mark(token, OP_STOP);
+    this._session.events.push(OP_STOP, token, tracer, this._retrieveCounters());
   }
 
   resume(token) {
-    this._session.events.push(OP_RESUME, token, now(), this._retrieveCounters());
+    let tracer = this._mark(token, OP_RESUME);
+    this._session.events.push(OP_RESUME, token, tracer, this._retrieveCounters());
   }
 
   annotate(info) {
