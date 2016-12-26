@@ -10,7 +10,13 @@ import {
   OP_ANNOTATE
 } from '../shared/op-codes';
 
+const VERSION = 'VERSION_STRING_PLACEHOLDER';
+
 export default class Heimdall {
+  static get VERSION() {
+    return VERSION;
+  }
+
   constructor(session) {
     if (arguments.length < 1) {
       this._session = new Session();
@@ -18,6 +24,10 @@ export default class Heimdall {
     } else {
       this._session = session;
     }
+  }
+
+  get VERSION() {
+    return VERSION;
   }
 
   get _monitors() {
@@ -87,6 +97,7 @@ export default class Heimdall {
    */
   toJSON() {
     return {
+      heimdallVersion: VERSION,
       format,
       monitors: this._monitors.toJSON(),
       events: this._events.toJSON(),

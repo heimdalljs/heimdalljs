@@ -70,6 +70,23 @@ describe('HeimdallTree', function() {
         tree.construct();
       }).to.throw('Cannot Resume node, already running!');
     });
+  });
 
-  })
+  describe('toJSON', function() {
+    let heimdall;
+    let tree;
+
+    beforeEach(function () {
+      heimdall = {
+        _events: []
+      };
+      tree = new Tree(heimdall);
+    });
+
+    it('includes version information', function() {
+      let json = tree.toJSON();
+
+      expect(json.heimdallVersion).to.be;
+    });
+  });
 });
