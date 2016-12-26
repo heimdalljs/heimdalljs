@@ -7,9 +7,12 @@ import setupSession from '../setup-session';
 
 setupSession(process);
 
-Heimdall.now = now;
-Heimdall.Session = Session;
-Heimdall.Tree = Tree;
-Heimdall.Node = Node;
+const defaultHeimdall = new Heimdall(process._heimdall_session_3);
 
-export default new Heimdall(process._heimdall_session_3);
+defaultHeimdall.now = now;
+defaultHeimdall.Heimdall = Heimdall;
+defaultHeimdall.Session = Session;
+defaultHeimdall._Tree = Tree;
+defaultHeimdall._Node = Node;
+
+export default defaultHeimdall;
