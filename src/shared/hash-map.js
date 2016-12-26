@@ -1,11 +1,9 @@
-import EmptyObject from './empty-object';
-
 export const UNDEFINED_KEY = Object.create(null);
 
 export default class HashMap {
 
   constructor(entries) {
-    this._data = new EmptyObject();
+    this._data = Object.create(null);
 
     if (entries) {
       for (let i = 0; i < entries.length; i++) {

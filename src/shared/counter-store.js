@@ -1,4 +1,3 @@
-import EmptyObject from './empty-object';
 import { MAX_ARRAY_LENGTH, default as FastIntArray } from './fast-int-array';
 import A from './a';
 import fill from './fill';
@@ -62,7 +61,7 @@ export default class CounterStore {
     let numCounters = labels.length;
     let namespaceIndex = this._namespaceCount++;
     let bitNamespaceIndex = namespaceIndex << 16;
-    let namespace = new EmptyObject();
+    let namespace = Object.create(null);
 
     // we also generate a map between the counters
     // and these labels so that we can reconstruct
@@ -92,14 +91,14 @@ export default class CounterStore {
   _initializeIfNeeded() {
     if (this.initialized === false) {
       this._config = new FastIntArray(this.options.namespaceAllocation || DEFAULT_NAMESPACE_SIZE);
-      this._labelCache = new EmptyObject();
-      this._nameCache = new EmptyObject();
+      this._labelCache = Object.create(null);
+      this._nameCache = Object.create(null);
       this.initialized = true;
     }
   }
 
   restoreFromCache(cache) {
-    let stats = new EmptyObject();
+    let stats = Object.create(null);
 
     for (let i = 0; i < cache.length; i++) {
       if (cache[i] !== NULL_NUMBER) {
@@ -107,7 +106,7 @@ export default class CounterStore {
         let namespace = this._nameCache[i];
         let counterCount = this._config.get(i);
 
-        stats[namespace] = new EmptyObject();
+        stats[namespace] = Object.create(null);
 
         for (let j = 0; j < counterCount; j++) {
           let storeIndex = startIndex + j;
