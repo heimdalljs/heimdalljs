@@ -1,7 +1,6 @@
 import Session from './session';
 import now from '../shared/time';
 import { format } from '../shared/time';
-import EmptyObject from '../shared/empty-object';
 import { NULL_NUMBER } from '../shared/counter-store';
 import {
   OP_START,
@@ -73,7 +72,7 @@ export default class Heimdall {
     let config = this._session.configs.get(name);
 
     if (!config) {
-      config = new EmptyObject();
+      config = Object.create(null);
       this._session.configs.set(name, config);
     }
 

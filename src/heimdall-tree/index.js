@@ -3,7 +3,6 @@ import HeimdallLeaf from './leaf';
 import EventArray from '../shared/event-array';
 import CounterStore from '../shared/counter-store';
 import HashMap from '../shared/hash-map';
-import EmptyObject from '../shared/empty-object';
 import { format, normalizeTime, default as now } from '../shared/time';
 import {
   OP_START,
