@@ -51,6 +51,11 @@ describe('heimdall', function() {
     tree = new Tree(heimdall);
   });
 
+  it('includes a version number', function() {
+    expect(Heimdall.VERSION).to.be;
+    expect(heimdall.VERSION).to.be;
+  });
+
   it('creates a new session if none is provided', function() {
     let h1 = new Heimdall();
     let h2 = new Heimdall();

@@ -272,7 +272,10 @@ export default class HeimdallTree {
     if (!this.root) {
       this.construct();
     }
-    return { nodes: this.root.toJSONSubgraph() };
+    return {
+      heimdallVersion: 'VERSION_STRING_PLACEHOLDER',
+      nodes: this.root.toJSONSubgraph()
+    };
   }
 
   visitPreOrder(cb) {
