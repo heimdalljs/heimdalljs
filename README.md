@@ -48,24 +48,31 @@ heimdall.stop(token);
 
 ### Monitors
 
+A monitor is a group of counters which you can increment as needed to track things such as entry
+into a function or object creations.
+
 **querying**
 ```js
 let condition = heimdall.hasMonitor('<name>');
 ```
 
 **register**
+
+When you register a monitor, the first argument functions as the unique name for that monitor,
+while all other arguments (labels) will be the name of a specific counter in your group of counters.
+
+The call to `registerMonitor` will give you back an object with your labels as its keys and
+the token to increment as the value at that key.
+
 ```js
-let tokens = heimdall.registerMonitor('<name>', ...labels);
+const tokens = heimdall.registerMonitor('<name>', ...labels);
 ```
 
-Example:
+Full Example:
 ```js
-let [a, b, c] = heimdall.registerMonitor('<name>', 'foo', 'bar', 'baz');
-```
+const { foo, bar, baz } = heimdall.registerMonitor('my-first-monitor', 'foo', 'bar', 'baz');
 
-**using**
-```js
-heimdall.increment(a);
+heimdall.increment(foo); // increment 'foo' counter in the 'my-first-monitor' group.
 ```
 
 ### Annotations
