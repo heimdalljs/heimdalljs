@@ -1,26 +1,14 @@
 language: node_js
 node_js:
-  - "0.12"
   - "4"
   - "6"
   - "node"
-sudo: false
 
-cache:
-  directories:
-    $HOME/.npm
-
+cache: yarn
 before_install:
-  - nvm install 6
-  - nvm use 6
-  # prevent the npm loading indicator
-  - npm config --global set spin false
-  # if npm version is less 3.0.0 (lets say 1.x or 2.x) we should attempt to upgrade to 3
-  - if [[ $(npm -v | cut -d '.' -f 1) -lt 3 ]]; then npm i -g npm@^3; fi
-
-install:
-  - npm install --no-optional
-
+  - nvm install 7
+  - nvm use 7
 before_script:
-  - npm run build:node && npm run build:test
+  - yarn run build:node
+  - yarn run build:test
   - nvm use $TRAVIS_NODE_VERSION
