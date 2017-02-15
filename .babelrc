@@ -1,4 +1,13 @@
-// .babelrc
 {
-  "presets": [ "es2015-rollup" ]
+  "presets": [
+    ["es2015", { "modules": false }]
+  ],
+  "plugins": [
+    "external-helpers",
+    ["transform-runtime", {
+      "helpers": false, // defaults to true
+      "polyfill": false, // defaults to true
+      "regenerator": true, // defaults to true
+    }]
+  ]
 }
