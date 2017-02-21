@@ -1,1 +1,1 @@
-// we gots nothing right now
+import './performance-measure';

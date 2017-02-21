@@ -28,7 +28,7 @@ class Clock {
 
 
 export default function mockHRTime() {
-  clock = new Clock();
+  let clock = new Clock();
   clock.install();
   return clock;
 }

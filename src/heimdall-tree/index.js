@@ -10,7 +10,6 @@ import {
   OP_RESUME,
   OP_ANNOTATE
 } from '../shared/op-codes';
-import PerformanceMeasureInterface from '../shared/measure-interface';
 
 /*
 Example Event Timeline and tree reconstruction
@@ -63,7 +62,7 @@ export default class HeimdallTree {
       _timeFormat: json.format || format,
       _events: new EventArray(events.length, events),
       _monitors: CounterStore.fromJSON(json.monitors),
-      timings: json._timings
+      _timings: json.timings
     };
 
     return new HeimdallTree(heimdall, json.serializationTime);
@@ -184,14 +183,14 @@ export default class HeimdallTree {
 
   construct() {
     let events = this._heimdall._events;
+    let counterStore = this._heimdall._monitors;
+    let timings = this._heimdall._timings;
     let currentLeaf = null;
     let currentNode = null;
     let nodeMap = new HashMap();
     let openNodes = [];
     let node;
     let format = this.format;
-    let counterStore = this._heimdall._monitors;
-    let timings = this._heimdall.timings;
     let stopTime = this.lastKnownTime ? normalizeTime(this.lastKnownTime) : now();
     let pageRootIndex = events._length + 1;
 
@@ -199,11 +198,15 @@ export default class HeimdallTree {
     currentLeaf = this._createLeaf(currentNode, 0);
     openNodes.push(this.root);
 
-    events.forEach(([op, name, traceId, counters], i) => {
-      let time = timings[traceId];
+    events.forEach((traceEvent, i) => {
+      let op = traceEvent[0];
+      let name = traceEvent[1];
+      let traceId = traceEvent[2];
+      let counters = traceEvent[3];
+      let time;
 
       if (op !== OP_ANNOTATE) {
-        time = normalizeTime(time, format);
+        time = normalizeTime(timings[traceId], format);
         counters = statsFromCounters(counterStore, counters);
       }
 

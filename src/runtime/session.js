@@ -2,7 +2,7 @@
 import HashMap from '../shared/hash-map';
 import EventArray from '../shared/event-array';
 import CounterStore from '../shared/counter-store';
-import PerformanceMeasureInterface from '../shared/measure-interface';
+import PerformanceMeasure from '../shared/performance-measure';
 
 export default class HeimdallSession {
   constructor() {
@@ -13,7 +13,7 @@ export default class HeimdallSession {
     this.monitors = new CounterStore();
     this.configs = new HashMap();
     this.events = new EventArray(640000 * 4);
-    this._performance = new PerformanceMeasureInterface();
+    this._performance = new PerformanceMeasure();
   }
 
   get timings() {

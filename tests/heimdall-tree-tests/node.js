@@ -2,7 +2,6 @@ import HeimdallNode from '../../src/heimdall-tree/node';
 import HeimdallTree from '../../src/heimdall-tree';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { Promise, defer } from 'rsvp';
 import { NICE_OP_TREE, NICE_OP_TREE_TIMINGS } from './-op-trees';
 
 const { expect } = chai;
@@ -22,7 +21,7 @@ describe('HeimdallNode', function() {
     let tree;
 
     beforeEach( function() {
-      heimdall = { _events: NICE_OP_TREE, NICE_OP_TREE_TIMINGS };
+      heimdall = { _events: NICE_OP_TREE, _timings: NICE_OP_TREE_TIMINGS };
       tree = new HeimdallTree(heimdall);
       tree.construct();
     });
@@ -133,7 +132,7 @@ describe('HeimdallNode', function() {
     let tree;
 
     beforeEach( function() {
-      heimdall = { _events: NICE_OP_TREE };
+      heimdall = { _events: NICE_OP_TREE, _timings: NICE_OP_TREE_TIMINGS };
       tree = new HeimdallTree(heimdall);
       tree.construct();
       root = tree.root;

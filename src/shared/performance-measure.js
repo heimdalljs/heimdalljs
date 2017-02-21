@@ -6,10 +6,10 @@ import {
   OP_RESUME
 } from './op-codes';
 
-export const HAS_MEASURE_API = HAS_PERFORMANCE_NOW && performance.mark && performance.measure;
+export const HAS_MEASURE_API = HAS_PERFORMANCE_NOW && !!performance.mark && !!performance.measure;
 let TRACE_ID = 1;
 
-function splitFirstColon(str) {
+export function splitFirstColon(str) {
   let i = str.indexOf(':');
   let first = str;
   let rest = '*';
@@ -22,7 +22,7 @@ function splitFirstColon(str) {
   return [first, rest];
 }
 
-class Mark {
+export class Mark {
   constructor(traceId, label) {
     this.label = label;
     this.startMark = traceId;
@@ -36,7 +36,7 @@ class Mark {
   }
 }
 
-class ScopeCache {
+export class ScopeCache {
   constructor() {
     this._lookupCache = makeDict();
     this._activeScopes = makeDict();
@@ -66,7 +66,7 @@ class ScopeCache {
   }
 
   /**
-   * Checks whether the scope is enabled for a particular group of trace events.
+   * Checks whether the scope is enabled for a particular path (name of a timer passed in to heimdall.start`).
    *
    * For example:
    *
@@ -74,7 +74,7 @@ class ScopeCache {
    * 'finder:*' => scope with all of the sub-scopes enabled
    * 'finder:query' => only sub-scope enabled
    *
-   * @param name
+   * @param {String} path
    * @returns {Boolean}
    * @private
    */
@@ -114,7 +114,7 @@ class ScopeCache {
  * is synchronous and must be called at the same point at which the mark is created. This is another
  * motivation for the `trace` API having extend information about the nature of the mark requested.
  */
-export default class PerformanceMeasureInterface {
+export default class PerformanceMeasure {
   constructor() {
     /**
      When an environment does not support the performance.mark and performance.measure APIs, we
@@ -123,7 +123,7 @@ export default class PerformanceMeasureInterface {
      @property {Array} _timings
      @private
      */
-    this._timings = HAS_MEASURE_API ? null : makeDict();
+    this._timings = PerformanceMeasure.hasMeasureApi ? null : makeDict();
 
     /**
       When `true`, activate timer "scopes" will have their duration marked
@@ -135,10 +135,14 @@ export default class PerformanceMeasureInterface {
     this._enableMeasurements = false;
 
     // cache for _scopeCache
-    this.__enabledScopeCache = null;
+    this.__scopeCache = null;
 
     // cache for _startMarksCache
     this.__startMarksCache = null;
+  }
+
+  static get hasMeasureApi() {
+    return HAS_MEASURE_API;
   }
 
   /**
@@ -148,11 +152,11 @@ export default class PerformanceMeasureInterface {
    @private
    */
   get _scopeCache() {
-    if (!this.__enabledScopeCache) {
-      this.__enabledScopeCache = new ScopeCache();
+    if (!this.__scopeCache) {
+      this.__scopeCache = new ScopeCache();
     }
 
-    return this.__enabledScopeCache;
+    return this.__scopeCache;
   }
 
   get _startMarksCache() {
@@ -278,7 +282,7 @@ export default class PerformanceMeasureInterface {
    * @param {Number} traceId
    */
   mark(traceId) {
-    if (HAS_MEASURE_API) {
+    if (PerformanceMeasure.hasMeasureApi) {
       performance.mark(traceId);
     } else {
       this._timings[traceId] = now();
@@ -299,7 +303,7 @@ export default class PerformanceMeasureInterface {
    * @param {string} label
    */
   measureStart(label) {
-    if (!HAS_MEASURE_API) {
+    if (!PerformanceMeasure.hasMeasureApi) {
       console.time(label);
     }
   }
@@ -320,7 +324,7 @@ export default class PerformanceMeasureInterface {
    * @param {String} markB
    */
   measure(label, markA, markB) {
-    if (HAS_MEASURE_API) {
+    if (PerformanceMeasure.hasMeasureApi) {
       performance.measure(label, markA, markB);
     } else {
       console.timeEnd(label);
@@ -331,18 +335,19 @@ export default class PerformanceMeasureInterface {
    * Returns an array of timestamps.
    *
    * Depending on the `mark` and `measure` support in the browsers,
-   * it will either return an array of `PerformanceEntry.startTime`s or timestamps
-   * that were created in `mark()`.
+   * it will either return a dictionary of `PerformanceEntry.startTime`s or timestamps
+   * that were created in `mark()`.  `PerformanceEntry.startTime` returns a `DOMHighResTimestamp`.
    *
-   * @returns {Array} An array of timestamps.
+   * @returns {Object} A dictionary of whose keys are the names marks with timestamps
+   * as their values.
    */
   getEntries() {
     // when reconstructing a tree from the JSON of an exported session
     // we need to be able to access _timings instead.
-    if (!this._timings && HAS_MEASURE_API) {
+    if (!this._timings && PerformanceMeasure.hasMeasureApi) {
       // TODO investigate if we have any guarantee of the order here being the same as the "Created" order.
-      // (it seems we do)
-      // TODO enable a way of "filtering" out marks we did not create (probably a simple "in range of traceId max" check)
+      //   (it seems we do)
+      // TODO possibly enable a way of "filtering" out marks we did not create (probably a simple "in range of traceId max" check)
       let marks = performance.getEntriesByType('mark');
       let timings = makeDict();
 
@@ -357,13 +362,13 @@ export default class PerformanceMeasureInterface {
   }
 
   clearEntries() {
-    this._timings = HAS_MEASURE_API ? null : makeDict();
+    this._timings = PerformanceMeasure.hasMeasureApi ? null : makeDict();
     this.__startMarksCache = null;
   }
 
   reset() {
     this.clearEntries();
     this._enableMeasurements = false;
-    this.__enabledScopeCache = null;
+    this.__scopeCache = null;
   }
 }

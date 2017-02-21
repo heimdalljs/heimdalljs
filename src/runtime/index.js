@@ -38,6 +38,10 @@ export default class Heimdall {
     return this._session.events;
   }
 
+  get _timings() {
+    return this._session.timings;
+  }
+
   get _performance() {
     return this._session._performance;
   }
@@ -51,7 +55,7 @@ export default class Heimdall {
   }
 
   _trace(token, op, name) {
-    this._performance.trace(token, op, name);
+    return this._performance.trace(token, op, name);
   }
 
   start(name) {
@@ -113,7 +117,6 @@ export default class Heimdall {
     session data for transfer. Heimdall-tree can load time
     data from this format or out of `getSessionData`.
    */
-  // TODO this needs to grab timing information from the PerformanceMeasureInterface
   toJSON() {
     return {
       heimdallVersion: VERSION,

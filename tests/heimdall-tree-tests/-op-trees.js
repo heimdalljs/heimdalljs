@@ -6,7 +6,6 @@ import {
 } from '../../src/shared/op-codes';
 import { format, ORIGIN_TIME } from '../../src/shared/time';
 import EventArray from '../../src/shared/event-array';
-import PerformanceMeasureInterface from '../../src/shared/measure-interface';
 
 /*
   Creates a fake time signature from the number of milliseconds provided
@@ -54,54 +53,52 @@ function fT(milliseconds) {
  */
 export const NICE_OP_TREE = new EventArray(undefined,
  [
-    OP_START, 'A', fT(0), null,
-    OP_START, 'B', fT(1), null,
-    OP_START, 'C', fT(2), null,
-    OP_STOP, 8, fT(3), null,  // stop C
-    OP_STOP, 4, fT(4), null,  // stop B
-    OP_START, 'D', fT(5), null,
+    OP_START, 'A',0, null,
+    OP_START, 'B', 1, null,
+    OP_START, 'C', 2, null,
+    OP_STOP, 8, 3, null,  // stop C
+    OP_STOP, 4, 4, null,  // stop B
+    OP_START, 'D', 5, null,
     OP_ANNOTATE, null, null, { foo: 'bar' },
-    OP_STOP, 20, fT(6), null,  // stop D
-    OP_STOP, 0, fT(7), null  // stop A
+    OP_STOP, 20, 6, null,  // stop D
+    OP_STOP, 0, 7, null  // stop A
   ]);
 
-// TODO don't use the work `Interface` for PeformanceMeasureInterface
-export const NICE_OP_TREE_TIMINGS = [
-  fT(0), fT(1), fT(2), fT(3), fT(4), fT(5), null, fT(6), fT(7)
-];
+export const NICE_OP_TREE_TIMINGS = {
+  0: fT(0), 1: fT(1), 2: fT(2), 3: fT(3), 4: fT(4), 5: fT(5), 6: fT(6), 7: fT(7)
+};
 
 export const BAD_OP_TREE_INACTIVE_STOPPED = new EventArray(undefined,
   [
-    OP_START, 'A', fT(0), null,
-    OP_STOP, 0, fT(1), null, // stop A
-    OP_STOP, 0, fT(3), null  // stop A again
+    OP_START, 'A', 0, null,
+    OP_STOP, 0, 1, null, // stop A
+    OP_STOP, 0, 2, null  // stop A again
   ]);
 
-export const BAD_OP_TREE_INACTIVE_STOPPED_TIMINGS = [
-  fT(0), fT(1), fT(3)
-];
+export const BAD_OP_TREE_INACTIVE_STOPPED_TIMINGS = {
+  0: fT(0), 1: fT(1), 2: fT(3)
+};
 
 export const BAD_OP_TREE_ACTIVE_CHILD_STOPPED = new EventArray(undefined,
   [
-      OP_START, 'A', fT(0), null,
-      OP_START, 'B', fT(1), null,
-      OP_STOP, 0, fT(1), null // stop A while B is active
+      OP_START, 'A', 0, null,
+      OP_START, 'B', 1, null,
+      OP_STOP, 0, 2, null // stop A while B is active
     ]);
 
-export const BAD_OP_TREE_ACTIVE_CHILD_STOPPED_TIMINGS = [
-  fT(0), fT(1), fT(1)
-];
+export const BAD_OP_TREE_ACTIVE_CHILD_STOPPED_TIMINGS = {
+  0: fT(0), 1: fT(1), 2: fT(1)
+};
 
 export const BAD_OP_TREE_ACTIVE_RESUMED = new EventArray(undefined,
   [
-    OP_START, 'A', fT(0), null,
-    OP_RESUME, 0, fT(1), null // restart A
+    OP_START, 'A', 0, null,
+    OP_RESUME, 0, 1, null // restart A
   ]);
 
-export const BAD_OP_TREE_ACTIVE_RESUMED_TIMINGS = [
-  fT(0), fT(1)
-];
-
+export const BAD_OP_TREE_ACTIVE_RESUMED_TIMINGS = {
+  0: fT(0), 1: fT(1)
+};
 export default {
   NICE_OP_TREE,
   BAD_OP_TREE_INACTIVE_STOPPED,
