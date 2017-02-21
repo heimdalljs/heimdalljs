@@ -1,10 +1,10 @@
-import { default as now, HAS_PERFORMANCE_NOW } from '../shared/time';
-import makeDict from '../shared/dict';
+import { default as now, HAS_PERFORMANCE_NOW } from './time';
+import makeDict from './dict';
 import {
   OP_START,
   OP_STOP,
   OP_RESUME
-} from '../shared/op-codes';
+} from './op-codes';
 
 export const HAS_MEASURE_API = HAS_PERFORMANCE_NOW && performance.mark && performance.measure;
 let TRACE_ID = 1;
@@ -52,16 +52,16 @@ class ScopeCache {
         let parts = splitFirstColon(scopes[i]);
         let scopeKey = parts[0];
         let subScopeKey = parts[1];
-        let scope = cache.scopes[scopeKey];
+        let scope = cache[scopeKey];
 
         if (!scope) {
-          scope = cache.scopes[scopeKey] = makeDict();
+          scope = cache[scopeKey] = makeDict();
         }
 
         scope[subScopeKey] = true;
       }
     } else {
-      cache.scopes['*'] = true;
+      cache['*'] = true;
     }
   }
 
@@ -123,7 +123,7 @@ export default class PerformanceMeasureInterface {
      @property {Array} _timings
      @private
      */
-    this._timings = HAS_MEASURE_API ? null : [];
+    this._timings = HAS_MEASURE_API ? null : makeDict();
 
     /**
       When `true`, activate timer "scopes" will have their duration marked
@@ -150,8 +150,6 @@ export default class PerformanceMeasureInterface {
   get _scopeCache() {
     if (!this.__enabledScopeCache) {
       this.__enabledScopeCache = new ScopeCache();
-      // TODO remove this WTF
-      this.__enabledScopeCache.timers = makeDict();
     }
 
     return this.__enabledScopeCache;
@@ -178,7 +176,7 @@ export default class PerformanceMeasureInterface {
    */
   trace(id, opCode, name) {
     let traceId = TRACE_ID++;
-    this.mark(`${traceId}`);
+    this.mark(traceId);
     this._measureMarks(traceId, id, opCode, name);
     return traceId;
   }
@@ -233,7 +231,7 @@ export default class PerformanceMeasureInterface {
       this.measure(mark.label, mark.startMark, traceId);
 
     } else if (opCode === OP_START) {
-      startMarksCache[id] = new Mark(traceId, `${name}-:${id}`);
+      mark = startMarksCache[id] = new Mark(traceId, `${name}-:${id}`);
       this.measureStart(mark.label);
 
     } else if (opCode === OP_RESUME) {
@@ -277,13 +275,13 @@ export default class PerformanceMeasureInterface {
    * `performance.mark` would be called; otherwise a new timestamp will be
    * created and stored.
    *
-   * @param {String} name
+   * @param {Number} traceId
    */
-  mark(name) {
+  mark(traceId) {
     if (HAS_MEASURE_API) {
-      performance.mark(name);
+      performance.mark(traceId);
     } else {
-      this._timings.push(now());
+      this._timings[traceId] = now();
     }
   }
 
@@ -339,18 +337,33 @@ export default class PerformanceMeasureInterface {
    * @returns {Array} An array of timestamps.
    */
   getEntries() {
-    if (HAS_MEASURE_API) {
+    // when reconstructing a tree from the JSON of an exported session
+    // we need to be able to access _timings instead.
+    if (!this._timings && HAS_MEASURE_API) {
       // TODO investigate if we have any guarantee of the order here being the same as the "Created" order.
+      // (it seems we do)
+      // TODO enable a way of "filtering" out marks we did not create (probably a simple "in range of traceId max" check)
       let marks = performance.getEntriesByType('mark');
-      let l = marks.length;
-      let timings = new Array(l);
+      let timings = makeDict();
 
-      for (let i = 0; i < l; i++) {
-        timings[i] = marks[i].startTime;
+      for (let i = 0, l = marks.length; i < l; i++) {
+        let name = marks[i].name;
+        timings[name] = marks[i].startTime;
       }
 
       return timings;
     }
     return this._timings;
+  }
+
+  clearEntries() {
+    this._timings = HAS_MEASURE_API ? null : makeDict();
+    this.__startMarksCache = null;
+  }
+
+  reset() {
+    this.clearEntries();
+    this._enableMeasurements = false;
+    this.__enabledScopeCache = null;
   }
 }

@@ -9,7 +9,6 @@ import {
   OP_RESUME,
   OP_ANNOTATE
 } from '../shared/op-codes';
-import PerformanceMeasureInterface from './measure-interface';
 
 const VERSION = 'VERSION_STRING_PLACEHOLDER';
 
@@ -25,7 +24,6 @@ export default class Heimdall {
     } else {
       this._session = session;
     }
-    this._performance = new PerformanceMeasureInterface();
   }
 
   get VERSION() {
@@ -38,6 +36,10 @@ export default class Heimdall {
 
   get _events() {
     return this._session.events;
+  }
+
+  get _performance() {
+    return this._session._performance;
   }
 
   _retrieveCounters() {
@@ -118,6 +120,7 @@ export default class Heimdall {
       format,
       monitors: this._monitors.toJSON(),
       events: this._events.toJSON(),
+      timings: this._session.timings,
       serializationTime: this._performance.now()
     };
   }

@@ -1,7 +1,7 @@
 import Tree from '../../src/heimdall-tree';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { NICE_OP_TREE } from './-op-trees';
+import { NICE_OP_TREE, NICE_OP_TREE_TIMINGS } from './-op-trees';
 
 const { expect } = chai;
 
@@ -9,7 +9,8 @@ chai.use(chaiAsPromised);
 
 describe('HeimdallLeaf', function() {
   let heimdall = {
-    _events: NICE_OP_TREE
+    _events: NICE_OP_TREE,
+    _timings: NICE_OP_TREE_TIMINGS
   };
   let tree;
   let baseNode;
