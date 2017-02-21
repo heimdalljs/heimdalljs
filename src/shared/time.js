@@ -7,8 +7,9 @@ export let ORIGIN_TIME;
 // so we use this boolean to determine whether we "bind" or use a wrapper function.
 const freeGlobal = typeof window !== 'undefined' ? window : global;
 const IS_TESTING = freeGlobal.IS_HEIMDALL_TEST_ENVIRONMENT;
+export const HAS_PERFORMANCE_NOW = typeof performance === 'object' && typeof performance.now === 'function';
 
-if (typeof performance === 'object' && typeof performance.now === 'function') {
+if (HAS_PERFORMANCE_NOW) {
   now = IS_TESTING ? function now() { return performance.now(); } : performance.now.bind(performance);
   format = 'milli';
 } else if (typeof process !== 'undefined' && typeof process.hrtime === 'function') {

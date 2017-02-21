@@ -1,31 +1,17 @@
 import Session from './session';
-import now from '../shared/time';
 import { format } from '../shared/time';
 import { NULL_NUMBER } from '../shared/counter-store';
+import makeDict from '../shared/dict';
+
 import {
   OP_START,
   OP_STOP,
   OP_RESUME,
   OP_ANNOTATE
 } from '../shared/op-codes';
+import PerformanceMeasureInterface from './measure-interface';
 
 const VERSION = 'VERSION_STRING_PLACEHOLDER';
-
-function splitFirstColon(str) {
-  let i = str.indexOf(':');
-  let first = str;
-  let rest = '*';
-
-  if (i !== -1) {
-    first = str.substr(0, i);
-    rest = str.substr(i + 1);
-  }
-
-  return [first, rest];
-}
-
-const HAS_MEASURE_API = typeof performance !== 'undefined' && performance.mark && performance.measure;
-let TRACE_ID = 1;
 
 export default class Heimdall {
   static get VERSION() {
@@ -39,68 +25,7 @@ export default class Heimdall {
     } else {
       this._session = session;
     }
-
-    this._enableTimelineFeatures = false;
-    this.__timelineInfo = null;
-  }
-
-  get _timelineInfo() {
-    if (!this.__timelineInfo) {
-      this.__timelineInfo = {
-        timers: Object.create(null),
-        namespaces: Object.create(null)
-      };
-    }
-
-    return this.__timelineInfo;
-  }
-
-  enableTimelineFeatures(matchQuery) {
-    this._enableTimelineFeatures = true;
-    let info = this._timelineInfo;
-
-    if (matchQuery) {
-      let namespaces = matchQuery.split(',');
-      namespaces.forEach((str) => {
-        let [namespaceKey, section] = splitFirstColon(str);
-        let namespace = info.namespaces[namespaceKey] = info.namespaces[namespaceKey] || Object.create(null);
-
-        namespace[section] = true;
-      });
-    } else {
-      info.namespaces['*'] = true;
-    }
-  }
-
-  _checkTimelineEnabledForNode(name) {
-    let [namespace, section] = splitFirstColon(name);
-    let enabledNamespaces = this._timelineInfo.namespaces;
-    let globalEnabled = !!enabledNamespaces['*'];
-    let namespaceGlobalEnabled = enabledNamespaces[namespace] && !!enabledNamespaces[namespace]['*'];
-    let namespaceSectionEnabled = enabledNamespaces[namespace] && !!enabledNamespaces[namespace][section];
-
-    return globalEnabled || namespaceGlobalEnabled || namespaceSectionEnabled;
-  }
-
-  _timelineTimerStart(name, token) {
-    if (this._enableTimelineFeatures) {
-      if (this._checkTimelineEnabledForNode(name)) {
-        let label = `${name}--:${token}`;
-        this._timelineInfo.timers[token] = label;
-
-        markStart(label);
-      }
-    }
-  }
-
-  _timelineTimerEnd(token) {
-    if (this._enableTimelineFeatures) {
-      let label = this._timelineInfo.timers[token];
-
-      if (label) {
-        markEnd(label);
-      }
-    }
+    this._performance = new PerformanceMeasureInterface();
   }
 
   get VERSION() {
@@ -119,71 +44,29 @@ export default class Heimdall {
     return this._monitors.cache();
   }
 
-  _measureMarks(traceId, id, opCode, name) {
-    if (!this._enableTimelineFeatures) {
-      return;
-    }
-
-    let info = this._timelineInfo.timers;
-
-    if (opCode === OP_STOP) {
-      let mark = info[id];
-
-      if (mark) {
-        let [startMark, label] = mark;
-
-        if (HAS_MEASURE_API) {
-          performance.measure(label, startMark, traceId);
-        } else {
-          console.timeEnd(label);
-        }
-      }
-    } else if (opCode === OP_START) {
-      let label = `${name}-:${id}`;
-      info[id] = [traceId, label];
-
-      if (!HAS_MEASURE_API) {
-        console.time(label);
-      }
-    } else if (opCode === OP_RESUME) {
-      let label = info[id][1];
-
-      info[id][0] = traceId;
-      info[id][1] = label = `${label}:${traceId}`;
-      if (!HAS_MEASURE_API) {
-        console.time(label);
-      }
-    }
+  enableTimelineScopes(scopes) {
+    this._performance.enableScopes(scopes);
   }
 
-  _mark(id, opCode, name) {
-    let traceId = TRACE_ID++;
-
-    if (HAS_MEASURE_API) {
-      performance.mark(traceId);
-      this._measureMarks(traceId, id, opCode, name);
-      return traceId;
-    } else {
-      this._measureMarks(traceId, id, opCode, name);
-      return now();
-    }
+  _trace(token, op, name) {
+    this._performance.trace(token, op, name);
   }
 
   start(name) {
     let token = this._session.events.length;
-    let tracer = this._mark(token, OP_START, name);
+    let tracer = this._trace(token, OP_START, name);
     this._session.events.push(OP_START, name, tracer, this._retrieveCounters());
 
     return token;
   }
 
   stop(token) {
-    let tracer = this._mark(token, OP_STOP);
+    let tracer = this._trace(token, OP_STOP);
     this._session.events.push(OP_STOP, token, tracer, this._retrieveCounters());
   }
 
   resume(token) {
-    let tracer = this._mark(token, OP_RESUME);
+    let tracer = this._trace(token, OP_RESUME);
     this._session.events.push(OP_RESUME, token, tracer, this._retrieveCounters());
   }
 
@@ -216,7 +99,7 @@ export default class Heimdall {
     let config = this._session.configs.get(name);
 
     if (!config) {
-      config = Object.create(null);
+      config = makeDict();
       this._session.configs.set(name, config);
     }
 
@@ -228,13 +111,14 @@ export default class Heimdall {
     session data for transfer. Heimdall-tree can load time
     data from this format or out of `getSessionData`.
    */
+  // TODO this needs to grab timing information from the PerformanceMeasureInterface
   toJSON() {
     return {
       heimdallVersion: VERSION,
       format,
       monitors: this._monitors.toJSON(),
       events: this._events.toJSON(),
-      serializationTime: now()
+      serializationTime: this._performance.now()
     };
   }
 

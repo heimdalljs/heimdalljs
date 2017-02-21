@@ -1,9 +1,10 @@
+import makeDict from './dict';
+
 export const UNDEFINED_KEY = Object.create(null);
 
 export default class HashMap {
-
   constructor(entries) {
-    this._data = Object.create(null);
+    this._data = makeDict();
 
     if (entries) {
       for (let i = 0; i < entries.length; i++) {
@@ -42,5 +43,4 @@ export default class HashMap {
   delete(key) {
     this._data[key] = UNDEFINED_KEY;
   }
-
 }
