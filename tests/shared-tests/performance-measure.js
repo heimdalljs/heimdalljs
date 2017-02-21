@@ -1,13 +1,3 @@
-// for serious,
-//
-// Be very careful about changing ANY tests here.  This is the public API and
-// must work between different heimdalljs versions.  Changing things here
-// will very likely require a shim.  A node cannot assume that other nodes in
-// the graph share the same version.
-//
-// Sincerely,
-//    Serious.
-
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { ScopeCache, default as PerformanceMeasure } from '../../src/shared/performance-measure';
@@ -99,11 +89,69 @@ describe('PerformanceMeasure', function() {
   });
 
   describe('measureStart()', function() {
+    it('no-ops performance.measure is available', function() {
+      doubleMeasureProperty(true);
+      let performance = mockPerformance();
+      let console = mockConsole();
+      let measure = new PerformanceMeasure();
+      measure.measureStart('foo');
 
+      expect(performance.measureCalls).to.equal(0, `We shouldn't call measure`);
+      expect(console.timeCalls).to.equal(0, 'We did not call time');
+      expect(console.lastTimeArgs).to.equal(null, 'We did not call time');
+
+      performance.restore();
+      console.restore();
+      restoreMeasureProperty();
+    });
+    it('calls console.time when performance.measure is not available', function() {
+      doubleMeasureProperty(false);
+      let performance = mockPerformance();
+      let console = mockConsole();
+      let measure = new PerformanceMeasure();
+      measure.measureStart('foo');
+
+      expect(performance.measureCalls).to.equal(0, `We shouldn't call measure`);
+      expect(console.timeCalls).to.equal(1, 'We called time');
+      expect(console.lastTimeArgs).to.eql(['foo'], 'We called time with a label');
+
+      performance.restore();
+      console.restore();
+      restoreMeasureProperty();
+    });
   });
 
   describe('measure()', function() {
+    it('calls performance.measure when available', function() {
+      doubleMeasureProperty(true);
+      let performance = mockPerformance();
+      let console = mockConsole();
+      let measure = new PerformanceMeasure();
+      measure.measure('foo', 'bar', 'baz');
 
+      expect(performance.measureCalls).to.equal(1, 'We called measure');
+      expect(performance.lastMeasureArgs).to.eql(['foo', 'bar', 'baz'], 'We called measure with the right args.');
+      expect(console.timeEndCalls).to.equal(0, 'We did not call timeEnd');
+
+      performance.restore();
+      console.restore();
+      restoreMeasureProperty();
+    });
+    it('calls console.timeEnd when performance.measure is not available', function() {
+      doubleMeasureProperty(false);
+      let performance = mockPerformance();
+      let console = mockConsole();
+      let measure = new PerformanceMeasure();
+      measure.measure('foo', 'bar', 'baz');
+
+      expect(performance.measureCalls).to.equal(0, 'We did not call measure');
+      expect(console.timeEndCalls).to.equal(1, 'We called timeEnd');
+      expect(console.lastTimeEndArgs).to.eql(['foo'], 'We called timeEnd with the right args.');
+
+      performance.restore();
+      console.restore();
+      restoreMeasureProperty();
+    });
   });
 
   describe('getEntries()', function() {

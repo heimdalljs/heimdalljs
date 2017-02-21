@@ -8,12 +8,17 @@ class Console {
   }
 
   install() {
-    this.restoreConsole = process.console;
-    global.console = this;
+    this.restoreConsole = {
+      time: console.time,
+      timeEnd: console.timeEnd
+    };
+    console.time = this.time.bind(this);
+    console.timeEnd = this.timeEnd.bind(this);
   }
 
   restore() {
-    global.console = this.restoreConsole;
+    console.time = this.restoreConsole.time;
+    console.timeEnd = this.restoreConsole.timeEnd;
   }
 
   time(...args) {
