@@ -99,7 +99,7 @@ export class ScopeCache {
 }
 
 /**
- * @class PerformanceMeasureInterface
+ * @class PerformanceMeasure
  *
  * This API is _similar_ to the Performance interface https://developer.mozilla.org/en-US/docs/Web/API/Performance
  * however, it diverges in a couple of key scenarios detailed below:
@@ -113,6 +113,11 @@ export class ScopeCache {
  * marks and can be called after-the-fact to add the annotation to the timeline, the console variant
  * is synchronous and must be called at the same point at which the mark is created. This is another
  * motivation for the `trace` API having extend information about the nature of the mark requested.
+ *
+ * 3) Additionally, `performance.measure` expects to be given the names of two previously created `marks`; however,
+ * `performance.mark` intentionally supports calling `mark` with the same name repeatedly. This makes these two APIs
+ * at odds. Instead of using the name passed into `heimdall.start()`, we use the `traceId` we generate for that mark
+ * to ensure a unique mark name.
  */
 export default class PerformanceMeasure {
   constructor() {
