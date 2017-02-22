@@ -4,7 +4,11 @@ import {
   NICE_OP_TREE,
   BAD_OP_TREE_ACTIVE_RESUMED,
   BAD_OP_TREE_INACTIVE_STOPPED,
-  BAD_OP_TREE_ACTIVE_CHILD_STOPPED
+  BAD_OP_TREE_ACTIVE_CHILD_STOPPED,
+  NICE_OP_TREE_TIMINGS,
+  BAD_OP_TREE_ACTIVE_RESUMED_TIMINGS,
+  BAD_OP_TREE_INACTIVE_STOPPED_TIMINGS,
+  BAD_OP_TREE_ACTIVE_CHILD_STOPPED_TIMINGS
 } from './-op-trees';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
@@ -19,7 +23,8 @@ describe('HeimdallTree', function() {
 
     beforeEach(function () {
       heimdall = {
-        _events: []
+        _events: [],
+        _timings: {}
       };
       tree = new Tree(heimdall);
     });
@@ -34,6 +39,7 @@ describe('HeimdallTree', function() {
 
     it('properly adds children', function() {
       heimdall._events = NICE_OP_TREE;
+      heimdall._timings = NICE_OP_TREE_TIMINGS;
       tree.construct();
 
       expect(tree.root.leaves.length).to.equal(2);
@@ -49,6 +55,7 @@ describe('HeimdallTree', function() {
 
     it('errors when stopping an already stopped node', function() {
       heimdall._events = BAD_OP_TREE_INACTIVE_STOPPED;
+      heimdall._timings = BAD_OP_TREE_INACTIVE_STOPPED_TIMINGS;
 
       expect(function () {
         tree.construct();
@@ -57,6 +64,7 @@ describe('HeimdallTree', function() {
 
     it('errors when stopping a node with an active child node', function() {
       heimdall._events = BAD_OP_TREE_ACTIVE_CHILD_STOPPED;
+      heimdall._timings = BAD_OP_TREE_ACTIVE_CHILD_STOPPED_TIMINGS;
 
       expect(function () {
         tree.construct();
@@ -65,6 +73,7 @@ describe('HeimdallTree', function() {
 
     it('errors when resuming a node that has not been stopped', function() {
       heimdall._events = BAD_OP_TREE_ACTIVE_RESUMED;
+      heimdall._timings = BAD_OP_TREE_ACTIVE_RESUMED_TIMINGS;
 
       expect(function () {
         tree.construct();
@@ -78,7 +87,8 @@ describe('HeimdallTree', function() {
 
     beforeEach(function () {
       heimdall = {
-        _events: []
+        _events: [],
+        _timings: {}
       };
       tree = new Tree(heimdall);
     });

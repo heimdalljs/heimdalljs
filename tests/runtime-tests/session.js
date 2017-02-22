@@ -46,6 +46,14 @@ describe('HeimdallSession', function() {
     });
   });
 
+  describe('timings', function() {
+    it('is a hash on the session', function() {
+      let timings = new Session().timings;
+
+      expect(timings).to.eql(Object.create(null), `Timings is an object`);
+    });
+  });
+
   describe('reset()', function() {
     it('is callable', function() {
       let session = new Session();

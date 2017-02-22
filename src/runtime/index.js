@@ -1,7 +1,8 @@
 import Session from './session';
-import now from '../shared/time';
 import { format } from '../shared/time';
 import { NULL_NUMBER } from '../shared/counter-store';
+import makeDict from '../shared/dict';
+
 import {
   OP_START,
   OP_STOP,
@@ -37,20 +38,42 @@ export default class Heimdall {
     return this._session.events;
   }
 
+  get _timings() {
+    return this._session.timings;
+  }
+
+  get _performance() {
+    return this._session._performance;
+  }
+
   _retrieveCounters() {
     return this._monitors.cache();
   }
 
+  enableTimelineScopes(scopes) {
+    this._performance.enableScopes(scopes);
+  }
+
+  _trace(token, op, name) {
+    return this._performance.trace(token, op, name);
+  }
+
   start(name) {
-    return this._session.events.push(OP_START, name, now(), this._retrieveCounters());
+    let token = this._session.events.length;
+    let tracer = this._trace(token, OP_START, name);
+    this._session.events.push(OP_START, name, tracer, this._retrieveCounters());
+
+    return token;
   }
 
   stop(token) {
-    this._session.events.push(OP_STOP, token, now(), this._retrieveCounters());
+    let tracer = this._trace(token, OP_STOP);
+    this._session.events.push(OP_STOP, token, tracer, this._retrieveCounters());
   }
 
   resume(token) {
-    this._session.events.push(OP_RESUME, token, now(), this._retrieveCounters());
+    let tracer = this._trace(token, OP_RESUME);
+    this._session.events.push(OP_RESUME, token, tracer, this._retrieveCounters());
   }
 
   annotate(info) {
@@ -82,7 +105,7 @@ export default class Heimdall {
     let config = this._session.configs.get(name);
 
     if (!config) {
-      config = Object.create(null);
+      config = makeDict();
       this._session.configs.set(name, config);
     }
 
@@ -100,7 +123,8 @@ export default class Heimdall {
       format,
       monitors: this._monitors.toJSON(),
       events: this._events.toJSON(),
-      serializationTime: now()
+      timings: this._session.timings,
+      serializationTime: this._performance.now()
     };
   }
 

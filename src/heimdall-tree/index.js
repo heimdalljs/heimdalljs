@@ -48,6 +48,39 @@ function statsFromCounters(counterStore, counterCache) {
   return counterStore.restoreFromCache(counterCache);
 }
 
+/*
+ In 0.3, HeimdallSession.events stored information in four-indeces segments
+ that mapped to `opCode, token|name, timestamp, counterCache`.
+
+ In 0.4, the third index is a `traceId` instead, which can be used to locate
+ the timestamp from within the dictionary returned by `HeimdallSession.timings`.
+
+ On the surface, this change is non-breaking; however, HeimdallTree must be able
+ to correctly inter-op these two formats.  To do so, the following algorithm is used:
+
+ - if the opCode is OP_ANNOTATE, do nothing
+ - else if the third param is not a number, assume it is a timestamp
+ - else if the third param is a float, assume it is a timestamp
+ - else if the third param is an integer matching a traceId in the dictionary, treat it as a traceId
+ - else treat it as a timestamp
+ */
+function getSessionCompatibleTime(timings, traceId) {
+  if (typeof traceId !== 'number') {
+    return traceId;
+  }
+
+  if (!numberIsInteger(traceId)) {
+    return traceId;
+  }
+
+  return timings[traceId] !== undefined ? timings[traceId] : traceId;
+}
+
+function numberIsInteger(value) {
+  return isFinite(value) &&
+    Math.floor(value) === value;
+}
+
 export default class HeimdallTree {
   constructor(heimdall, lastKnownTime) {
     this._heimdall = heimdall;
@@ -61,7 +94,8 @@ export default class HeimdallTree {
     let heimdall = {
       _timeFormat: json.format || format,
       _events: new EventArray(events.length, events),
-      _monitors: CounterStore.fromJSON(json.monitors)
+      _monitors: CounterStore.fromJSON(json.monitors),
+      _timings: json.timings
     };
 
     return new HeimdallTree(heimdall, json.serializationTime);
@@ -182,23 +216,30 @@ export default class HeimdallTree {
 
   construct() {
     let events = this._heimdall._events;
+    let counterStore = this._heimdall._monitors;
+    let timings = this._heimdall._timings;
     let currentLeaf = null;
     let currentNode = null;
     let nodeMap = new HashMap();
     let openNodes = [];
     let node;
     let format = this.format;
-    let counterStore = this._heimdall._monitors;
     let stopTime = this.lastKnownTime ? normalizeTime(this.lastKnownTime) : now();
     let pageRootIndex = events._length + 1;
 
     currentNode = this.root = this._createNode('page-root', pageRootIndex, nodeMap);
     currentLeaf = this._createLeaf(currentNode, 0);
-    openNodes.push(node);
+    openNodes.push(this.root);
 
-    events.forEach(([op, name, time, counters], i) => {
+    events.forEach((traceEvent, i) => {
+      let op = traceEvent[0];
+      let name = traceEvent[1];
+      let traceId = traceEvent[2];
+      let counters = traceEvent[3];
+      let time;
+
       if (op !== OP_ANNOTATE) {
-        time = normalizeTime(time, format);
+        time = normalizeTime(getSessionCompatibleTime(timings, traceId), format);
         counters = statsFromCounters(counterStore, counters);
       }
 

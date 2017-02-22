@@ -293,7 +293,7 @@ describe('heimdall', function() {
       }).to.throw('A monitor for "some-monitor" is already registered');
     });
 
-    it('throws if using the reserved namespaces own or time', function() {
+    it('throws if using the reserved scopes own or time', function() {
       expect(function () {
         heimdall.registerMonitor('own', 'a');
       }).to.throw('Cannot register monitor at namespace "own".  "own" and "time" are reserved');

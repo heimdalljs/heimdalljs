@@ -1,21 +1,21 @@
 export let now;
 export let format;
-export let ORIGIN_TIME;
+export const ORIGIN_TIME = Date.now();
 
 // It turns out to be nicer for perf to bind than to close over the time method
 // however, when testing we need to be able to stub the clock via the global
 // so we use this boolean to determine whether we "bind" or use a wrapper function.
 const freeGlobal = typeof window !== 'undefined' ? window : global;
 const IS_TESTING = freeGlobal.IS_HEIMDALL_TEST_ENVIRONMENT;
+export const HAS_PERFORMANCE_NOW = typeof performance === 'object' && typeof performance.now === 'function';
 
-if (typeof performance === 'object' && typeof performance.now === 'function') {
+if (HAS_PERFORMANCE_NOW) {
   now = IS_TESTING ? function now() { return performance.now(); } : performance.now.bind(performance);
   format = 'milli';
 } else if (typeof process !== 'undefined' && typeof process.hrtime === 'function') {
   now = IS_TESTING ? function now() { return process.hrtime(); } : process.hrtime.bind(process);
   format = 'hrtime';
 } else {
-  ORIGIN_TIME = Date.now();
   now = Date.now.bind(Date);
   format = 'timestamp';
 }
@@ -33,8 +33,19 @@ export function normalizeTime(time, format = format) {
   }
 }
 
+export function toPrecision(n, decimals = 2) {
+  let padding = 1;
+  while (decimals > 0) {
+    padding *= 10;
+    decimals--;
+  }
+  n *= padding;
+  n = Math.round(n);
+  return n / padding;
+}
+
 export function milliToNano(time) {
-  return Math.floor(time * 1e6);
+  return Math.round(toPrecision(time) * 1e6);
 }
 
 export function timeFromHRTime(hrtime) {
