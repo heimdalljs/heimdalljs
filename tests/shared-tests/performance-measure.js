@@ -69,23 +69,209 @@ describe('PerformanceMeasure', function() {
   });
 
   describe('trace()', function() {
+    it('returns an incrementing id', function() {
+      doubleMeasureProperty(false);
+      let console = mockConsole();
+      let measure = new PerformanceMeasure();
+      let ret = measure.trace(123, OP_START, 'foo');
+      let ret2 = measure.trace(456, OP_START, 'bar');
 
-  });
+      expect(typeof ret).to.equal('number');
+      expect(ret2 - ret).to.equal(1);
 
-  describe('_measureMarks()', function() {
+      console.restore();
+      restoreMeasureProperty();
+    });
+    it('generates a mark with the traceId (console-api)', function() {
+      doubleMeasureProperty(false);
+      let console = mockConsole();
+      let measure = new PerformanceMeasure();
+      let ret = measure.trace(123, OP_START, 'foo');
+      let marks = measure.getEntries();
+      expect(typeof ret).to.equal('number');
+      expect(typeof marks[ret]).to.not.equal('undefined');
 
+      console.restore();
+      restoreMeasureProperty();
+    });
+    it('generates a mark with the traceId (performance-api)', function() {
+      doubleMeasureProperty(true);
+      let performance = mockPerformance();
+      let measure = new PerformanceMeasure();
+      let ret = measure.trace(123, OP_START, 'foo');
+      let marks = measure.getEntries();
+      expect(typeof ret).to.equal('number');
+      expect(typeof marks[ret]).to.not.equal('undefined');
+
+      performance.restore();
+      restoreMeasureProperty();
+    });
+    it('measures between a start and a stop (console-api)', function() {
+      doubleMeasureProperty(false);
+      let console = mockConsole();
+      let measure = new PerformanceMeasure();
+
+      measure.enableScopes('*');
+      measure.trace(123, OP_START, 'foo');
+
+      expect(console.timeCalls).to.equal(1, 'We started the timer');
+      expect(console.lastTimeArgs).to.eql(['foo-:123']);
+
+      measure.trace(123, OP_STOP);
+
+      expect(console.timeEndCalls).to.equal(1, 'We stopped the timer');
+      expect(console.lastTimeEndArgs).to.eql(['foo-:123']);
+
+      console.restore();
+      restoreMeasureProperty();
+    });
+    it('measures between a start and a stop (performance-api)', function() {
+      doubleMeasureProperty(true);
+      let performance = mockPerformance();
+      let measure = new PerformanceMeasure();
+
+      measure.enableScopes('*');
+      let markA = measure.trace(123, OP_START, 'foo');
+
+      expect(performance.markCalls).to.equal(1, 'We created a mark');
+      expect(performance.lastMarkArgs).to.eql([markA]);
+
+      let markB = measure.trace(123, OP_STOP);
+
+      expect(performance.markCalls).to.equal(2, 'We created a second mark');
+      expect(performance.lastMarkArgs).to.eql([markB]);
+      expect(performance.measureCalls).to.equal(1, 'We called measure');
+      expect(performance.lastMeasureArgs).to.eql(['foo-:123', markA, markB]);
+
+      performance.restore();
+      restoreMeasureProperty();
+    });
+    it('measure is skipped when _enableMeasurements is false (console-api)', function() {
+      doubleMeasureProperty(false);
+      let console = mockConsole();
+      let measure = new PerformanceMeasure();
+
+      measure.trace(123, OP_START, 'foo');
+      measure.trace(123, OP_STOP);
+
+      expect(console.timeCalls).to.equal(0, 'We never called time');
+      expect(console.timeEndCalls).to.equal(0, 'We never called timeEnd');
+
+      console.restore();
+      restoreMeasureProperty();
+    });
+    it('measure is skipped when _enableMeasurements is false (performance-api)', function() {
+      doubleMeasureProperty(true);
+      let performance = mockPerformance();
+      let measure = new PerformanceMeasure();
+
+      measure.trace(123, OP_START, 'foo');
+      measure.trace(123, OP_STOP);
+
+      expect(performance.measureCalls).to.equal(0, 'We did not call measure');
+
+      performance.restore();
+      restoreMeasureProperty();
+    });
   });
 
   describe('enableScopes()', function() {
+    it(`calling with no args enables '*'`, function() {
+      doubleMeasureProperty(true);
+      let performance = mockPerformance();
+      let measure = new PerformanceMeasure();
 
-  });
+      measure.enableScopes();
+      measure.trace(123, OP_START, 'foo');
+      measure.trace(123, OP_STOP);
 
-  describe('now()', function() {
+      expect(performance.measureCalls).to.equal(1, 'We called measure');
 
+      performance.restore();
+      restoreMeasureProperty();
+    });
+    it(`can be called with a scope`, function() {
+      doubleMeasureProperty(true);
+      let performance = mockPerformance();
+      let measure = new PerformanceMeasure();
+
+      measure.enableScopes('foo');
+      measure.trace(123, OP_START, 'foo');
+      measure.trace(123, OP_STOP);
+      measure.trace(234, OP_START, 'bar');
+      measure.trace(234, OP_STOP);
+
+      expect(performance.measureCalls).to.equal(1, 'We called measure only once');
+
+      performance.restore();
+      restoreMeasureProperty();
+    });
+    it(`can be called with a subscope`, function() {
+      doubleMeasureProperty(true);
+      let performance = mockPerformance();
+      let measure = new PerformanceMeasure();
+
+      measure.enableScopes('foo:bar');
+      measure.trace(123, OP_START, 'foo');
+      measure.trace(123, OP_STOP);
+      measure.trace(234, OP_START, 'foo:bar');
+      measure.trace(234, OP_STOP);
+
+      expect(performance.measureCalls).to.equal(1, 'We called measure only once');
+
+      performance.restore();
+      restoreMeasureProperty();
+    });
+    it(`can be called with multiple scopes and subscopes`, function() {
+      doubleMeasureProperty(true);
+      let performance = mockPerformance();
+      let measure = new PerformanceMeasure();
+
+      measure.enableScopes('foo,bar,baz:foo');
+      measure.trace(123, OP_START, 'foo');
+      measure.trace(123, OP_STOP);
+      measure.trace(234, OP_START, 'bar:baz');
+      measure.trace(234, OP_STOP);
+      measure.trace(567, OP_START, 'baz');
+      measure.trace(567, OP_STOP);
+      measure.trace(891, OP_START, 'baz:foo');
+      measure.trace(891, OP_STOP);
+
+      expect(performance.measureCalls).to.equal(3, 'We called measure only three times');
+
+      performance.restore();
+      restoreMeasureProperty();
+    });
   });
 
   describe('mark()', function() {
+    it('calls mark when the performance-api is present', function() {
+      doubleMeasureProperty(true);
+      let performance = mockPerformance();
+      let measure = new PerformanceMeasure();
 
+      measure.mark(100);
+
+      expect(performance.markCalls).to.equal(1, 'We called mark');
+      expect(measure._timings).to.equal(null, 'We did not store our own timing');
+
+      performance.restore();
+      restoreMeasureProperty();
+    });
+    it('calls creates and stores a timing when the performance-api is not present', function() {
+      doubleMeasureProperty(false);
+      let performance = mockPerformance();
+      let measure = new PerformanceMeasure();
+      measure.now = function() { return 1; };
+
+      measure.mark(100);
+
+      expect(performance.markCalls).to.equal(0, 'We did not call mark');
+      expect(measure._timings).to.eql({ 100: 1 }, 'We stored our own timing');
+
+      performance.restore();
+      restoreMeasureProperty();
+    });
   });
 
   describe('measureStart()', function() {

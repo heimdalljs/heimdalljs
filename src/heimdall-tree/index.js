@@ -48,6 +48,39 @@ function statsFromCounters(counterStore, counterCache) {
   return counterStore.restoreFromCache(counterCache);
 }
 
+/*
+ In 0.3, HeimdallSession.events stored information in four-indeces segments
+ that mapped to `opCode, token|name, timestamp, counterCache`.
+
+ In 0.4, the third index is a `traceId` instead, which can be used to locate
+ the timestamp from within the dictionary returned by `HeimdallSession.timings`.
+
+ On the surface, this change is non-breaking; however, HeimdallTree must be able
+ to correctly inter-op these two formats.  To do so, the following algorithm is used:
+
+ - if the opCode is OP_ANNOTATE, do nothing
+ - else if the third param is not a number, assume it is a timestamp
+ - else if the third param is a float, assume it is a timestamp
+ - else if the third param is an integer matching a traceId in the dictionary, treat it as a traceId
+ - else treat it as a timestamp
+ */
+function getSessionCompatibleTime(timings, traceId) {
+  if (typeof traceId !== 'number') {
+    return traceId;
+  }
+
+  if (!numberIsInteger(traceId)) {
+    return traceId;
+  }
+
+  return timings[traceId] !== undefined ? timings[traceId] : traceId;
+}
+
+function numberIsInteger(value) {
+  return isFinite(value) &&
+    Math.floor(value) === value;
+}
+
 export default class HeimdallTree {
   constructor(heimdall, lastKnownTime) {
     this._heimdall = heimdall;
@@ -206,7 +239,7 @@ export default class HeimdallTree {
       let time;
 
       if (op !== OP_ANNOTATE) {
-        time = normalizeTime(timings[traceId], format);
+        time = normalizeTime(getSessionCompatibleTime(timings, traceId), format);
         counters = statsFromCounters(counterStore, counters);
       }
 

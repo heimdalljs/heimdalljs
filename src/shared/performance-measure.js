@@ -51,7 +51,7 @@ export class ScopeCache {
       for (let i = 0, l = scopes.length; i < l; i++) {
         let parts = splitFirstColon(scopes[i]);
         let scopeKey = parts[0];
-        let subScopeKey = parts[1];
+        let subScopeKey = parts[1] || '*';
         let scope = cache[scopeKey];
 
         if (!scope) {
@@ -87,7 +87,7 @@ export class ScopeCache {
 
     let parts = splitFirstColon(path);
     let scope = parts[0];
-    let subScope = parts[1];
+    let subScope = parts[1] || '*';
 
     let enabledScopes = this._activeScopes;
     let globalEnabled = !!enabledScopes['*'];
@@ -175,7 +175,7 @@ export default class PerformanceMeasure {
     @method trace
     @param {Number} id the heimdall token generated with a call to `heimdall.start`
     @param {Number} opCode
-    @param {String|} name
+    @param {String} name
     @return {Number} a unique ID that can be used to trace and find this mark later.
    */
   trace(id, opCode, name) {
@@ -227,7 +227,7 @@ export default class PerformanceMeasure {
     let mark = startMarksCache[id];
     let hasExistingMark = !!mark;
 
-    if (!hasExistingMark && !this._scopeCache.isActive(name)) {
+    if (!hasExistingMark && (opCode !== OP_START || !this._scopeCache.isActive(name))) {
       return;
     }
 
@@ -285,7 +285,7 @@ export default class PerformanceMeasure {
     if (PerformanceMeasure.hasMeasureApi) {
       performance.mark(traceId);
     } else {
-      this._timings[traceId] = now();
+      this._timings[traceId] = this.now();
     }
   }
 

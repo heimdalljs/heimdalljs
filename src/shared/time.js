@@ -1,6 +1,6 @@
 export let now;
 export let format;
-export let ORIGIN_TIME;
+export const ORIGIN_TIME = Date.now();
 
 // It turns out to be nicer for perf to bind than to close over the time method
 // however, when testing we need to be able to stub the clock via the global
@@ -16,7 +16,6 @@ if (HAS_PERFORMANCE_NOW) {
   now = IS_TESTING ? function now() { return process.hrtime(); } : process.hrtime.bind(process);
   format = 'hrtime';
 } else {
-  ORIGIN_TIME = Date.now();
   now = Date.now.bind(Date);
   format = 'timestamp';
 }
@@ -34,8 +33,19 @@ export function normalizeTime(time, format = format) {
   }
 }
 
+export function toPrecision(n, decimals = 2) {
+  let padding = 1;
+  while (decimals > 0) {
+    padding *= 10;
+    decimals--;
+  }
+  n *= padding;
+  n = Math.round(n);
+  return n / padding;
+}
+
 export function milliToNano(time) {
-  return Math.floor(time * 1e6);
+  return Math.round(toPrecision(time) * 1e6);
 }
 
 export function timeFromHRTime(hrtime) {
