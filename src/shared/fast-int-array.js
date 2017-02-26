@@ -1,8 +1,6 @@
 export const SMALL_ARRAY_LENGTH = 250;
 export const MAX_ARRAY_LENGTH = 1e6;
 import A from './a';
-import arrayFill from './array-fill';
-import arraySet from './array-set';
 
 export default class FastIntArray {
   constructor(length = SMALL_ARRAY_LENGTH, initialData) {
@@ -51,18 +49,8 @@ export default class FastIntArray {
    any quantity.
    */
   grow(newLength) {
-    let l = this._length;
+    this._data = arrayGrow(this._data, this._length, newLength, this._fillValue);
     this._length = newLength;
-
-
-    let data = this._data;
-    let _d = this._data = new A(newLength);
-
-    arraySet(_d, data);
-
-    if (this._fillValue !== 0) {
-      arrayFill(_d, this._fillValue, l);
-    }
   }
 
   claim(count) {
