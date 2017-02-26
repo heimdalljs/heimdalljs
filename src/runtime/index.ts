@@ -1,18 +1,19 @@
 import Session from './session';
 import now from '../shared/time';
 import { format } from '../shared/time';
+import CounterStore from '../shared/counter-store';
+import EventArray from '../shared/event-array';
+import FastIntArray from '../shared/fast-int-array';
 import { NULL_NUMBER } from '../shared/counter-store';
-import {
-  OP_START,
-  OP_STOP,
-  OP_RESUME,
-  OP_ANNOTATE
-} from '../shared/op-codes';
+import OpCodes from '../shared/op-codes';
+import JsonSerializable from '../interfaces/json-serializable';
 
 const VERSION = 'VERSION_STRING_PLACEHOLDER';
 
-export default class Heimdall {
-  static get VERSION() {
+export default class Heimdall implements JsonSerializable<Object> {
+  private _session: Session;
+
+  static get VERSION(): string {
     return VERSION;
   }
 
@@ -25,45 +26,45 @@ export default class Heimdall {
     }
   }
 
-  get VERSION() {
+  get VERSION(): string {
     return VERSION;
   }
 
-  get _monitors() {
+  get _monitors(): CounterStore {
     return this._session.monitors;
   }
 
-  get _events() {
+  get _events(): EventArray {
     return this._session.events;
   }
 
-  _retrieveCounters() {
+  _retrieveCounters(): Uint32Array | number[] | FastIntArray {
     return this._monitors.cache();
   }
 
-  start(name) {
-    return this._session.events.push(OP_START, name, now(), this._retrieveCounters());
+  start(name: string): number {
+    return this._session.events.push(OpCodes.OP_START, name, now(), this._retrieveCounters());
   }
 
-  stop(token) {
-    this._session.events.push(OP_STOP, token, now(), this._retrieveCounters());
+  stop(token: number): void {
+    this._session.events.push(OpCodes.OP_STOP, token, now(), this._retrieveCounters());
   }
 
-  resume(token) {
-    this._session.events.push(OP_RESUME, token, now(), this._retrieveCounters());
+  resume(token: number): void {
+    this._session.events.push(OpCodes.OP_RESUME, token, now(), this._retrieveCounters());
   }
 
-  annotate(info) {
+  annotate(info: Uint32Array | number[] | FastIntArray): void {
     // This has the side effect of making events heterogenous, as info is an object
     // while counters will always be `null` or an `Array`
-    this._session.events.push(OP_ANNOTATE, NULL_NUMBER, NULL_NUMBER, info);
+    this._session.events.push(OpCodes.OP_ANNOTATE, NULL_NUMBER, NULL_NUMBER, info);
   }
 
-  hasMonitor(name) {
+  hasMonitor(name): boolean {
     return !!this._monitors.has(name);
   }
 
-  registerMonitor(name, ...keys) {
+  registerMonitor(name: string, ...keys: string[]): never | Object {
     if (name === 'own' || name === 'time') {
       throw new Error('Cannot register monitor at namespace "' + name + '".  "own" and "time" are reserved');
     }
@@ -74,11 +75,11 @@ export default class Heimdall {
     return this._monitors.registerNamespace(name, keys);
   }
 
-  increment(token) {
+  increment(token: number): void {
     this._session.monitors.increment(token);
   }
 
-  configFor(name) {
+  configFor(name: string): any {
     let config = this._session.configs.get(name);
 
     if (!config) {
@@ -94,7 +95,7 @@ export default class Heimdall {
     session data for transfer. Heimdall-tree can load time
     data from this format or out of `getSessionData`.
    */
-  toJSON() {
+  toJSON(): Object {
     return {
       heimdallVersion: VERSION,
       format,
@@ -104,7 +105,7 @@ export default class Heimdall {
     };
   }
 
-  toString() {
+  toString(): string {
     return JSON.stringify(this.toJSON());
   }
 }

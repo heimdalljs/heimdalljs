@@ -1,9 +1,9 @@
-let HAS_TYPED_ARRAYS = typeof Uint32Array !== 'undefined';
+let HAS_TYPED_ARRAYS: boolean = typeof Uint32Array !== 'undefined';
 
 /*
   For stubbing in tests
  */
-export function _setHasTypedArrays(v) {
+export function _setHasTypedArrays(v: boolean) {
   HAS_TYPED_ARRAYS = v;
 }
 

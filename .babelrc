@@ -1,8 +1,0 @@
-// .babelrc
-{
-  "presets": [ "es2015-rollup" ],
-  "plugins": [
-    "./babel-strip-class-call-check",
-    "transform-proto-to-assign"
-  ]
-}

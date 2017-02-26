@@ -1,5 +1,18 @@
-export default class HeimdallNode {
-  constructor(name, id) {
+import HeimdallLeaf from './leaf';
+import JsonSerializable from '../interfaces/json-serializable';
+
+export default class HeimdallNode implements JsonSerializable<Object> {
+  private _id: number;
+
+  name: string;
+  parent: HeimdallNode;
+  resumeNode: HeimdallNode;
+  stopped: boolean;
+  leaves: HeimdallLeaf[];
+  nodes: HeimdallNode[];
+  children: any[];
+
+  constructor(name: string, id: number) {
     this._id = id;
     this.parent = null;
     this.resumeNode = null;
@@ -10,7 +23,7 @@ export default class HeimdallNode {
     this.children = [];
   }
 
-  get stats() {
+  get stats(): Object {
     let own = {
       selfTime: 0,
       duration: 0,
@@ -19,20 +32,20 @@ export default class HeimdallNode {
     };
     own.duration = own.endTime - own.startTime;
 
-    let counters = [];
-    let annotations = [];
-    let stats = {
+    let counters: any[] = [];
+    let annotations: any[] = [];
+    let stats: Object = {
       self: own,
       // _annotations: annotations,
       // _counters: counters
     };
 
-    this.forEachLeaf((leaf) => {
+    this.forEachLeaf((leaf: HeimdallLeaf) => {
       own.selfTime += leaf.selfTime;
       annotations.push(leaf.annotations);
 
       for (let namespace in leaf.counters) {
-        let value = leaf.counters[namespace];
+        let value: any = leaf.counters[namespace];
 
         if (!stats.hasOwnProperty(namespace)) {
           stats[namespace] = value;
@@ -49,14 +62,14 @@ export default class HeimdallNode {
     return stats;
   }
 
-  stop() {
+  stop(): void | never {
     if (this.stopped === true) {
       throw new Error('Cannot Stop node, already stopped!');
     }
     this.stopped = true;
   }
 
-  resume(resumeNode) {
+  resume(resumeNode: HeimdallNode): void | never {
     if (!this.stopped) {
       throw new Error('Cannot Resume node, already running!');
     }
@@ -64,13 +77,13 @@ export default class HeimdallNode {
     this.stopped = false;
   }
 
-  addLeaf(leaf) {
+  addLeaf(leaf: HeimdallLeaf): void {
     leaf.owner = this;
     this.leaves.push(leaf);
     this.children.push(leaf);
   }
 
-  addNode(node) {
+  addNode(node: HeimdallNode): void | never {
     if (node.parent) {
       throw new Error(`Cannot set parent of node '${node.name}', node already has a parent!`);
     }
@@ -80,11 +93,11 @@ export default class HeimdallNode {
     this.children.push(node);
   }
 
-  get isRoot() {
+  get isRoot(): boolean {
     return this.parent === null;
   }
 
-  visitPreOrder(cb) {
+  visitPreOrder(cb: Function): void {
     cb(this);
 
     for (let i = 0; i < this.nodes.length; i++) {
@@ -92,7 +105,7 @@ export default class HeimdallNode {
     }
   }
 
-  visitPostOrder(cb) {
+  visitPostOrder(cb: Function): void {
     for (let i = 0; i < this.nodes.length; i++) {
       this.nodes[i].visitPostOrder(cb);
     }
@@ -100,25 +113,25 @@ export default class HeimdallNode {
     cb(this);
   }
 
-  forEachNode(cb) {
+  forEachNode(cb: Function): void {
     for (let i=0; i<this.nodes.length; ++i) {
       cb(this.nodes[i]);
     }
   }
 
-  forEachLeaf(cb) {
+  forEachLeaf(cb: Function): void {
     for (let i=0; i<this.leaves.length; ++i) {
       cb(this.leaves[i]);
     }
   }
 
-  forEachChild(cb) {
+  forEachChild(cb: Function): void {
     for (let i=0; i<this.children.length; ++i) {
       cb(this.children[i]);
     }
   }
 
-  toJSON() {
+  toJSON(): Object {
     return {
       _id: this._id,
       name: this.name,
@@ -128,8 +141,8 @@ export default class HeimdallNode {
     };
   }
 
-  toJSONSubgraph() {
-    let nodes = [];
+  toJSONSubgraph(): HeimdallNode[] {
+    let nodes: HeimdallNode[] = [];
 
     this.visitPreOrder(node => nodes.push(node.toJSON()));
 
