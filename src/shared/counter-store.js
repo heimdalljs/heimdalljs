@@ -1,6 +1,7 @@
 import { MAX_ARRAY_LENGTH, default as FastIntArray } from './fast-int-array';
 import A from './a';
-import fill from './fill';
+import arraySet from './array-set';
+import arrayFill from './array-fill';
 
 const DEFAULT_STORE_SIZE = 1e3;
 const DEFAULT_NAMESPACE_SIZE = 10;
@@ -78,7 +79,7 @@ export default class CounterStore {
       let cache = this._cache;
 
       this._cache = new A(this._namespaceCount);
-      this._cache.set(cache);
+      arraySet(this._cache, cache);
       this._cache[namespaceIndex] = NULL_NUMBER;
     }
 
@@ -127,7 +128,7 @@ export default class CounterStore {
 
     if (this._cache === null) {
       this._initializeStoreIfNeeded();
-      this._cache = fill(new A(this._namespaceCount), NULL_NUMBER);
+      this._cache = arrayFill(new A(this._namespaceCount), NULL_NUMBER);
     }
 
     if (this._cache[namespaceIndex] === NULL_NUMBER) {
