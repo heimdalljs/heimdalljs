@@ -1,6 +1,7 @@
 export const SMALL_ARRAY_LENGTH = 250;
 export const MAX_ARRAY_LENGTH = 1e6;
-import A from './a';
+import hasTypedArrays from './has-typed-arrays';
+import fillArray from './array-fill';
 
 export default class FastIntArray {
   constructor(length = SMALL_ARRAY_LENGTH, initialData) {
@@ -8,10 +9,15 @@ export default class FastIntArray {
   }
 
   init(length = SMALL_ARRAY_LENGTH, initialData) {
+    let useTypedArray = hasTypedArrays();
     this.length = 0;
     this._length = length;
     this._fillValue = 0;
-    this._data = new A(length);
+    this._data = useTypedArray ? new Uint32Array(length) : new Array(length);
+
+    if (!useTypedArray) {
+      fillArray(this._data, this._fillValue);
+    }
 
     if (initialData) {
       if (initialData.length > length) {

@@ -1,7 +1,7 @@
-import { HAS_TYPED_ARRAYS } from './a';
+import hasTypedArrays from './has-typed-arrays';
 
 export default function fill(array, value, start, end) {
-  if (HAS_TYPED_ARRAYS) {
+  if (hasTypedArrays()) {
     return array.fill(value, start, end);
   } else {
     let s = start || 0;

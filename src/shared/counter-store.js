@@ -1,5 +1,5 @@
 import { MAX_ARRAY_LENGTH, default as FastIntArray } from './fast-int-array';
-import A from './a';
+import hasTypedArrays from './has-typed-arrays';
 import arrayFill from './array-fill';
 
 const DEFAULT_STORE_SIZE = 1e3;
@@ -123,7 +123,8 @@ export default class CounterStore {
 
     if (this._cache === null) {
       this._initializeStoreIfNeeded();
-      this._cache = arrayFill(new A(this._namespaceCount), NULL_NUMBER);
+      let a = hasTypedArrays() ? new Uint32Array(this._namespaceCount) : new Array(this._namespaceCount);
+      this._cache = arrayFill(a, NULL_NUMBER);
     }
 
     if (this._cache[namespaceIndex] === NULL_NUMBER) {

@@ -1,9 +1,9 @@
-import { HAS_TYPED_ARRAYS, default as A } from './a';
+import hasTypedArrays from './has-typed-arrays';
 import arrayFill from './array-fill';
 
 export default function grow(array, oldLength, newLength, fillValue = 0) {
-  if (HAS_TYPED_ARRAYS) {
-    let ret = new A(newLength);
+  if (hasTypedArrays()) {
+    let ret = new Uint32Array(newLength);
     ret.set(array);
 
     if (fillValue !== 0) {
