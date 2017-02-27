@@ -1,6 +1,6 @@
 import { MAX_ARRAY_LENGTH, default as FastIntArray } from './fast-int-array';
-import A from './a';
-import fill from './fill';
+import hasTypedArrays from './has-typed-arrays';
+import arrayFill from './array-fill';
 
 const DEFAULT_STORE_SIZE = 1e3;
 const DEFAULT_NAMESPACE_SIZE = 10;
@@ -75,11 +75,7 @@ export default class CounterStore {
     this._config.push(numCounters);
 
     if (this._cache !== null) {
-      let cache = this._cache;
-
-      this._cache = new A(this._namespaceCount);
-      this._cache.set(cache);
-      this._cache[namespaceIndex] = NULL_NUMBER;
+      this._cache = arrayGrow(this._cache, namespaceIndex, this._namespaceCount, NULL_NUMBER);
     }
 
     for (let i = 0; i < numCounters; i++) {
@@ -127,7 +123,8 @@ export default class CounterStore {
 
     if (this._cache === null) {
       this._initializeStoreIfNeeded();
-      this._cache = fill(new A(this._namespaceCount), NULL_NUMBER);
+      let a = hasTypedArrays() ? new Uint32Array(this._namespaceCount) : new Array(this._namespaceCount);
+      this._cache = arrayFill(a, NULL_NUMBER);
     }
 
     if (this._cache[namespaceIndex] === NULL_NUMBER) {
