@@ -1,5 +1,6 @@
 import { MAX_ARRAY_LENGTH, default as FastIntArray } from './fast-int-array';
 import hasTypedArrays from './has-typed-arrays';
+import arrayGrow from './array-grow';
 import arrayFill from './array-fill';
 
 const DEFAULT_STORE_SIZE = 1e3;

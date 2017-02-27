@@ -2,6 +2,7 @@ export const SMALL_ARRAY_LENGTH = 250;
 export const MAX_ARRAY_LENGTH = 1e6;
 import hasTypedArrays from './has-typed-arrays';
 import fillArray from './array-fill';
+import arrayGrow from './array-grow';
 
 export default class FastIntArray {
   constructor(length = SMALL_ARRAY_LENGTH, initialData) {
