@@ -8,7 +8,7 @@ import scenarios from './scenarios';
 function seekArg(name) {
   let args = process.argv;
 
-  for (let i = 0, l = args.length; i < l; i++) {
+  for (let i = 1, l = args.length; i < l; i++) {
     if (args[i].indexOf(name) === 0) {
       let argStr = args[i];
 
