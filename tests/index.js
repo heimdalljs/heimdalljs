@@ -1,6 +1,6 @@
 import ENV from './-env';
 import console from '../src/shared/log';
-// import './shared-tests';
+import './shared-tests';
 import './runtime-tests';
 import './heimdall-tree-tests';
 

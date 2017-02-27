@@ -53,6 +53,7 @@ export default class CounterStore {
     if (json._config) {
       store._config = new FastIntArray(json._config.length, json._config);
     }
+    return store;
   }
 
   registerNamespace(name, labels) {
