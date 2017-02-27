@@ -21,13 +21,13 @@ function seekArg(name) {
     }
   }
 
-  return -1;
+  return null;
 }
 
 let scenarioSpecified = seekArg('--scenario');
 let scenario;
 
-if (scenarioSpecified !== -1) {
+if (scenarioSpecified !== null) {
   scenario = scenarioSpecified.value;
 } else {
   scenario = 'default'
@@ -41,7 +41,7 @@ if (ENV.IS_TESTING) {
   console.log(
     '\n\t===========================' +
     '\n\tRunning Heimdall Test Suite' +
-    '\n\t\tScenario: ' + scenario +
+    `\n\t\tScenario: ${scenario}` +
     '\n\t===========================' +
     '\n');
 }

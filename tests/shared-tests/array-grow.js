@@ -1,11 +1,8 @@
 import chai from 'chai';
-import chaiAsPromised from 'chai-as-promised';
 import arrayGrow from '../../src/shared/array-grow';
 import doubleArray from '../mock/has-typed-arrays';
 
 const { expect } = chai;
-
-chai.use(chaiAsPromised);
 
 describe('arrayGrow', function() {
   it('grows a Uint32Array', function() {

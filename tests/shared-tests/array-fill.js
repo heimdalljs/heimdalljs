@@ -1,11 +1,8 @@
 import chai from 'chai';
-import chaiAsPromised from 'chai-as-promised';
 import arrayFill from '../../src/shared/array-fill';
 import doubleArray from '../mock/has-typed-arrays';
 
 const { expect } = chai;
-
-chai.use(chaiAsPromised);
 
 describe('arrayFill', function() {
   it('fills a Uint32Array', function() {
