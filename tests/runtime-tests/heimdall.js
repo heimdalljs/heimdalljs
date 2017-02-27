@@ -279,9 +279,7 @@ describe('heimdall', function() {
     });
 
     it('hasMonitor returns true if a given namespace is being used', function () {
-      class MySchema {}
-
-      heimdall.registerMonitor('some-monitor', MySchema);
+      heimdall.registerMonitor('some-monitor', 'foo');
 
       expect(heimdall.hasMonitor('some-monitor')).to.eql(true);
     });
@@ -291,6 +289,23 @@ describe('heimdall', function() {
       expect(function () {
         heimdall.registerMonitor('some-monitor', 'a');
       }).to.throw('A monitor for "some-monitor" is already registered');
+    });
+
+    it('registering more than one monitor works', function () {
+      let  { a } = heimdall.registerMonitor('some-monitor', 'a');
+      heimdall.registerMonitor('another-monitor', 'b');
+
+      expect(heimdall.hasMonitor('some-monitor')).to.equal(true);
+      expect(heimdall.hasMonitor('another-monitor')).to.equal(true);
+    });
+
+    it('registering a monitor post-initialization works', function () {
+      let  { a } = heimdall.registerMonitor('some-monitor', 'a');
+      expect(heimdall.hasMonitor('some-monitor')).to.equal(true);
+      heimdall.increment(a);
+
+      heimdall.registerMonitor('another-monitor', 'b');
+      expect(heimdall.hasMonitor('another-monitor')).to.equal(true);
     });
 
     it('throws if using the reserved namespaces own or time', function() {
