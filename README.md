@@ -109,3 +109,13 @@ that change `Session`, or the APIs of `HeimdallNode` or `Cookie` will use a
 different property to store their session (`process._heimdall_session_<n>`).  It
 is quite easy for this to result in lost detail & lost stats, although it is
 also easy to detect this situation and issue a warning.
+
+## TypeScript
+
+If you are using [Visual Studio Code](https://code.visualstudio.com/) for development,
+you might want to install both [`typescript`](https://github.com/Microsoft/TypeScript)
+and [`tslint`](https://github.com/palantir/tslint) packages via [`yarn`](https://yarnpkg.com/en/).
+
+```sh
+yarn global add typescript tslint
+```

@@ -1,6 +1,6 @@
-export let now;
-export let format;
-export let ORIGIN_TIME;
+export let now: number;
+export let format: string;
+export let ORIGIN_TIME: number;
 
 // It turns out to be nicer for perf to bind than to close over the time method
 // however, when testing we need to be able to stub the clock via the global
@@ -20,8 +20,8 @@ if (typeof performance === 'object' && typeof performance.now === 'function') {
   format = 'timestamp';
 }
 
-export function normalizeTime(time, format = format) {
-  switch (format) {
+export function normalizeTime(time: number, optionalFormat: string = format) {
+  switch (optionalFormat) {
     case 'milli':
       return milliToNano(time);
     case 'hrtime':
@@ -33,11 +33,11 @@ export function normalizeTime(time, format = format) {
   }
 }
 
-export function milliToNano(time) {
+export function milliToNano(time: number): number {
   return Math.floor(time * 1e6);
 }
 
-export function timeFromHRTime(hrtime) {
+export function timeFromHRTime(hrtime: number): number {
   return hrtime[0] * 1e9 + hrtime[1];
 }
 

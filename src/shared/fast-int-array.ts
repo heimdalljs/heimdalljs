@@ -1,15 +1,22 @@
-export const SMALL_ARRAY_LENGTH = 250;
-export const MAX_ARRAY_LENGTH = 1e6;
+export const SMALL_ARRAY_LENGTH: number = 250;
+export const MAX_ARRAY_LENGTH: number = 1e6;
 import hasTypedArrays from './has-typed-arrays';
 import fillArray from './array-fill';
 import arrayGrow from './array-grow';
+import JsonSerializable from '../interfaces/json-serializable';
 
-export default class FastIntArray {
-  constructor(length = SMALL_ARRAY_LENGTH, initialData) {
+export default class FastIntArray implements JsonSerializable<Uint32Array | number[]> {
+  private _length: number;
+  private _fillValue: number;
+  private _data: Uint32Array | number[];
+
+  length: number;
+
+  constructor(length: number = SMALL_ARRAY_LENGTH, initialData?: Uint32Array | number[] | FastIntArray) {
     this.init(length, initialData);
   }
 
-  init(length = SMALL_ARRAY_LENGTH, initialData) {
+  init(length: number = SMALL_ARRAY_LENGTH, initialData?: Uint32Array | number[] | FastIntArray): void {
     let useTypedArray = hasTypedArrays();
     this.length = 0;
     this._length = length;
@@ -34,11 +41,11 @@ export default class FastIntArray {
     }
   }
 
-  toJSON() {
+  toJSON(): Uint32Array | number[] {
     return this._data.slice(0, this.length);
   }
 
-  get(index) {
+  get(index: number): number | undefined {
     if (index >= 0 && index < this.length) {
       return this._data[index];
     }
@@ -46,7 +53,7 @@ export default class FastIntArray {
     return undefined;
   }
 
-  increment(index) {
+  increment(index: number): void {
     this._data[index]++;
   }
 
@@ -55,20 +62,20 @@ export default class FastIntArray {
    enables us to efficiently increase the length by
    any quantity.
    */
-  grow(newLength) {
+  grow(newLength: number): void {
     this._data = arrayGrow(this._data, this._length, newLength, this._fillValue);
     this._length = newLength;
   }
 
-  claim(count) {
+  claim(count: number): void {
     this.length += count;
     while (this.length > this._length) {
       this.grow(this._length * 2);
     }
   }
 
-  push(int) {
-    let index = this.length++;
+  push(int: number): void {
+    let index: number = this.length++;
 
     if (index === this._length) {
       this.grow(this._length * 2);

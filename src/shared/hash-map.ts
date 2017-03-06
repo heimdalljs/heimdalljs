@@ -1,8 +1,11 @@
-export const UNDEFINED_KEY = Object.create(null);
+export const UNDEFINED_KEY: Object = Object.create(null);
 
-export default class HashMap {
+export default class HashMap<T> {
+  private _data: Object;
 
-  constructor(entries) {
+  data: Object;
+
+  constructor(entries?: any) {
     this._data = Object.create(null);
 
     if (entries) {
@@ -12,7 +15,7 @@ export default class HashMap {
     }
   }
 
-  forEach(cb) {
+  forEach(cb: Function): HashMap<T> {
     for (let key in this._data) {
       // skip undefined
       if (this._data[key] !== UNDEFINED_KEY) {
@@ -23,24 +26,23 @@ export default class HashMap {
     return this;
   }
 
-  has(key) {
+  has(key: string): boolean {
     return key in this._data && this._data[key] !== UNDEFINED_KEY;
   }
 
-  get(key) {
-    let val = this._data[key];
+  get(key: string): T | undefined {
+    let val: T = this._data[key];
 
     return val === UNDEFINED_KEY ? undefined : val;
   }
 
-  set(key, value) {
+  set(key: string | number, value: T): HashMap<T> {
     this._data[key] = value;
 
     return this;
   }
 
-  delete(key) {
+  delete(key: string): void {
     this._data[key] = UNDEFINED_KEY;
   }
-
 }

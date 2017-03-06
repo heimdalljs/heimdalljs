@@ -2,18 +2,48 @@ import { MAX_ARRAY_LENGTH, default as FastIntArray } from './fast-int-array';
 import hasTypedArrays from './has-typed-arrays';
 import arrayGrow from './array-grow';
 import arrayFill from './array-fill';
+import JsonSerializable from '../interfaces/json-serializable';
 
-const DEFAULT_STORE_SIZE = 1e3;
-const DEFAULT_NAMESPACE_SIZE = 10;
+const DEFAULT_STORE_SIZE: number = 1e3;
+const DEFAULT_NAMESPACE_SIZE: number = 10;
+
+/**
+ * Wrapper type around options for `CounterStore`.
+ *
+ * Intentionally left private as `CounterStore`
+ * only used internally when `HeimdallSession` is created.
+ *
+ * @class CounterStoreOptions
+ */
+class CounterStoreOptions {
+  storeSize: number;
+  namespaceAllocation: number;
+
+  constructor(storeSize: number = DEFAULT_STORE_SIZE, namespaceAllocation: number = DEFAULT_NAMESPACE_SIZE) {
+    this.storeSize = storeSize;
+    this.namespaceAllocation = namespaceAllocation;
+  }
+}
 
 // NULL_NUMBER is a number larger than the largest
 // index we are capable of utilizing in the store.
 // if an index is this number, we know that it is null.
-export const NULL_NUMBER = MAX_ARRAY_LENGTH + 1;
-const LOB = (1 << 16) - 1;
+export const NULL_NUMBER: number = MAX_ARRAY_LENGTH + 1;
+const LOB: number = (1 << 16) - 1;
 
-export default class CounterStore {
-  constructor(options = {}) {
+export default class CounterStore implements JsonSerializable<Object> {
+  private _storeInitialized: boolean;
+  private _store: FastIntArray;
+  private _namespaceCount: number;
+  private _config: FastIntArray;
+  private _cache: Uint32Array | number[] | FastIntArray;
+  private _labelCache: Object;
+  private _nameCache: Object;
+
+  options: CounterStoreOptions;
+  initialized: boolean;
+
+  constructor(options: CounterStoreOptions = new CounterStoreOptions()) {
     this.options = options;
     this.initialized = false;
     this._storeInitialized = false;
@@ -25,13 +55,13 @@ export default class CounterStore {
     this._nameCache = null;
   }
 
-  clean() {
+  clean(): void {
     this._storeInitialized = false;
     this._store = null;
     this._cache = null;
   }
 
-  toJSON() {
+  toJSON(): Object {
     return {
       _namespaceCount: this._namespaceCount,
       _config: this._config,
@@ -41,8 +71,8 @@ export default class CounterStore {
     }
   }
 
-  static fromJSON(json) {
-    let store = new CounterStore();
+  static fromJSON(json: CounterStore): CounterStore {
+    let store: CounterStore = new CounterStore();
     store._namespaceCount = json._namespaceCount;
     store._labelCache = json._labelCache;
     store._nameCache = json._nameCache;
@@ -57,13 +87,13 @@ export default class CounterStore {
     return store;
   }
 
-  registerNamespace(name, labels) {
+  registerNamespace(name: string, labels: string[]): Object {
     this._initializeIfNeeded();
 
-    let numCounters = labels.length;
-    let namespaceIndex = this._namespaceCount++;
-    let bitNamespaceIndex = namespaceIndex << 16;
-    let namespace = Object.create(null);
+    let numCounters: number = labels.length;
+    let namespaceIndex: number = this._namespaceCount++;
+    let bitNamespaceIndex: number = namespaceIndex << 16;
+    let namespace: Object = Object.create(null);
 
     // we also generate a map between the counters
     // and these labels so that we can reconstruct
@@ -86,29 +116,29 @@ export default class CounterStore {
     return namespace;
   }
 
-  _initializeIfNeeded() {
+  _initializeIfNeeded(): void {
     if (this.initialized === false) {
-      this._config = new FastIntArray(this.options.namespaceAllocation || DEFAULT_NAMESPACE_SIZE);
+      this._config = new FastIntArray(this.options.namespaceAllocation);
       this._labelCache = Object.create(null);
       this._nameCache = Object.create(null);
       this.initialized = true;
     }
   }
 
-  restoreFromCache(cache) {
+  restoreFromCache(cache): Object {
     let stats = Object.create(null);
 
     for (let i = 0; i < cache.length; i++) {
       if (cache[i] !== NULL_NUMBER) {
-        let startIndex = cache[i];
-        let namespace = this._nameCache[i];
-        let counterCount = this._config.get(i);
+        let startIndex: number = cache[i];
+        let namespace: number | string = this._nameCache[i];
+        let counterCount: number = this._config.get(i);
 
         stats[namespace] = Object.create(null);
 
         for (let j = 0; j < counterCount; j++) {
-          let storeIndex = startIndex + j;
-          let label = this._labelCache[namespace][j];
+          let storeIndex: number = startIndex + j;
+          let label: string = this._labelCache[namespace][j];
 
           stats[namespace][label] = this._store.get(storeIndex);
         }
@@ -118,9 +148,9 @@ export default class CounterStore {
     return stats;
   }
 
-  increment(counter) {
-    let namespaceIndex = counter >> 16;
-    let counterIndex = counter & LOB;
+  increment(counter): void {
+    let namespaceIndex: number = counter >> 16;
+    let counterIndex: number = counter & LOB;
 
     if (this._cache === null) {
       this._initializeStoreIfNeeded();
@@ -129,28 +159,28 @@ export default class CounterStore {
     }
 
     if (this._cache[namespaceIndex] === NULL_NUMBER) {
-      let counterCount = this._config.get(namespaceIndex);
+      let counterCount: number = this._config.get(namespaceIndex);
 
       this._cache[namespaceIndex] = this._store.length;
       this._store.claim(counterCount);
     }
 
-    let storeIndex = this._cache[namespaceIndex] + counterIndex;
+    let storeIndex: number = this._cache[namespaceIndex] + counterIndex;
     this._store.increment(storeIndex);
   }
 
-  _initializeStoreIfNeeded() {
+  _initializeStoreIfNeeded(): void {
     if (this._storeInitialized === false) {
-      this._store = new FastIntArray(this.options.storeSize || DEFAULT_STORE_SIZE);
+      this._store = new FastIntArray(this.options.storeSize);
       this._storeInitialized = true;
     }
   }
 
-  has(name) {
+  has(name): boolean {
     return this._labelCache && name in this._labelCache;
   }
 
-  cache() {
+  cache(): Uint32Array | number[] | FastIntArray {
     let cache = this._cache;
     this._cache = null;
 

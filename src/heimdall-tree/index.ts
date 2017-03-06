@@ -4,12 +4,8 @@ import EventArray from '../shared/event-array';
 import CounterStore from '../shared/counter-store';
 import HashMap from '../shared/hash-map';
 import { format, normalizeTime, default as now } from '../shared/time';
-import {
-  OP_START,
-  OP_STOP,
-  OP_RESUME,
-  OP_ANNOTATE
-} from '../shared/op-codes';
+import OpCodes from '../shared/op-codes';
+import JsonSerializable from '../interfaces/json-serializable';
 
 /*
 Example Event Timeline and tree reconstruction
@@ -48,15 +44,21 @@ function statsFromCounters(counterStore, counterCache) {
   return counterStore.restoreFromCache(counterCache);
 }
 
-export default class HeimdallTree {
-  constructor(heimdall, lastKnownTime) {
+export default class HeimdallTree implements JsonSerializable<Object> {
+  private _heimdall: Object;
+
+  root: HeimdallNode;
+  format: string;
+  lastKnownTime: number;
+
+  constructor(heimdall: Object, lastKnownTime) {
     this._heimdall = heimdall;
     this.root = null;
     this.format = heimdall && heimdall._timeFormat ? heimdall._timeFormat : format;
     this.lastKnownTime = lastKnownTime;
   }
 
-  static fromJSON(json) {
+  static fromJSON(json: Object) {
     let events = json.events || [];
     let heimdall = {
       _timeFormat: json.format || format,
@@ -70,25 +72,25 @@ export default class HeimdallTree {
   // primarily a test helper, you can get this at any time
   // to get an array representing the path of open node names
   // from "root" to the last open node.
-  get path() {
+  get path(): HeimdallNode[] {
     let events = this._heimdall._events;
     let root = new HeimdallNode('root', 1e9);
     let currentNode = root;
-    let nodeMap = new HashMap();
+    let nodeMap: HashMap<HeimdallNode> = new HashMap<HeimdallNode>();
     let node;
     let top;
     let path = [];
 
     events.forEach(([op, name], i) => {
       switch (op) {
-        case OP_START:
+        case OpCodes.OP_START:
           node = new HeimdallNode(name, i);
           nodeMap.set(i, node);
           currentNode.addNode(node);
           currentNode = node;
           break;
 
-        case OP_STOP:
+        case OpCodes.OP_STOP:
           node = nodeMap.get(name);
 
           if (name !== currentNode._id) {
@@ -105,7 +107,7 @@ export default class HeimdallTree {
           currentNode = currentNode.resumeNode;
           break;
 
-        case OP_RESUME:
+        case OpCodes.OP_RESUME:
           node = nodeMap.get(name);
           node.resume(currentNode);
           currentNode = node;
@@ -128,19 +130,19 @@ export default class HeimdallTree {
 
   // primarily a test helper, you can get this at any time
   // to get an array representing the "stack" of open node names.
-  get stack() {
+  get stack(): any[] {
     let events = this._heimdall._events;
     let stack = [];
-    let nodeMap = new HashMap();
+    let nodeMap = new HashMap<string>();
 
     events.forEach(([op, name], i) => {
-      if (op === OP_START) {
+      if (op === OpCodes.OP_START) {
         stack.push(name);
         nodeMap.set(i, name);
-      } else if (op === OP_RESUME) {
+      } else if (op === OpCodes.OP_RESUME) {
         let n = nodeMap.get(name);
         stack.push(n);
-      } else if (op === OP_STOP) {
+      } else if (op === OpCodes.OP_STOP) {
         let n = nodeMap.get(name);
 
         if (n !== stack[stack.length -1]) {
@@ -154,56 +156,56 @@ export default class HeimdallTree {
     return stack;
   }
 
-  _createLeaf(currentNode, time) {
+  _createLeaf(currentNode: HeimdallNode, time: number): HeimdallLeaf {
     let leaf = new HeimdallLeaf();
     leaf.start(currentNode, currentNode.name, time);
     currentNode.addLeaf(leaf);
     return leaf;
   }
 
-  _chainLeaf(currentNode, incomingNode, time) {
+  _chainLeaf(currentNode: HeimdallNode, incomingNode: HeimdallNode, time: number): HeimdallLeaf {
     let leaf = new HeimdallLeaf();
     leaf.start(currentNode, incomingNode.name, time);
     currentNode.addLeaf(leaf);
     return leaf;
   }
 
-  _createNode(nodeName, index, nodeMap) {
+  _createNode(nodeName: string, index: number, nodeMap: HashMap<HeimdallNode>): HeimdallNode {
     let node = new HeimdallNode(nodeName, index);
     nodeMap.set(index, node);
     return node;
   }
 
-  _chainNode(currentNode, nodeName, index, nodeMap) {
+  _chainNode(currentNode: HeimdallNode, nodeName: string, index: number, nodeMap: HashMap<HeimdallNode>): HeimdallNode {
     let node = this._createNode(nodeName, index, nodeMap);
     currentNode.addNode(node);
     return node;
   }
 
   construct() {
-    let events = this._heimdall._events;
-    let currentLeaf = null;
-    let currentNode = null;
-    let nodeMap = new HashMap();
-    let openNodes = [];
-    let node;
-    let format = this.format;
-    let counterStore = this._heimdall._monitors;
-    let stopTime = this.lastKnownTime ? normalizeTime(this.lastKnownTime) : now();
-    let pageRootIndex = events._length + 1;
+    let events: EventArray = this._heimdall._events;
+    let currentLeaf: HeimdallLeaf = null;
+    let currentNode: HeimdallNode = null;
+    let nodeMap: HashMap<HeimdallNode> = new HashMap<HeimdallNode>();
+    let openNodes: HeimdallNode[] = [];
+    let node: HeimdallNode;
+    let format: string = this.format;
+    let counterStore: CounterStore = this._heimdall._monitors;
+    let stopTime: number = this.lastKnownTime ? normalizeTime(this.lastKnownTime) : now();
+    let pageRootIndex: number = events._length + 1;
 
     currentNode = this.root = this._createNode('page-root', pageRootIndex, nodeMap);
     currentLeaf = this._createLeaf(currentNode, 0);
     openNodes.push(node);
 
     events.forEach(([op, name, time, counters], i) => {
-      if (op !== OP_ANNOTATE) {
+      if (op !== OpCodes.OP_ANNOTATE) {
         time = normalizeTime(time, format);
         counters = statsFromCounters(counterStore, counters);
       }
 
       switch (op) {
-        case OP_START:
+        case OpCodes.OP_START:
           currentNode = this._chainNode(currentNode, name, i, nodeMap);
           openNodes.push(currentNode);
 
@@ -213,7 +215,7 @@ export default class HeimdallTree {
           currentLeaf = this._createLeaf(currentNode, time);
           break;
 
-        case OP_STOP:
+        case OpCodes.OP_STOP:
           node = nodeMap.get(name);
 
           if (name !== currentNode._id) {
@@ -234,7 +236,7 @@ export default class HeimdallTree {
           currentLeaf = this._chainLeaf(currentNode, node, time);
           break;
 
-        case OP_RESUME:
+        case OpCodes.OP_RESUME:
           node = nodeMap.get(name);
           node.resume(currentNode);
           currentNode = node;
@@ -246,7 +248,7 @@ export default class HeimdallTree {
           currentLeaf = this._chainLeaf(currentNode, node, time);
           break;
 
-        case OP_ANNOTATE:
+        case OpCodes.OP_ANNOTATE:
           currentLeaf.annotate(counters);
           break;
         default:
@@ -255,8 +257,8 @@ export default class HeimdallTree {
     });
 
     while (currentNode && !currentNode.stopped) {
-      let name = currentNode.name;
-      let node = currentNode;
+      let name: string = currentNode.name;
+      let node: HeimdallNode = currentNode;
 
       currentNode.stop();
       currentNode = currentNode.resumeNode;
@@ -268,7 +270,7 @@ export default class HeimdallTree {
     }
   }
 
-  toJSON() {
+  toJSON(): Object {
     if (!this.root) {
       this.construct();
     }
@@ -278,11 +280,11 @@ export default class HeimdallTree {
     };
   }
 
-  visitPreOrder(cb) {
-    return this.root.visitPreOrder(cb);
+  visitPreOrder(cb: Function): void {
+    this.root.visitPreOrder(cb);
   }
 
-  visitPostOrder(cb) {
-    return this.root.visitPostOrder(cb);
+  visitPostOrder(cb: Function): void {
+    this.root.visitPostOrder(cb);
   }
 }

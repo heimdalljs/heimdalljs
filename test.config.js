@@ -1,14 +1,20 @@
 import nodeResolve from 'rollup-plugin-node-resolve';
-import babel from 'rollup-plugin-babel';
 import commonjs from 'rollup-plugin-commonjs';
 import replace from 'rollup-plugin-replace';
+import typescript from 'rollup-plugin-typescript';
 
 export default {
-  entry: 'tests/index.js',
+  entry: 'tests/index.ts',
   moduleName: 'heimdall-js',
   plugins: [
-    babel({
-      exclude: 'node_modules/**'
+    typescript({
+      include: [
+        'src/**/*',
+        'tests/**/*'
+      ],
+      exclude: [
+        'node_modules/**'
+      ]
     }),
     nodeResolve({ jsnext: true, main: true }),
     commonjs({ include: 'node_modules/**', ignoreGlobal: true }),

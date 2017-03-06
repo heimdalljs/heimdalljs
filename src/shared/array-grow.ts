@@ -1,7 +1,7 @@
 import hasTypedArrays from './has-typed-arrays';
 import arrayFill from './array-fill';
 
-export default function grow(array, oldLength, newLength, fillValue = 0) {
+export default function grow(array: Uint32Array | number[], oldLength: number, newLength: number, fillValue = 0) {
   if (hasTypedArrays()) {
     let ret = new Uint32Array(newLength);
     ret.set(array);
