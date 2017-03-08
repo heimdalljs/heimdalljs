@@ -4,6 +4,66 @@ import arrayGrow from './array-grow';
 import arrayFill from './array-fill';
 import JsonSerializable from '../interfaces/json-serializable';
 import CounterStoreOptions from './counter-store-options';
+import deprecate from './deprecate';
+
+const DEFAULT_STORE_SIZE: number = 1e3;
+const DEFAULT_NAMESPACE_SIZE: number = 10;
+
+function DeprecatedMonitor(name: String) {
+  deprecate('You should no longer supply a schema for a monitor to registerMonitor, pass in strings instead.' +
+      '\n\nExample:\n```\nfunction BaseballSchema() {\n\tthis.hits = 0;\n\tthis.runs = 0;\n\tthis.bats = 0;\n}\n' +
+      "heimdall.registerMonitor('baseball', BaseballSchema);\nlet monitor = heimdall.statsFor('baseball');```\n" +
+      "\nBecomes:\n```let monitor = heimdall.registerMonitor('baseball', 'hits', 'runs', 'bats');\n```",
+      {
+    id: `monitor-schema:${name}`,
+    since: '0.3',
+    until: '0.4'
+  });
+}
+
+function extractDeprecatedLabels(PotentialSchema: Function) {
+  let labels = [];
+
+  if (typeof PotentialSchema !== 'function') {
+    throw new Error(`You supplied what looks to be a Schema for ${name} to heimdall.registerMonitor(), but it is not a constructor.`);
+  }
+
+  // extract keys from schema
+  let instance = new PotentialSchema();
+
+  for (let potentialKey in instance) {
+    if (instance.hasOwnProperty(potentialKey)) {
+      let val = instance[potentialKey];
+      // disallow types
+      if (val && typeof val === 'number') {
+        labels.push(potentialKey);
+      } else {
+        throw new Error("You can only provide instance properties with numeric values on schemas provided to heimdall.registerMonitor();\n" +
+            `\tDiscovered the property '${potentialKey}' on the schema for '${name}' with the type '${typeof val}'`);
+      }
+    }
+  }
+
+  return labels;
+}
+
+/**
+ * Wrapper type around options for `CounterStore`.
+ *
+ * Intentionally left private as `CounterStore`
+ * only used internally when `HeimdallSession` is created.
+ *
+ * @class CounterStoreOptions
+ */
+class CounterStoreOptions {
+  storeSize: number;
+  namespaceAllocation: number;
+
+  constructor(storeSize: number = DEFAULT_STORE_SIZE, namespaceAllocation: number = DEFAULT_NAMESPACE_SIZE) {
+    this.storeSize = storeSize;
+    this.namespaceAllocation = namespaceAllocation;
+  }
+}
 
 // NULL_NUMBER is a number larger than the largest
 // index we are capable of utilizing in the store.
@@ -52,6 +112,11 @@ export default class CounterStore implements JsonSerializable<object> {
     return store;
   }
 
+  private _cache: Uint32Array | number[];
+  private _labelCache: Object;
+  private _nameCache: Object;
+  private _namespaceCache: Object;
+
   public options: CounterStoreOptions;
   public initialized: boolean;
 
@@ -65,6 +130,7 @@ export default class CounterStore implements JsonSerializable<object> {
     this._cache = null;
     this._labelCache = null;
     this._nameCache = null;
+    this._namespaceCache = null;
   }
 
   public clean(): void {
@@ -86,10 +152,18 @@ export default class CounterStore implements JsonSerializable<object> {
   public registerNamespace(name: string, labels: string[]): object {
     this._initializeIfNeeded();
 
-    const numCounters: number = labels.length;
-    const namespaceIndex: number = this._namespaceCount++;
-    const bitNamespaceIndex: number = namespaceIndex << 16;
-    const namespace: object = Object.create(null);
+    let numCounters: number = labels.length;
+    let namespaceIndex: number = this._namespaceCount++;
+    let bitNamespaceIndex: number = namespaceIndex << 16;
+    let namespace: Object = Object.create(null);
+    let deprecatedMonitor = null;
+    let heimdall = this;
+
+    if (numCounters === 1 && typeof labels[0] !== 'string') {
+      deprecatedMonitor = new DeprecatedMonitor(name);
+      labels = extractDeprecatedLabels(labels[0]);
+      numCounters = labels.length;
+    }
 
     // we also generate a map between the counters
     // and these labels so that we can reconstruct
@@ -109,11 +183,51 @@ export default class CounterStore implements JsonSerializable<object> {
       namespace[labels[i]] = bitNamespaceIndex + i;
     }
 
-    return namespace;
+    for (let i = 0; i < numCounters; i++) {
+      let label = labels[i];
+      let namespaceCounterToken = namespace[label] = bitNamespaceIndex + i;
+
+      if (deprecatedMonitor) {
+        Object.defineProperty(deprecatedMonitor, label, {
+          get() {
+            return namespaceCounterToken;
+          },
+
+          set() {
+            deprecate("You should no longer directly increment a property on a Monitor.\n\n" +
+                "Refactor:\n```\n" +
+                `${name}Monitor.${label}++;` +
+                "\n```\nTo:\n```\n" +
+                `heimdall.increment(${name}Monitor.${label});` +
+                "\n```", {
+              id: `no-direct-monitor-increment:{${name}:${label}}`,
+              since: '0.3',
+              until: '0.4'
+            });
+            heimdall.increment(namespaceCounterToken);
+          }
+        });
+      }
+    }
+
+    if (deprecatedMonitor && typeof Object.freeze === 'function') {
+      Object.freeze(deprecatedMonitor);
+    }
+
+    this._namespaceCache = deprecatedMonitor || namespace;
+
+    return deprecatedMonitor || namespace;
   }
 
-  public restoreFromCache(cache): object {
-    const stats = Object.create(null);
+  getNamespace(name) {
+    if (this._namespaceCache) {
+      return this._namespaceCache[name];
+    }
+  }
+
+  restoreFromCache(cache): Object {
+    let stats = Object.create(null);
+>>>>>>> implements most of the mechanisms required to shim v3 to support v2 APIs with deprecations.:src/shared/counter-store.ts
 
     for (let i = 0; i < cache.length; i++) {
       if (cache[i] !== NULL_NUMBER) {
@@ -160,9 +274,9 @@ export default class CounterStore implements JsonSerializable<object> {
     return this._labelCache && name in this._labelCache;
   }
 
+<<<<<<< HEAD:packages/heimdalljs/src/shared/counter-store.ts
   public cache(): Uint32Array | number[] | FastIntArray {
     const cache = this._cache;
-    this._cache = null;
 
     return cache;
   }
