@@ -3,9 +3,48 @@ import hasTypedArrays from './has-typed-arrays';
 import arrayGrow from './array-grow';
 import arrayFill from './array-fill';
 import JsonSerializable from '../interfaces/json-serializable';
+import deprecate from './deprecate';
 
 const DEFAULT_STORE_SIZE: number = 1e3;
 const DEFAULT_NAMESPACE_SIZE: number = 10;
+
+function DeprecatedMonitor(name: String) {
+  deprecate('You should no longer supply a schema for a monitor to registerMonitor, pass in strings instead.' +
+      '\n\nExample:\n```\nfunction BaseballSchema() {\n\tthis.hits = 0;\n\tthis.runs = 0;\n\tthis.bats = 0;\n}\n' +
+      "heimdall.registerMonitor('baseball', BaseballSchema);\nlet monitor = heimdall.statsFor('baseball');```\n" +
+      "\nBecomes:\n```let monitor = heimdall.registerMonitor('baseball', 'hits', 'runs', 'bats');\n```",
+      {
+    id: `monitor-schema:${name}`,
+    since: '0.3',
+    until: '0.4'
+  });
+}
+
+function extractDeprecatedLabels(PotentialSchema: Function) {
+  let labels = [];
+
+  if (typeof PotentialSchema !== 'function') {
+    throw new Error(`You supplied what looks to be a Schema for ${name} to heimdall.registerMonitor(), but it is not a constructor.`);
+  }
+
+  // extract keys from schema
+  let instance = new PotentialSchema();
+
+  for (let potentialKey in instance) {
+    if (instance.hasOwnProperty(potentialKey)) {
+      let val = instance[potentialKey];
+      // disallow types
+      if (val && typeof val === 'number') {
+        labels.push(potentialKey);
+      } else {
+        throw new Error("You can only provide instance properties with numeric values on schemas provided to heimdall.registerMonitor();\n" +
+            `\tDiscovered the property '${potentialKey}' on the schema for '${name}' with the type '${typeof val}'`);
+      }
+    }
+  }
+
+  return labels;
+}
 
 /**
  * Wrapper type around options for `CounterStore`.
@@ -36,9 +75,10 @@ export default class CounterStore implements JsonSerializable<Object> {
   private _store: FastIntArray;
   private _namespaceCount: number;
   private _config: FastIntArray;
-  private _cache: Uint32Array | number[] | FastIntArray;
+  private _cache: Uint32Array | number[];
   private _labelCache: Object;
   private _nameCache: Object;
+  private _namespaceCache: Object;
 
   options: CounterStoreOptions;
   initialized: boolean;
@@ -53,6 +93,7 @@ export default class CounterStore implements JsonSerializable<Object> {
     this._cache = null;
     this._labelCache = null;
     this._nameCache = null;
+    this._namespaceCache = null;
   }
 
   clean(): void {
@@ -87,13 +128,21 @@ export default class CounterStore implements JsonSerializable<Object> {
     return store;
   }
 
-  registerNamespace(name: string, labels: string[]): Object {
+  registerNamespace(name: string, labels: string[]|Function[]): Object {
     this._initializeIfNeeded();
 
     let numCounters: number = labels.length;
     let namespaceIndex: number = this._namespaceCount++;
     let bitNamespaceIndex: number = namespaceIndex << 16;
     let namespace: Object = Object.create(null);
+    let deprecatedMonitor = null;
+    let heimdall = this;
+
+    if (numCounters === 1 && typeof labels[0] !== 'string') {
+      deprecatedMonitor = new DeprecatedMonitor(name);
+      labels = extractDeprecatedLabels(labels[0]);
+      numCounters = labels.length;
+    }
 
     // we also generate a map between the counters
     // and these labels so that we can reconstruct
@@ -113,7 +162,46 @@ export default class CounterStore implements JsonSerializable<Object> {
       namespace[labels[i]] = bitNamespaceIndex + i;
     }
 
-    return namespace;
+    for (let i = 0; i < numCounters; i++) {
+      let label = labels[i];
+      let namespaceCounterToken = namespace[label] = bitNamespaceIndex + i;
+
+      if (deprecatedMonitor) {
+        Object.defineProperty(deprecatedMonitor, label, {
+          get() {
+            return namespaceCounterToken;
+          },
+
+          set() {
+            deprecate("You should no longer directly increment a property on a Monitor.\n\n" +
+                "Refactor:\n```\n" +
+                `${name}Monitor.${label}++;` +
+                "\n```\nTo:\n```\n" +
+                `heimdall.increment(${name}Monitor.${label});` +
+                "\n```", {
+              id: `no-direct-monitor-increment:{${name}:${label}}`,
+              since: '0.3',
+              until: '0.4'
+            });
+            heimdall.increment(namespaceCounterToken);
+          }
+        });
+      }
+    }
+
+    if (deprecatedMonitor && typeof Object.freeze === 'function') {
+      Object.freeze(deprecatedMonitor);
+    }
+
+    this._namespaceCache = deprecatedMonitor || namespace;
+
+    return deprecatedMonitor || namespace;
+  }
+
+  getNamespace(name) {
+    if (this._namespaceCache) {
+      return this._namespaceCache[name];
+    }
   }
 
   _initializeIfNeeded(): void {
@@ -121,6 +209,7 @@ export default class CounterStore implements JsonSerializable<Object> {
       this._config = new FastIntArray(this.options.namespaceAllocation);
       this._labelCache = Object.create(null);
       this._nameCache = Object.create(null);
+      this._namespaceCache = Object.create(null);
       this.initialized = true;
     }
   }
@@ -180,7 +269,7 @@ export default class CounterStore implements JsonSerializable<Object> {
     return this._labelCache && name in this._labelCache;
   }
 
-  cache(): Uint32Array | number[] | FastIntArray {
+  cache(): Uint32Array | number[] {
     let cache = this._cache;
     this._cache = null;
 
