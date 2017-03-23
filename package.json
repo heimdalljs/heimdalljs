@@ -5,7 +5,7 @@
   "main": "dist/heimdalljs.cjs.js",
   "jsnext:main": "dist/heimdalljs.es.js",
   "scripts": {
-    "build": "npm run build:node && npm run build:browser",
+    "build": "npm run build:node && npm run build:browser && npm run build:test",
     "build:node": "rollup --no-strict -c node.config.js",
     "build:browser": "rollup --no-strict -c browser.config.js",
     "build:test": "rollup --no-strict -c test.config.js",
@@ -30,7 +30,10 @@
     "javascript"
   ],
   "files": [
-    "dist",
+    "dist/heimdalljs.cjs.js",
+    "dist/heimdalljs.es.js",
+    "dist/heimdalljs.iife.js",
+    "dist/heimdalljs.umd.js",
     "heimdall.js"
   ],
   "devDependencies": {
