@@ -1,5 +1,20 @@
 # master
 
+# 0.3.3
+
+* add runtime version information
+* replace `EmptyObject` with `Object.create(null)`
+* don't include tests in published package
+
+# 0.3.2
+
+* add session-root and page-root to tree construction
+
+# 0.3.1
+
+* don't depend on Uint32Array
+* add hasMonitor
+
 # 0.3.0
 
 * DO NOT USE THIS VERSION
