@@ -5,7 +5,7 @@
   "main": "dist/heimdalljs.cjs.js",
   "jsnext:main": "dist/heimdalljs.es.js",
   "scripts": {
-    "build": "npm run build:node && npm run build:browser",
+    "build": "npm run build:node && npm run build:browser && npm run build:test",
     "build:node": "rollup --no-strict -c node.config.js",
     "build:browser": "rollup --no-strict -c browser.config.js",
     "build:test": "rollup --no-strict -c test.config.js",
