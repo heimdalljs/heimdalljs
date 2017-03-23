@@ -27,7 +27,10 @@
     "javascript"
   ],
   "files": [
-    "dist",
+    "dist/heimdalljs.cjs.js",
+    "dist/heimdalljs.es.js",
+    "dist/heimdalljs.iife.js",
+    "dist/heimdalljs.umd.js",
     "heimdall.js"
   ],
   "devDependencies": {
