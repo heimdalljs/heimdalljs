@@ -9,7 +9,7 @@ export default {
     babel({
       exclude: 'node_modules/**'
     }),
-    nodeResolve({ jsnext: true, main: true }),
+    nodeResolve({ jsnext: true, main: true, skip: ['rsvp'] }),
     commonjs({ include: 'node_modules/**', ignoreGlobal: true }),
   ],
   targets: [
