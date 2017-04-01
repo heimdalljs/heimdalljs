@@ -1,17 +1,17 @@
 import HeimdallNode from './node';
 import JsonSerializable from '../interfaces/json-serializable';
 
-export default class HeimdallLeaf implements JsonSerializable<Object> {
+export default class HeimdallLeaf implements JsonSerializable<object> {
   private _id: string;
 
-  owner: HeimdallNode;
-  previousOp: string;
-  startTime: number;
-  annotations: Object[];
-  nextOp: string;
-  endTime: number;
-  counters: Object;
-  name: string;
+  public owner: HeimdallNode;
+  public previousOp: string;
+  public startTime: number;
+  public annotations: Array<object>;
+  public nextOp: string;
+  public endTime: number;
+  public counters: object;
+  public name: string;
 
   constructor() {
     // set on start
@@ -27,7 +27,7 @@ export default class HeimdallLeaf implements JsonSerializable<Object> {
     this.nextOp = null;
     this.endTime = 0;
     this.counters = null;
-    this.name= null;
+    this.name = null;
   }
 
   get selfTime(): number {
@@ -38,27 +38,27 @@ export default class HeimdallLeaf implements JsonSerializable<Object> {
     return this.endTime !== 0;
   }
 
-  annotate(annotation: Object): void {
+  public annotate(annotation: object): void {
     if (this.annotations === null) {
       this.annotations = [];
     }
     this.annotations.push(annotation);
   }
 
-  start(owner: HeimdallNode, previousOp: string, time: number): void {
+  public start(owner: HeimdallNode, previousOp: string, time: number): void {
     this.owner = owner;
     this.previousOp = previousOp;
     this.startTime = time;
   }
 
-  stop(nextOp: string, time: number, counters: Object): void {
+  public stop(nextOp: string, time: number, counters: object): void {
     this.nextOp = nextOp;
     this.endTime = time;
     this.counters = counters;
     this._id = this.name = `[${this.owner.name}]#${this.previousOp}:${nextOp}`;
   }
 
-  toJSON(): Object {
+  public toJSON(): object {
     return {
       _id: this._id,
       name: this.name,

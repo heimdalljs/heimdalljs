@@ -10,8 +10,12 @@ import JsonSerializable from '../interfaces/json-serializable';
 
 const VERSION = 'VERSION_STRING_PLACEHOLDER';
 
-export default class Heimdall implements JsonSerializable<Object> {
+export default class Heimdall implements JsonSerializable<object> {
   private _session: Session;
+
+  private _retrieveCounters(): Uint32Array | number[] | FastIntArray {
+    return this._monitors.cache();
+  }
 
   static get VERSION(): string {
     return VERSION;
@@ -38,33 +42,29 @@ export default class Heimdall implements JsonSerializable<Object> {
     return this._session.events;
   }
 
-  _retrieveCounters(): Uint32Array | number[] | FastIntArray {
-    return this._monitors.cache();
-  }
-
-  start(name: string): number {
+  public start(name: string): number {
     return this._session.events.push(OpCodes.OP_START, name, now(), this._retrieveCounters());
   }
 
-  stop(token: number): void {
+  public stop(token: number): void {
     this._session.events.push(OpCodes.OP_STOP, token, now(), this._retrieveCounters());
   }
 
-  resume(token: number): void {
+  public resume(token: number): void {
     this._session.events.push(OpCodes.OP_RESUME, token, now(), this._retrieveCounters());
   }
 
-  annotate(info: Uint32Array | number[] | FastIntArray): void {
+  public annotate(info: Uint32Array | number[] | FastIntArray): void {
     // This has the side effect of making events heterogenous, as info is an object
     // while counters will always be `null` or an `Array`
     this._session.events.push(OpCodes.OP_ANNOTATE, NULL_NUMBER, NULL_NUMBER, info);
   }
 
-  hasMonitor(name): boolean {
+  public hasMonitor(name): boolean {
     return !!this._monitors.has(name);
   }
 
-  registerMonitor(name: string, ...keys: string[]): never | Object {
+  public registerMonitor(name: string, ...keys: string[]): never | object {
     if (name === 'own' || name === 'time') {
       throw new Error('Cannot register monitor at namespace "' + name + '".  "own" and "time" are reserved');
     }
@@ -75,11 +75,11 @@ export default class Heimdall implements JsonSerializable<Object> {
     return this._monitors.registerNamespace(name, keys);
   }
 
-  increment(token: number): void {
+  public increment(token: number): void {
     this._session.monitors.increment(token);
   }
 
-  configFor(name: string): any {
+  public configFor(name: string): any {
     let config = this._session.configs.get(name);
 
     if (!config) {
@@ -95,7 +95,7 @@ export default class Heimdall implements JsonSerializable<Object> {
     session data for transfer. Heimdall-tree can load time
     data from this format or out of `getSessionData`.
    */
-  toJSON(): Object {
+  public toJSON(): object {
     return {
       heimdallVersion: VERSION,
       format,
@@ -105,7 +105,7 @@ export default class Heimdall implements JsonSerializable<Object> {
     };
   }
 
-  toString(): string {
+  public toString(): string {
     return JSON.stringify(this.toJSON());
   }
 }

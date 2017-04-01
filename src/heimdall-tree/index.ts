@@ -44,23 +44,50 @@ function statsFromCounters(counterStore, counterCache) {
   return counterStore.restoreFromCache(counterCache);
 }
 
-export default class HeimdallTree implements JsonSerializable<Object> {
-  private _heimdall: Object;
+export default class HeimdallTree implements JsonSerializable<object> {
+  private _heimdall: {
+    _events: EventArray,
+    _monitors: CounterStore,
+    _timeFormat: string
+  };
 
-  root: HeimdallNode;
-  format: string;
-  lastKnownTime: number;
-
-  constructor(heimdall: Object, lastKnownTime) {
-    this._heimdall = heimdall;
-    this.root = null;
-    this.format = heimdall && heimdall._timeFormat ? heimdall._timeFormat : format;
-    this.lastKnownTime = lastKnownTime;
+  private _createLeaf(currentNode: HeimdallNode, time: number): HeimdallLeaf {
+    const leaf = new HeimdallLeaf();
+    leaf.start(currentNode, currentNode.name, time);
+    currentNode.addLeaf(leaf);
+    return leaf;
   }
 
-  static fromJSON(json: Object) {
-    let events = json.events || [];
-    let heimdall = {
+  private _chainLeaf(currentNode: HeimdallNode, incomingNode: HeimdallNode, time: number): HeimdallLeaf {
+    const leaf = new HeimdallLeaf();
+    leaf.start(currentNode, incomingNode.name, time);
+    currentNode.addLeaf(leaf);
+    return leaf;
+  }
+
+  private _createNode(nodeName: string, index: number, nodeMap: HashMap<HeimdallNode>): HeimdallNode {
+    const node = new HeimdallNode(nodeName, index);
+    nodeMap.set(index, node);
+    return node;
+  }
+
+  private _chainNode(currentNode: HeimdallNode,
+                     nodeName: string,
+                     index: number,
+                     nodeMap: HashMap<HeimdallNode>): HeimdallNode {
+    const node = this._createNode(nodeName, index, nodeMap);
+    currentNode.addNode(node);
+    return node;
+  }
+
+  public static fromJSON(json: {
+    events: any[],
+    format: string,
+    monitors: CounterStore,
+    serializationTime: number
+  }) {
+    const events = json.events || [];
+    const heimdall = {
       _timeFormat: json.format || format,
       _events: new EventArray(events.length, events),
       _monitors: CounterStore.fromJSON(json.monitors)
@@ -69,17 +96,33 @@ export default class HeimdallTree implements JsonSerializable<Object> {
     return new HeimdallTree(heimdall, json.serializationTime);
   }
 
+  public root: HeimdallNode;
+  public format: string;
+  public lastKnownTime: number;
+
+  constructor(heimdall: {
+    _events: EventArray,
+    _monitors: CounterStore,
+    _timeFormat: string
+  },          lastKnownTime: number) {
+    this._heimdall = heimdall;
+    this.root = null;
+    this.format = heimdall && heimdall._timeFormat ? heimdall._timeFormat : format;
+    this.lastKnownTime = lastKnownTime;
+  }
+
   // primarily a test helper, you can get this at any time
   // to get an array representing the path of open node names
   // from "root" to the last open node.
   get path(): HeimdallNode[] {
-    let events = this._heimdall._events;
-    let root = new HeimdallNode('root', 1e9);
-    let currentNode = root;
-    let nodeMap: HashMap<HeimdallNode> = new HashMap<HeimdallNode>();
+    const events = this._heimdall._events;
+    const root = new HeimdallNode('root', 1e9);
+    const nodeMap: HashMap<HeimdallNode> = new HashMap<HeimdallNode>();
+    const path = [];
+
     let node;
     let top;
-    let path = [];
+    let currentNode = root;
 
     events.forEach(([op, name], i) => {
       switch (op) {
@@ -93,7 +136,7 @@ export default class HeimdallTree implements JsonSerializable<Object> {
         case OpCodes.OP_STOP:
           node = nodeMap.get(name);
 
-          if (name !== currentNode._id) {
+          if (name !== currentNode.id) {
             // potentially throw the correct error (already stopped)
             if (node) {
               node.stop();
@@ -131,21 +174,21 @@ export default class HeimdallTree implements JsonSerializable<Object> {
   // primarily a test helper, you can get this at any time
   // to get an array representing the "stack" of open node names.
   get stack(): any[] {
-    let events = this._heimdall._events;
-    let stack = [];
-    let nodeMap = new HashMap<string>();
+    const events = this._heimdall._events;
+    const stack = [];
+    const nodeMap = new HashMap<string>();
 
     events.forEach(([op, name], i) => {
       if (op === OpCodes.OP_START) {
         stack.push(name);
         nodeMap.set(i, name);
       } else if (op === OpCodes.OP_RESUME) {
-        let n = nodeMap.get(name);
+        const n = nodeMap.get(name);
         stack.push(n);
       } else if (op === OpCodes.OP_STOP) {
-        let n = nodeMap.get(name);
+        const n = nodeMap.get(name);
 
-        if (n !== stack[stack.length -1]) {
+        if (n !== stack[stack.length - 1]) {
           throw new Error('Invalid Stack!');
         }
 
@@ -156,46 +199,20 @@ export default class HeimdallTree implements JsonSerializable<Object> {
     return stack;
   }
 
-  _createLeaf(currentNode: HeimdallNode, time: number): HeimdallLeaf {
-    let leaf = new HeimdallLeaf();
-    leaf.start(currentNode, currentNode.name, time);
-    currentNode.addLeaf(leaf);
-    return leaf;
-  }
-
-  _chainLeaf(currentNode: HeimdallNode, incomingNode: HeimdallNode, time: number): HeimdallLeaf {
-    let leaf = new HeimdallLeaf();
-    leaf.start(currentNode, incomingNode.name, time);
-    currentNode.addLeaf(leaf);
-    return leaf;
-  }
-
-  _createNode(nodeName: string, index: number, nodeMap: HashMap<HeimdallNode>): HeimdallNode {
-    let node = new HeimdallNode(nodeName, index);
-    nodeMap.set(index, node);
-    return node;
-  }
-
-  _chainNode(currentNode: HeimdallNode, nodeName: string, index: number, nodeMap: HashMap<HeimdallNode>): HeimdallNode {
-    let node = this._createNode(nodeName, index, nodeMap);
-    currentNode.addNode(node);
-    return node;
-  }
-
-  construct() {
-    let events: EventArray = this._heimdall._events;
-    let currentLeaf: HeimdallLeaf = null;
-    let currentNode: HeimdallNode = null;
-    let nodeMap: HashMap<HeimdallNode> = new HashMap<HeimdallNode>();
-    let openNodes: HeimdallNode[] = [];
+  public construct(): void {
+    const events: EventArray = this._heimdall._events;
     let node: HeimdallNode;
-    let format: string = this.format;
-    let counterStore: CounterStore = this._heimdall._monitors;
-    let stopTime: number = this.lastKnownTime ? normalizeTime(this.lastKnownTime) : now();
-    let pageRootIndex: number = events._length + 1;
 
-    currentNode = this.root = this._createNode('page-root', pageRootIndex, nodeMap);
-    currentLeaf = this._createLeaf(currentNode, 0);
+    const nodeMap: HashMap<HeimdallNode> = new HashMap<HeimdallNode>();
+    const openNodes: HeimdallNode[] = [];
+    const format: string = this.format;
+    const counterStore: CounterStore = this._heimdall._monitors;
+    const stopTime: number = this.lastKnownTime ? normalizeTime(this.lastKnownTime) : now();
+    const pageRootIndex: number = events.length + 1;
+
+    let currentNode: HeimdallNode = this.root = this._createNode('page-root', pageRootIndex, nodeMap);
+    let currentLeaf: HeimdallLeaf = this._createLeaf(currentNode, 0);
+
     openNodes.push(node);
 
     events.forEach(([op, name, time, counters], i) => {
@@ -218,7 +235,7 @@ export default class HeimdallTree implements JsonSerializable<Object> {
         case OpCodes.OP_STOP:
           node = nodeMap.get(name);
 
-          if (name !== currentNode._id) {
+          if (name !== currentNode.id) {
             // potentially throw the correct error (already stopped)
             if (node) {
               node.stop();
@@ -257,20 +274,23 @@ export default class HeimdallTree implements JsonSerializable<Object> {
     });
 
     while (currentNode && !currentNode.stopped) {
-      let name: string = currentNode.name;
-      let node: HeimdallNode = currentNode;
+      const name: string = currentNode.name;
+      const n: HeimdallNode = currentNode;
 
       currentNode.stop();
       currentNode = currentNode.resumeNode;
-      currentLeaf.stop(node.name, stopTime, null);
+      currentLeaf.stop(n.name, stopTime, null);
 
       if (currentNode) {
-        currentLeaf = this._chainLeaf(currentNode, node, stopTime);
+        currentLeaf = this._chainLeaf(currentNode, n, stopTime);
       }
     }
   }
 
-  toJSON(): Object {
+  public toJSON(): {
+    heimdallVersion: string,
+    nodes: HeimdallNode[]
+  } {
     if (!this.root) {
       this.construct();
     }
@@ -280,11 +300,11 @@ export default class HeimdallTree implements JsonSerializable<Object> {
     };
   }
 
-  visitPreOrder(cb: Function): void {
+  public visitPreOrder(cb: (HeimdallNode) => void): void {
     this.root.visitPreOrder(cb);
   }
 
-  visitPostOrder(cb: Function): void {
+  public visitPostOrder(cb: (HeimdallNode) => void): void {
     this.root.visitPostOrder(cb);
   }
 }
