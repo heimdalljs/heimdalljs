@@ -1,11 +1,13 @@
+'use strict';
+
 module.exports = {
   name: 'Increment Monitor',
-  setup: function() {
-    var heimdall = new Heimdall();
-    var schema = heimdall.registerMonitor('mon', 'x');
-    var x = schema[0];
+  setup() {
+    let heimdall = new Heimdall();
+    let schema = heimdall.registerMonitor('mon', 'x');
+    let x = schema[0];
   },
-  fn: function() {
+  fn() {
     heimdall.increment(x);
   }
 };
