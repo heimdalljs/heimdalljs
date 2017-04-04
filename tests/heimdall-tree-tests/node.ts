@@ -21,7 +21,7 @@ describe('HeimdallNode', function() {
     let heimdall;
     let tree;
 
-    beforeEach( function() {
+    beforeEach(function() {
       heimdall = { _events: NICE_OP_TREE };
       tree = new HeimdallTree(heimdall);
       tree.construct();
@@ -132,7 +132,7 @@ describe('HeimdallNode', function() {
     let heimdall;
     let tree;
 
-    beforeEach( function() {
+    beforeEach(function() {
       heimdall = { _events: NICE_OP_TREE };
       tree = new HeimdallTree(heimdall);
       tree.construct();

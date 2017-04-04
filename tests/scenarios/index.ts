@@ -1,7 +1,6 @@
 import doubleArray from '../mock/has-typed-arrays';
 
 export default {
-
   default: {
     setup() {}
   },
@@ -11,5 +10,4 @@ export default {
       doubleArray(false);
     }
   }
-
 };

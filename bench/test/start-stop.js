@@ -1,11 +1,13 @@
+'use strict';
+
 module.exports = {
   name: 'Start Stop',
-  setup: function() {
-    var heimdall = new Heimdall();
+  setup() {
+    let heimdall = new Heimdall();
   },
-  fn: function() {
-    var a = heimdall.start('a');
-    var b = heimdall.start('b');
+  fn() {
+    let a = heimdall.start('a');
+    let b = heimdall.start('b');
     heimdall.stop(b);
     heimdall.stop(a);
   }
