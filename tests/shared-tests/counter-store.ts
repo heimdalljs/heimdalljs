@@ -6,11 +6,11 @@ const { expect } = chai;
 let counterStore;
 
 describe('CounterStore', function() {
-  beforeEach(() => {
+  beforeEach(function() {
     counterStore = new CounterStore();
   });
 
-  afterEach(() => {
+  afterEach(function() {
     counterStore = null;
   });
 

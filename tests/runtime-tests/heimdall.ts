@@ -89,11 +89,11 @@ describe('heimdall', function() {
   describe('with nodes from multiple heimdall instances', function() {
     let clock;
 
-    beforeEach( function() {
+    beforeEach(function() {
       clock = mockHRTime();
     });
 
-    afterEach( function() {
+    afterEach(function() {
       clock.restore();
     });
 
@@ -132,14 +132,14 @@ describe('heimdall', function() {
     describe('timing', function() {
       let clock;
 
-      beforeEach( function() {
+      beforeEach(function() {
         heimdall._session.init();
         tree.root = null;
         tree._heimdall = heimdall;
         clock = mockHRTime();
       });
 
-      afterEach( function() {
+      afterEach(function() {
         clock.restore();
       });
 
