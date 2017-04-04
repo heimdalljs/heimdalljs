@@ -9,10 +9,11 @@
     "build:node": "rollup --no-strict -c node.config.js",
     "build:browser": "rollup --no-strict -c browser.config.js",
     "build:test": "rollup --no-strict -c test.config.js",
-    "test": "mocha dist/tests/bundle.cjs --scenario=default && mocha dist/tests/bundle.cjs --scenario=array-fallback",
+    "test": "yarn run tslint && mocha dist/tests/bundle.cjs --scenario=default && mocha dist/tests/bundle.cjs --scenario=array-fallback",
     "test:debug": "mocha --no-timeouts debug dist/tests/bundle.cjs",
     "build_and_test": "npm run build:test && npm run test",
-    "tslint": "tslint -c tslint.json --project tsconfig.json",
+    "tslint": "tslint --typecheck -c tslint.json --project tsconfig.json",
+    "tslint:format": "tslint --typecheck -c tslint.json --project tsconfig.json --fix",
     "trace": "node --trace-hydrogen --trace_phase=Z --trace_deopt --code_comments --hydrogen_track_positions --redirect_code_traces bench/ ",
     "prepublish": "npm run build"
   },
@@ -49,8 +50,8 @@
     "rollup-plugin-node-resolve": "^1.7.1",
     "rollup-plugin-replace": "^1.1.1",
     "rollup-plugin-typescript": "^0.8.1",
-    "tslint": "^4.4.2",
-    "typescript": "^2.2"
+    "tslint": "^4.5.1",
+    "typescript": "^2.2.1"
   },
   "dependencies": {
     "rsvp": "~3.2.1"

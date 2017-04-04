@@ -3,7 +3,7 @@ import arrayFill from './array-fill';
 
 export default function grow(array: Uint32Array | number[], oldLength: number, newLength: number, fillValue = 0) {
   if (hasTypedArrays()) {
-    let ret = new Uint32Array(newLength);
+    const ret = new Uint32Array(newLength);
     ret.set(array);
 
     if (fillValue !== 0) {

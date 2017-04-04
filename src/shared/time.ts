@@ -1,12 +1,12 @@
-export let now: number;
+export let now: () => number;
 export let format: string;
 export let ORIGIN_TIME: number;
 
 // It turns out to be nicer for perf to bind than to close over the time method
 // however, when testing we need to be able to stub the clock via the global
 // so we use this boolean to determine whether we "bind" or use a wrapper function.
-const freeGlobal = typeof window !== 'undefined' ? window : global;
-const IS_TESTING = freeGlobal.IS_HEIMDALL_TEST_ENVIRONMENT;
+const freeGlobal: any = typeof window !== 'undefined' ? window : global;
+const IS_TESTING: boolean = freeGlobal.IS_HEIMDALL_TEST_ENVIRONMENT;
 
 if (typeof performance === 'object' && typeof performance.now === 'function') {
   now = IS_TESTING ? function now() { return performance.now(); } : performance.now.bind(performance);

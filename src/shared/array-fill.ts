@@ -5,8 +5,8 @@ export default function fill(array: Uint32Array | number[], value: number, start
     return array.fill(value, start, end);
   } else {
     let s: number = start || 0;
-    let e: number = end || array.length;
-    for (;s<e;s++) {
+    const e: number = end || array.length;
+    for (; s < e; s++) {
       array[s] = value;
     }
     return array;
