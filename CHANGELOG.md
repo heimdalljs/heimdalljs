@@ -2,7 +2,7 @@
 
 # 0.2.5
 
-* don't include RSVP as a dependency for node
+* don't include RSVP within node bundle
 * unbalanced start/stop now warn instead of throw
 
 # 0.2.4
