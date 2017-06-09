@@ -1,5 +1,10 @@
 # master
 
+# 0.2.5
+
+* don't include RSVP as a dependency for node
+* unbalanced start/stop now warn instead of throw
+
 # 0.2.4
 
 * don't include tests in published package
