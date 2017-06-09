@@ -9,7 +9,14 @@ const { expect } = chai;
 
 chai.use(chaiAsPromised);
 
+let origLog = console.log;
+
 let heimdall;
+let logOutput;
+
+function captureOutput() {
+  console.log = (msg) => { logOutput = msg; }
+}
 
 function getJSONSansTime() {
   let json = heimdall.toJSON();
@@ -22,6 +29,10 @@ function getJSONSansTime() {
 describe('heimdall', function() {
   beforeEach(function () {
     heimdall = new Heimdall();
+  });
+
+  afterEach(function() {
+    console.log = origLog;
   });
 
   it('creates a new session if none is provided', function() {
@@ -131,7 +142,7 @@ describe('heimdall', function() {
       });
     });
 
-    it('throws when child nodes escape their parent', function () {
+    it('warns when child nodes escape their parent', function () {
       expect(heimdall.stack).to.eql([]);
 
       let deferA = defer();
@@ -146,9 +157,13 @@ describe('heimdall', function() {
         return deferB.promise;
       });
 
-      deferA.resolve();
+      captureOutput();
+      deferA.resolve(1);
 
-      return expect(nodeA).to.eventually.be.rejectedWith('cannot stop: not the current node');
+      return Promise.all([
+        expect(nodeA.then(() => logOutput)).to.eventually.equal(`Cannot stop: not the current node.`),
+        expect(nodeA).to.eventually.equal(1),
+      ]);
     });
   });
 
@@ -229,22 +244,22 @@ describe('heimdall', function() {
       expect(heimdall.stack).to.eql([]);
     });
 
-    it('throws if stop is called when stopped', function () {
+    it('warns if stop is called when stopped', function () {
       let cookieA = heimdall.start({ name: 'node-a' });
 
       cookieA.stop();
 
-      expect(function () {
-        cookieA.stop();
-      }).to.throw('cannot stop: not the current node');
+      captureOutput();
+      cookieA.stop();
+      expect(logOutput).to.eql(`Cannot stop: not the current node.`);
     });
 
     it('throws if resume is called when not stopped', function () {
       let cookieA = heimdall.start({ name: 'node-a' });
 
-      expect(function () {
-        cookieA.resume();
-      }).to.throw('cannot resume: not stopped');
+      captureOutput();
+      cookieA.resume();
+      expect(logOutput).to.eql(`Cannot resume: not stopped.`);
     });
   });
 

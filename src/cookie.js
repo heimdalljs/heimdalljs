@@ -14,9 +14,11 @@ export default class Cookie {
     let monitor;
 
     if (this._heimdall.current !== this._node) {
-      throw new TypeError('cannot stop: not the current node');
+      console.log(`Cannot stop: not the current node.`);
+      return;
     } else if (this.stopped === true) {
-      throw new TypeError('cannot stop: already stopped');
+      console.log(`Cannot stop: already stopped.`);
+      return;
     }
 
     this._stopped = true;
@@ -26,7 +28,8 @@ export default class Cookie {
 
   resume() {
     if (this._stopped === false) {
-      throw new TypeError('cannot resume: not stopped');
+      console.log(`Cannot resume: not stopped.`);
+      return;
     }
 
     this._stopped = false;
