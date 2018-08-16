@@ -141,30 +141,6 @@ describe('heimdall', function() {
         expect(heimdall.stack).to.eql([]);
       });
     });
-
-    it('warns when child nodes escape their parent', function () {
-      expect(heimdall.stack).to.eql([]);
-
-      let deferA = defer();
-      let nodeA = heimdall.node('node-a', function () {
-        return deferA.promise;
-      });
-
-      expect(heimdall.stack).to.eql(['node-a']);
-
-      let deferB = defer();
-      let nodeB = heimdall.node('node-b', function () {
-        return deferB.promise;
-      });
-
-      captureOutput();
-      deferA.resolve(1);
-
-      return Promise.all([
-        expect(nodeA.then(() => logOutput)).to.eventually.equal(`Cannot stop: not the current node.`),
-        expect(nodeA).to.eventually.equal(1),
-      ]);
-    });
   });
 
   describe('.start/stop/resume', function() {
@@ -251,15 +227,7 @@ describe('heimdall', function() {
 
       captureOutput();
       cookieA.stop();
-      expect(logOutput).to.eql(`Cannot stop: not the current node.`);
-    });
-
-    it('throws if resume is called when not stopped', function () {
-      let cookieA = heimdall.start({ name: 'node-a' });
-
-      captureOutput();
-      cookieA.resume();
-      expect(logOutput).to.eql(`Cannot resume: not stopped.`);
+      expect(logOutput).to.eql(undefined);
     });
   });
 
