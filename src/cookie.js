@@ -14,10 +14,8 @@ export default class Cookie {
     let monitor;
 
     if (this._heimdall.current !== this._node) {
-      console.log(`Cannot stop: not the current node.`);
       return;
     } else if (this.stopped === true) {
-      console.log(`Cannot stop: already stopped.`);
       return;
     }
 
@@ -28,7 +26,6 @@ export default class Cookie {
 
   resume() {
     if (this._stopped === false) {
-      console.log(`Cannot resume: not stopped.`);
       return;
     }
 
