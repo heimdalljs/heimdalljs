@@ -91,7 +91,7 @@ For the documentation for `HeimdallTree` see []().
 ## Removing Heimdall from production builds.
 
 If desired, heimdall can be stripped from production builds using
-[this plugin](https://github.com/heimdalljs/babel5-plugin-strip-heimdall) for Babel5 or [this plugin]() for Babel6.
+[this plugin](https://github.com/heimdalljs/babel5-plugin-strip-heimdall) for Babel5 or [this plugin](https://github.com/heimdalljs/babel6-plugin-strip-heimdall) for Babel6.
 
 ## Global Session
 
