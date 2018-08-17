@@ -19,7 +19,7 @@ based.
 The overhead of time based stat collection is the cost of allocating a
  tiny `TypedArray`, a four element `Array`, and `performance.now()`. On
 Desktop Chrome on a 2015 era MacBook Pro this amounts to roughly 200
-nano seconds. You can easily run the benchmarks on devices you care about
+nanoseconds. You can easily run the benchmarks on devices you care about
  to see what the cost will be for you.
 
 The overhead of counter based collection is the cost of a method call
