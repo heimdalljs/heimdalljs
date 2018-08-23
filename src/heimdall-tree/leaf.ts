@@ -7,7 +7,7 @@ export default class HeimdallLeaf implements JsonSerializable<object> {
   public owner: HeimdallNode;
   public previousOp: string;
   public startTime: number;
-  public annotations: Array<object>;
+  public annotations: object[];
   public nextOp: string;
   public endTime: number;
   public counters: object;

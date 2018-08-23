@@ -4,8 +4,16 @@ import replace from 'rollup-plugin-replace';
 import typescript from 'rollup-plugin-typescript';
 
 export default {
-  entry: 'src/runtime/node/index.ts',
-  moduleName: 'heimdalljs',
+  input: 'src/runtime/node/index.ts',
+  output: [{
+      name: 'heimdalljs',
+      file: 'dist/heimdalljs.cjs.js',
+      format: 'cjs'
+    }, {
+      name: 'heimdalljs',
+      file: 'dist/heimdalljs.es.js',
+      format: 'es'
+  }],
   plugins: [
     typescript({
       include: [
@@ -20,9 +28,5 @@ export default {
     replace({
       VERSION_STRING_PLACEHOLDER: require('./package').version
     }),
-  ],
-  targets: [
-    { dest: 'dist/heimdalljs.cjs.js', format: 'cjs' },
-    { dest: 'dist/heimdalljs.es.js', format: 'es' },
   ]
 };

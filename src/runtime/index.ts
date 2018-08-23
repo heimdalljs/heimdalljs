@@ -1,10 +1,8 @@
 import Session from './session';
-import now from '../shared/time';
-import { format } from '../shared/time';
-import CounterStore from '../shared/counter-store';
+import now, { format } from '../shared/time';
 import EventArray from '../shared/event-array';
 import FastIntArray from '../shared/fast-int-array';
-import { NULL_NUMBER } from '../shared/counter-store';
+import CounterStore, { NULL_NUMBER } from '../shared/counter-store';
 import OpCodes from '../shared/op-codes';
 import JsonSerializable from '../interfaces/json-serializable';
 

@@ -127,7 +127,7 @@ export default class HeimdallNode implements JsonSerializable<object> {
     }
   }
 
-  public forEachChild(cb: (any) => void): void {
+  public forEachChild(cb: (arg: any) => void): void {
     for (let i = 0; i < this.children.length; ++i) {
       cb(this.children[i]);
     }

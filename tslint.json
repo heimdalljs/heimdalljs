@@ -6,6 +6,7 @@
     "prefer-for-of": false,
     "no-empty": false,
     "arrow-parens": [true, "ban-single-arg-parens"],
+    "no-console": [false, "log", "warn"],
     "member-ordering": [true, {
       "order": [
         "private-static-field",
@@ -30,10 +31,11 @@
     "match-default-export-name": false,
     "no-default-export": false,
     "no-internal-module": true,
+    "no-shadowed-variable": false,
     "ordered-imports": {
       "options": {
-        "import-sources-order": "never",
-        "named-imports-order": "never"
+        "import-sources-order": "any",
+        "named-imports-order": "any"
       }
     },
     "variable-name": {

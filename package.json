@@ -12,8 +12,8 @@
     "test": "yarn run tslint && mocha dist/tests/bundle.cjs --scenario=default && mocha dist/tests/bundle.cjs --scenario=array-fallback",
     "test:debug": "mocha --no-timeouts debug dist/tests/bundle.cjs",
     "build_and_test": "npm run build:test && npm run test",
-    "tslint": "tslint --typecheck -c tslint.json --project tsconfig.json",
-    "tslint:format": "tslint --typecheck -c tslint.json --project tsconfig.json --fix",
+    "tslint": "tslint -c tslint.json --project tsconfig.json",
+    "tslint:format": "tslint -c tslint.json --project tsconfig.json --fix",
     "trace": "node --trace-hydrogen --trace_phase=Z --trace_deopt --code_comments --hydrogen_track_positions --redirect_code_traces bench/ ",
     "prepublish": "npm run build"
   },
@@ -38,20 +38,20 @@
     "heimdall.js"
   ],
   "devDependencies": {
-    "@types/node": "^7.0.5",
-    "chai": "^3.2.0",
-    "chai-as-promised": "^5.1.0",
-    "chai-files": "^1.2.0",
-    "do-you-even-bench": "^1.0.2",
-    "mocha": "^2.2.5",
-    "mocha-jshint": "~2.2.3",
-    "rollup": "^0.34.1",
-    "rollup-plugin-commonjs": "^3.3.1",
-    "rollup-plugin-node-resolve": "^1.7.1",
-    "rollup-plugin-replace": "^1.1.1",
+    "@types/node": "^10.7.1",
+    "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
+    "chai-files": "^1.4.0",
+    "do-you-even-bench": "^1.0.5",
+    "mocha": "^5.2.0",
+    "mocha-jshint": "~2.3.1",
+    "rollup": "^0.64.1",
+    "rollup-plugin-commonjs": "^9.1.5",
+    "rollup-plugin-node-resolve": "^3.3.0",
+    "rollup-plugin-replace": "^2.0.0",
     "rollup-plugin-typescript": "^0.8.1",
-    "tslint": "^4.5.1",
-    "typescript": "^2.2.1"
+    "tslint": "^5.11.0",
+    "typescript": "^3.0.1"
   },
   "dependencies": {
     "rsvp": "~3.2.1"

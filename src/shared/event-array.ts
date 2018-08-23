@@ -48,7 +48,7 @@ export default class EventArray implements JsonSerializable<number[]> {
 
   public set(index: number, value: any): void {
     if (index > this.length) {
-      throw new Error("Index is out of array bounds.");
+      throw new Error('Index is out of array bounds.');
     }
 
     if (index === this.length) {
@@ -58,7 +58,7 @@ export default class EventArray implements JsonSerializable<number[]> {
     this._data[index] = value;
   }
 
-  public forEach(cb: (any, number) => void): void {
+  public forEach(cb: (x: any, n: number) => void): void {
     for (let i = 0; i < this.length; i += 4) {
       cb(this._data.slice(i, i + 4), i);
     }
