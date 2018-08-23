@@ -141,9 +141,9 @@ export default class HeimdallTree implements JsonSerializable<object> {
             if (node) {
               node.stop();
             } else {
-              throw new Error("Cannot Stop, Attempting to stop a non-existent node!");
+              throw new Error('Cannot Stop, Attempting to stop a non-existent node!');
             }
-            throw new Error("Cannot Stop, Attempting to stop a node with an active child!");
+            throw new Error('Cannot Stop, Attempting to stop a node with an active child!');
           }
 
           currentNode.stop();
@@ -240,9 +240,9 @@ export default class HeimdallTree implements JsonSerializable<object> {
             if (node) {
               node.stop();
             } else {
-              throw new Error("Cannot Stop, Attempting to stop a non-existent node!");
+              throw new Error('Cannot Stop, Attempting to stop a non-existent node!');
             }
-            throw new Error("Cannot Stop, Attempting to stop a node with an active child!");
+            throw new Error('Cannot Stop, Attempting to stop a node with an active child!');
           }
 
           currentNode.stop();

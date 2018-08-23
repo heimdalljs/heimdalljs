@@ -4,8 +4,20 @@ import replace from 'rollup-plugin-replace';
 import typescript from 'rollup-plugin-typescript';
 
 export default {
-  entry: 'tests/index.ts',
-  moduleName: 'heimdall-js',
+  input: 'tests/index.ts',
+  output: [{
+      name: 'heimdall-js',
+      file: 'dist/tests/bundle.cjs.js',
+      format: 'cjs'
+    }, {
+      name: 'heimdall-js',
+      file: 'dist/tests/bundle.umd.js',
+      format: 'umd'
+    }, {
+      name: 'heimdall-js',
+      file: 'dist/tests/bundle.es.js',
+      format: 'es'  
+  }],
   plugins: [
     typescript({
       include: [
@@ -21,10 +33,5 @@ export default {
     replace({
       VERSION_STRING_PLACEHOLDER: require('./package').version
     }),
-  ],
-  targets: [
-    { dest: 'dist/tests/bundle.cjs.js', format: 'cjs' },
-    { dest: 'dist/tests/bundle.umd.js', format: 'umd' },
-    { dest: 'dist/tests/bundle.es.js', format: 'es' },
   ]
 };

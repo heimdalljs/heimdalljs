@@ -15,7 +15,7 @@ export default class HashMap<T> {
     }
   }
 
-  public forEach(cb: (any, object) => void): HashMap<T> {
+  public forEach(cb: (arg1: any, arg2: any) => void): HashMap<T> {
     for (const key in this._data) {
       // skip undefined
       if (this._data[key] !== UNDEFINED_KEY) {

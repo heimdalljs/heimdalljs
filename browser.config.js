@@ -4,9 +4,16 @@ import replace from 'rollup-plugin-replace';
 import typescript from 'rollup-plugin-typescript';
 
 export default {
-  entry: 'src/runtime/browser/index.ts',
-  // module name is really heimdalljs but this is the global name
-  moduleName: 'heimdall',
+  input: 'src/runtime/browser/index.ts',
+  output: [{
+      name: 'heimdall',
+      file: 'dist/heimdalljs.umd.js',
+      format: 'umd'
+    }, {
+      name: 'heimdall',
+      file: 'dist/heimdalljs.iife.js',
+      format: 'iife'
+  }],
   plugins: [
     typescript({
       include: [
@@ -21,10 +28,6 @@ export default {
     replace({
       VERSION_STRING_PLACEHOLDER: require('./package').version
     }),
-  ],
-  targets: [
-    { dest: 'dist/heimdalljs.umd.js', format: 'umd' },
-    { dest: 'dist/heimdalljs.iife.js', format: 'iife' },
   ]
 };
 
