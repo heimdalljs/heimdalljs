@@ -4,15 +4,15 @@ import replace from 'rollup-plugin-replace';
 import typescript from 'rollup-plugin-typescript';
 
 export default {
-  input: 'src/runtime/node/index.ts',
+  input: 'src/runtime/browser/index.ts',
   output: [{
-      name: 'heimdalljs',
-      file: 'dist/heimdalljs.cjs.js',
-      format: 'cjs'
+      name: 'heimdall',
+      file: 'dist/heimdalljs.umd.js',
+      format: 'umd'
     }, {
-      name: 'heimdalljs',
-      file: 'dist/heimdalljs.es.js',
-      format: 'es'
+      name: 'heimdall',
+      file: 'dist/heimdalljs.iife.js',
+      format: 'iife'
   }],
   plugins: [
     typescript({
@@ -20,13 +20,14 @@ export default {
         'src/**/*'
       ],
       exclude: [
-        'node_modules/**'
+        '../../node_modules/**'
       ]
     }),
     nodeResolve({ jsnext: true, main: true }),
-    commonjs({ include: 'node_modules/**', ignoreGlobal: true }),
+    commonjs({ include: '../../node_modules/**', ignoreGlobal: true }),
     replace({
       VERSION_STRING_PLACEHOLDER: require('./package').version
     }),
   ]
 };
+

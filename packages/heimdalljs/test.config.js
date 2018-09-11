@@ -4,30 +4,34 @@ import replace from 'rollup-plugin-replace';
 import typescript from 'rollup-plugin-typescript';
 
 export default {
-  input: 'src/runtime/browser/index.ts',
+  input: 'tests/index.ts',
   output: [{
-      name: 'heimdall',
-      file: 'dist/heimdalljs.umd.js',
+      name: 'heimdall-js',
+      file: 'dist/tests/bundle.cjs.js',
+      format: 'cjs'
+    }, {
+      name: 'heimdall-js',
+      file: 'dist/tests/bundle.umd.js',
       format: 'umd'
     }, {
-      name: 'heimdall',
-      file: 'dist/heimdalljs.iife.js',
-      format: 'iife'
+      name: 'heimdall-js',
+      file: 'dist/tests/bundle.es.js',
+      format: 'es'  
   }],
   plugins: [
     typescript({
       include: [
-        'src/**/*'
+        'src/**/*',
+        'tests/**/*'
       ],
       exclude: [
-        'node_modules/**'
+        '../../node_modules/**'
       ]
     }),
     nodeResolve({ jsnext: true, main: true }),
-    commonjs({ include: 'node_modules/**', ignoreGlobal: true }),
+    commonjs({ include: '../../node_modules/**', ignoreGlobal: true }),
     replace({
       VERSION_STRING_PLACEHOLDER: require('./package').version
     }),
   ]
 };
-
