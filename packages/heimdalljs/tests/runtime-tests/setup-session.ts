@@ -11,7 +11,7 @@ describe('setupSession', function() {
   describe('when an existing session exists', function() {
 
     it('reuses that session', function() {
-      const global = {};
+      const global: any = {};
       const session = new Session();
 
       global._heimdall_session_3 = session;
@@ -24,7 +24,7 @@ describe('setupSession', function() {
 
   describe('when an existing session does not exist', function() {
     it('creates a new session saves it on the global', function() {
-      const global = {};
+      const global: any = {};
 
       expect(global._heimdall_session_3).to.equal(undefined);
 

@@ -33,7 +33,7 @@ export default class HashMap<T> {
   public get(key: string): T | undefined {
     const val: T = this._data[key];
 
-    return val === UNDEFINED_KEY ? undefined : val;
+    return val === (UNDEFINED_KEY as any) ? undefined : val;
   }
 
   public set(key: string | number, value: T): HashMap<T> {

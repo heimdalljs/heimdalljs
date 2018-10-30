@@ -6,15 +6,15 @@ import './heimdall-tree-tests';
 import scenarios from './scenarios';
 
 function seekArg(name) {
-  let args = process.argv;
+  const args = process.argv;
 
   for (let i = 1, l = args.length; i < l; i++) {
     if (args[i].indexOf(name) === 0) {
-      let argStr = args[i];
+      const argStr = args[i];
 
       return {
         index: i,
-        name: name,
+        name,
         arg: argStr,
         value: argStr.substr(name.length + 1)
       };
@@ -24,14 +24,8 @@ function seekArg(name) {
   return null;
 }
 
-let scenarioSpecified = seekArg('--scenario');
-let scenario;
-
-if (scenarioSpecified !== null) {
-  scenario = scenarioSpecified.value;
-} else {
-  scenario = 'default'
-}
+const scenarioSpecified = seekArg('--scenario');
+const scenario = scenarioSpecified !== null ? scenarioSpecified.value : 'default';
 
 scenarios[scenario].setup();
 

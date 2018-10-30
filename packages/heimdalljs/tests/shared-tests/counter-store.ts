@@ -19,6 +19,6 @@ describe('CounterStore', function() {
       _namespaceCount: 0,
       _nameCache: {},
       _labelCache: {}
-    }) instanceof CounterStore).to.be.true;
+    } as any) instanceof CounterStore).to.be.true;
   });
 });

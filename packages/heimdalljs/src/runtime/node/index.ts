@@ -7,7 +7,7 @@ import setupSession from '../setup-session';
 
 setupSession(process);
 
-const defaultHeimdall = new Heimdall(process._heimdall_session_3);
+const defaultHeimdall: any = new Heimdall((process as any)._heimdall_session_3);
 
 defaultHeimdall.now = now;
 defaultHeimdall.Heimdall = Heimdall;

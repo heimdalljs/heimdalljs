@@ -102,7 +102,7 @@ export default class CounterStore implements JsonSerializable<object> {
     this._config.push(numCounters);
 
     if (this._cache !== null) {
-      this._cache = arrayGrow(this._cache, namespaceIndex, this._namespaceCount, NULL_NUMBER);
+      this._cache = arrayGrow(this._cache as Uint32Array, namespaceIndex, this._namespaceCount, NULL_NUMBER);
     }
 
     for (let i = 0; i < numCounters; i++) {
