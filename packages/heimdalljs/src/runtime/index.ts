@@ -1,4 +1,5 @@
 import Session from './session';
+import Tree from '../heimdall-tree';
 import now, { format } from '../shared/time';
 import EventArray from '../shared/event-array';
 import FastIntArray from '../shared/fast-int-array';
@@ -20,7 +21,6 @@ const VERSION = 'VERSION_STRING_PLACEHOLDER';
  */
 export default class Heimdall implements JsonSerializable<object> {
   private _session: Session;
-
   /**
    * Proxy method to cache the current counts on the session's monitors.
    * @method _retrieveCounters
@@ -39,6 +39,8 @@ export default class Heimdall implements JsonSerializable<object> {
   static get VERSION(): string {
     return VERSION;
   }
+  public static Session: typeof Session;
+  public static Tree: typeof Tree;
 
   constructor(session) {
     if (arguments.length < 1) {
@@ -82,7 +84,12 @@ export default class Heimdall implements JsonSerializable<object> {
    * @returns {Number} a token that can be given to `stop()` and `resume()` to identify the timer
    */
   public start(name: string): number {
-    return this._session.events.push(OpCodes.OP_START, name, now(), this._retrieveCounters());
+    return this._session.events.push(
+      OpCodes.OP_START,
+      name,
+      now(),
+      this._retrieveCounters()
+    );
   }
 
   /**
@@ -92,7 +99,12 @@ export default class Heimdall implements JsonSerializable<object> {
    * @param {Number} token, the return value of a call to heimdall.start()
    */
   public stop(token: number): void {
-    this._session.events.push(OpCodes.OP_STOP, token, now(), this._retrieveCounters());
+    this._session.events.push(
+      OpCodes.OP_STOP,
+      token,
+      now(),
+      this._retrieveCounters()
+    );
   }
 
   /**
@@ -102,7 +114,12 @@ export default class Heimdall implements JsonSerializable<object> {
    * @param {Number} token, the return value of a call to heimdall.start()
    */
   public resume(token: number): void {
-    this._session.events.push(OpCodes.OP_RESUME, token, now(), this._retrieveCounters());
+    this._session.events.push(
+      OpCodes.OP_RESUME,
+      token,
+      now(),
+      this._retrieveCounters()
+    );
   }
 
   /**
@@ -111,7 +128,12 @@ export default class Heimdall implements JsonSerializable<object> {
    * @param {*} info
    */
   public annotate(info: Uint32Array | number[] | FastIntArray): void {
-    this._session.events.push(OpCodes.OP_ANNOTATE, NULL_NUMBER, NULL_NUMBER, info);
+    this._session.events.push(
+      OpCodes.OP_ANNOTATE,
+      NULL_NUMBER,
+      NULL_NUMBER,
+      info
+    );
   }
 
   /**
@@ -132,7 +154,11 @@ export default class Heimdall implements JsonSerializable<object> {
    */
   public registerMonitor(name: string, ...keys: string[]): never | object {
     if (name === 'own' || name === 'time') {
-      throw new Error('Cannot register monitor at namespace "' + name + '".  "own" and "time" are reserved');
+      throw new Error(
+        'Cannot register monitor at namespace "' +
+          name +
+          '".  "own" and "time" are reserved'
+      );
     }
     if (this.hasMonitor(name)) {
       throw new Error('A monitor for "' + name + '" is already registered"');

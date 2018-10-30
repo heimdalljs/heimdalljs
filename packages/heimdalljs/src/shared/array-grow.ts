@@ -12,7 +12,7 @@ export default function grow(array: Uint32Array | number[], oldLength: number, n
 
     return ret;
   } else {
-    array.length = newLength;
+    (array as number[]).length = newLength;
     arrayFill(array, fillValue, oldLength, newLength);
 
     return array;

@@ -6,6 +6,7 @@
     "prefer-for-of": false,
     "no-empty": false,
     "arrow-parens": [true, "ban-single-arg-parens"],
+    "only-arrow-functions": false,
     "no-console": [false, "log", "warn"],
     "member-ordering": [true, {
       "order": [
