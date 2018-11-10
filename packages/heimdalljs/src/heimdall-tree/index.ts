@@ -274,7 +274,6 @@ export default class HeimdallTree implements JsonSerializable<object> {
     });
 
     while (currentNode && !currentNode.stopped) {
-      const name: string = currentNode.name;
       const n: HeimdallNode = currentNode;
 
       currentNode.stop();

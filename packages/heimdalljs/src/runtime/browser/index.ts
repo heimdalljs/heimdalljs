@@ -1,14 +1,25 @@
-import Heimdall from '../';
-import Session from '../session';
-import Tree from '../../heimdall-tree';
+import HeimdallCtor from '../';
+import SessionCtor from '../session';
+import TreeCtor from '../../heimdall-tree';
 
 import setupSession from '../setup-session';
 
-setupSession(self);
+const session = setupSession(self);
 
 // browser equivalent of heimdall.js
-self.Heimdall = Heimdall;
-Heimdall.Session = Session;
-Heimdall.Tree = Tree;
 
-export default new Heimdall(self._heimdall_session_3);
+type HeimdallGlobal = typeof HeimdallCtor & {
+  Session: typeof SessionCtor;
+  Tree: typeof TreeCtor;
+};
+
+declare global {
+  let Heimdall: HeimdallGlobal;
+}
+
+// tslint:disable-next-line:prefer-object-spread
+Heimdall = HeimdallCtor as HeimdallGlobal;
+Heimdall.Session = SessionCtor;
+Heimdall.Tree = TreeCtor;
+
+export default new HeimdallCtor(session);

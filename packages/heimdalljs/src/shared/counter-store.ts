@@ -16,7 +16,7 @@ export default class CounterStore implements JsonSerializable<object> {
   private _store: FastIntArray;
   private _namespaceCount: number;
   private _config: FastIntArray;
-  private _cache: Uint32Array | number[] | FastIntArray;
+  private _cache: Uint32Array | number[];
   private _labelCache: object;
   private _nameCache: object;
 

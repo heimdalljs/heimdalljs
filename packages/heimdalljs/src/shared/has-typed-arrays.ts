@@ -7,6 +7,6 @@ export function _setHasTypedArrays(v: boolean) {
   HAS_TYPED_ARRAYS = v;
 }
 
-export default function hasTypedArrays() {
+export default function hasTypedArrays(array?: Uint32Array | number[]): array is Uint32Array {
   return HAS_TYPED_ARRAYS;
 }

@@ -2,7 +2,7 @@ import hasTypedArrays from './has-typed-arrays';
 import arrayFill from './array-fill';
 
 export default function grow(array: Uint32Array | number[], oldLength: number, newLength: number, fillValue = 0) {
-  if (hasTypedArrays()) {
+  if (hasTypedArrays(array)) {
     const ret = new Uint32Array(newLength);
     ret.set(array);
 

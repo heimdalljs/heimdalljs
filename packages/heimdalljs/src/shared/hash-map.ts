@@ -1,4 +1,4 @@
-export const UNDEFINED_KEY: object = Object.create(null);
+export const UNDEFINED_KEY: any = Object.create(null);
 
 export default class HashMap<T> {
   private _data: object;

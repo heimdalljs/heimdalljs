@@ -1,7 +1,7 @@
 import hasTypedArrays from './has-typed-arrays';
 
 export default function fill(array: Uint32Array | number[], value: number, start?: number, end?: number) {
-  if (hasTypedArrays()) {
+  if (hasTypedArrays(array)) {
     return array.fill(value, start, end);
   } else {
     let s: number = start || 0;

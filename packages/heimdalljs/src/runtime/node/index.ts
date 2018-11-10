@@ -5,9 +5,18 @@ import Tree from '../../heimdall-tree';
 import Node from '../../heimdall-tree/node';
 import setupSession from '../setup-session';
 
-setupSession(process);
+const session = setupSession(process);
 
-const defaultHeimdall = new Heimdall(process._heimdall_session_3);
+// This should be handled by packaging not here
+type HeimdallNamespace = Heimdall & {
+  now: typeof now;
+  Heimdall: typeof Heimdall;
+  Session: typeof Session;
+  _Tree: typeof Tree;
+  _Node: typeof Node;
+};
+
+const defaultHeimdall = new Heimdall(session) as HeimdallNamespace;
 
 defaultHeimdall.now = now;
 defaultHeimdall.Heimdall = Heimdall;
