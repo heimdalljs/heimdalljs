@@ -9,9 +9,10 @@
     "build:node": "lerna run build:node --stream",
     "build:browser": "lerna run build:browser --stream",
     "build:test": "lerna run build:test --stream",
+    "link": "lerna link --force-local",
     "test": "lerna run test --stream"
   },
   "devDependencies": {
-    "lerna": "^3.2.1"
+    "lerna": "^3.7.1"
   }
 }
