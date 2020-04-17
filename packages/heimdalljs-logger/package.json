@@ -1,0 +1,46 @@
+{
+  "name": "heimdalljs-logger",
+  "version": "0.1.10",
+  "description": "Structured logging via heimdalljs",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "rollup --no-strict -c test.config.js && rollup -c index.config.js",
+    "test": "npm run build && mocha dist/tests/index.js",
+    "test:debug": "npm run build && mocha --no-timeouts debug dist/tests/index.js",
+    "prepublish": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/heimdalljs/heimdalljs-logger.git"
+  },
+  "author": "David J. Hamilton <davidjh@hjdivad.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/heimdalljs/heimdalljs-logger/issues"
+  },
+  "homepage": "https://github.com/heimdalljs/heimdalljs-logger#README.md",
+  "keywords": [
+    "javascript"
+  ],
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@rollup/plugin-buble": "^0.21.3",
+    "@rollup/plugin-commonjs": "^11.1.0",
+    "@rollup/plugin-json": "^4.0.2",
+    "@rollup/plugin-node-resolve": "^7.1.3",
+    "babel-preset-es2015": "6.13.0",
+    "babel-preset-es2015-rollup": "^1.1.1",
+    "babel-core": "^6.26.3",
+    "chai": "^3.5.0",
+    "mocha": "^2.2.5",
+    "mocha-jshint": "~2.2.3",
+    "rollup": "^2.6.1",
+    "rollup-plugin-babel": "^3.0.0"
+  },
+  "dependencies": {
+    "debug": "^4.1.1",
+    "heimdalljs": "^0.2.6"
+  }
+}
