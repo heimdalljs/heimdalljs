@@ -13,7 +13,7 @@ export default {
   }],
   external: [...Object.keys(pkg.devDependencies), ...Object.keys(pkg.dependencies), 'path'],
   plugins: [
-    babel({ exclude: 'node_modules/**', include: 'src/**' }),
+    babel({ exclude: 'node_modules/**', include: 'src/**', babelrc: true }),
     nodeResolve({ jsnext: true, main: true }),
     commonjs({ include: '../../node_modules/**', ignoreGlobal: true }),
     json(),
