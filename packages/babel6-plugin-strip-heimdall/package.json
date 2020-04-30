@@ -1,0 +1,17 @@
+{
+  "name": "babel6-plugin-strip-heimdall",
+  "version": "6.0.1",
+  "description": "Strips heimdall instrumentation from babel6 output",
+  "main": "index.js",
+  "keywords": [
+    "babel",
+    "babel-plugin"
+  ],
+  "author": "Chris Thoburn",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-core": "^6.24.0",
+    "common-tags": "^1.4.0",
+    "mocha": "^3.2.0"
+  }
+}
