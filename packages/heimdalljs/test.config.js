@@ -22,6 +22,10 @@ export default {
       file: 'dist/tests/bundle.es.js',
       format: 'es'
   }],
+  external: [
+    'chai',
+    'chai-as-promised',
+  ],
   plugins: [
     typescript({
       include: [

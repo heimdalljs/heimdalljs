@@ -15,7 +15,7 @@ export default {
     'debug',
   ],
   plugins: [
-    babel({ exclude: 'node_modules/**' }),
+    babel({ exclude: 'node_modules/**', babelrc: true }),
     nodeResolve({ jsnext: true, main: true }),
     commonjs({ include: '../../node_modules/**', ignoreGlobal: true }),
     json(),
