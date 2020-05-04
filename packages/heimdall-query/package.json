@@ -1,0 +1,24 @@
+{
+  "name": "heimdall-query",
+  "version": "0.1.0",
+  "description": "Analysis Tool for Heimdall Trees",
+  "repository": "git://github.com/heimdalljs/heimdall-query.git",
+  "directories": {},
+  "scripts": {},
+  "engines": {
+    "node": ">= 4.0.0"
+  },
+  "main": "./src/index.js",
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^1.1.1",
+    "chrome-debugging-client": "^0.2.4",
+    "cli-table": "^0.3.1",
+    "lodash": "^4.15.0",
+    "outliers": "0.0.3",
+    "plain-text-box-plot": "0.0.1",
+    "progress": "^1.1.8",
+    "selenium-webdriver": "2.48.2"
+  }
+}
