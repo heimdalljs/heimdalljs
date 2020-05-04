@@ -5,6 +5,10 @@ import typescript from 'rollup-plugin-typescript';
 
 export default {
   input: 'tests/index.ts',
+  external: [
+    'chai',
+    'chai-as-promised'
+  ],
   output: [{
       name: 'heimdall-js',
       file: 'dist/tests/bundle.cjs.js',
@@ -16,7 +20,7 @@ export default {
     }, {
       name: 'heimdall-js',
       file: 'dist/tests/bundle.es.js',
-      format: 'es'  
+      format: 'es'
   }],
   plugins: [
     typescript({
