@@ -14,6 +14,8 @@
     "prepublish": "npm run build"
   },
   "files": [
+    "LICENSE",
+    "README.md",
     "src/",
     "dist/",
     "!dist/cjs/tests/",

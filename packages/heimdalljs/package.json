@@ -31,6 +31,8 @@
     "javascript"
   ],
   "files": [
+    "LICENSE",
+    "README.md",
     "dist/heimdalljs.cjs.js",
     "dist/heimdalljs.es.js",
     "dist/heimdalljs.iife.js",
