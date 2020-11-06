@@ -25,7 +25,7 @@ The overhead of counter based collection is the cost of a method call
 
 ## Getting started
 
-Checkout [heimdalljs](packages/heimdalljs) for more info on getting started and installed.
+Check out [heimdalljs](packages/heimdalljs) for more info on getting started and installed.
 
 ### How is the repo structured?
 
