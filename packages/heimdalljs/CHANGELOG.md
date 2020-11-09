@@ -1,5 +1,9 @@
 # master
 
+# 1.0.0 
+
+* rolls back changes to 0.2.6
+
 # 0.3.3
 
 * add runtime version information
@@ -20,6 +24,28 @@
 * DO NOT USE THIS VERSION
 * alpha release to work around npm install bugs causing problems downstream with
   our actual alpha tag 0.3.0-alpha3
+
+# 0.2.6
+
+* remove non-actionable logging
+
+# 0.2.5
+
+* don't include RSVP within node bundle
+* unbalanced start/stop now warn instead of throw
+
+# 0.2.4
+
+* don't include tests in published package
+
+# 0.2.3
+
+* Fixed publish of v0.2.2
+
+# 0.2.2
+
+* Add API `heimdall.hasMonitor` (#37) (thanks @zachthehuman)
+
 
 # 0.2.1
 

@@ -1,7 +1,7 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import Session from '../../src/runtime/session';
-import setupSession from '../../src/runtime/setup-session';
+import Session from '../src/session';
+import setupSession from '../src/setup-session';
 
 const { expect } = chai;
 
@@ -14,11 +14,11 @@ describe('setupSession', function() {
       const global = {};
       const session = new Session();
 
-      global._heimdall_session_3 = session;
+      global._heimdall_session_2 = session;
 
       setupSession(global);
 
-      expect(global._heimdall_session_3).to.equal(session);
+      expect(global._heimdall_session_2).to.equal(session);
     });
   });
 
@@ -26,11 +26,11 @@ describe('setupSession', function() {
     it('creates a new session saves it on the global', function() {
       const global = {};
 
-      expect(global._heimdall_session_3).to.equal(undefined);
+      expect(global._heimdall_session_2).to.equal(undefined);
 
       setupSession(global);
 
-      expect(global._heimdall_session_3).to.be.an.instanceOf(Session);
+      expect(global._heimdall_session_2).to.be.an.instanceOf(Session);
     });
   });
 });
