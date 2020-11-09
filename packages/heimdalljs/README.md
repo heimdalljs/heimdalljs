@@ -11,23 +11,6 @@ node or the browser.
 npm install heimdalljs
 ```
 
-## How fast?
-
-Heimdall allows for 2 forms of stat collection: counter based and time
-based.
-
-The overhead of time based stat collection is the cost of allocating a
- tiny `TypedArray`, a four element `Array`, and `performance.now()`. On
-Desktop Chrome on a 2015 era MacBook Pro this amounts to roughly 200
-nanoseconds. You can easily run the benchmarks on devices you care about
- to see what the cost will be for you.
-
-The overhead of counter based collection is the cost of a method call
- with two bitwise operations and an integer increment.  An occasional
- Uint32Array allocation is thrown in when more space is needed. The cost
- here is pragmatically negligible, and counters are ideal for situations
- in which the overhead of a timer is enough to significantly alter stats.
-
 ## Usage
 
 **instantiate**
