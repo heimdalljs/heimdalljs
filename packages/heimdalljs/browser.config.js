@@ -1,33 +1,25 @@
-import nodeResolve from 'rollup-plugin-node-resolve';
-import commonjs from 'rollup-plugin-commonjs';
-import replace from 'rollup-plugin-replace';
-import typescript from 'rollup-plugin-typescript';
+import nodeResolve from '@rollup/plugin-node-resolve';
+import babel from 'rollup-plugin-babel';
+import commonjs from '@rollup/plugin-commonjs';
+import json from '@rollup/plugin-json';
+import pkg from './package.json';
 
 export default {
-  input: 'src/runtime/browser/index.ts',
+  input: 'src/browser/index.js',
   output: [{
-      name: 'heimdall',
-      file: 'dist/heimdalljs.umd.js',
-      format: 'umd'
-    }, {
-      name: 'heimdall',
-      file: 'dist/heimdalljs.iife.js',
-      format: 'iife'
+    name: 'heimdalljs',
+    file: 'dist/heimdalljs.umd.js',
+    format: 'umd',
+  },{
+    name: 'heimdalljs',
+    file: 'dist/heimdalljs.iife.js',
+    format: 'iife',
   }],
+  external: [...Object.keys(pkg.devDependencies), ...Object.keys(pkg.dependencies), 'path'],
   plugins: [
-    typescript({
-      include: [
-        'src/**/*'
-      ],
-      exclude: [
-        '../../node_modules/**'
-      ]
-    }),
+    babel({ exclude: 'node_modules/**', include: 'src/**', babelrc: true }),
     nodeResolve({ jsnext: true, main: true }),
     commonjs({ include: '../../node_modules/**', ignoreGlobal: true }),
-    replace({
-      VERSION_STRING_PLACEHOLDER: require('./package').version
-    }),
-  ]
+    json(),
+  ],
 };
-
