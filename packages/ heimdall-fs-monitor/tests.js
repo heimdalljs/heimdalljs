@@ -8,12 +8,12 @@ const path = require('path');
 
 const originalFS = Object.assign({}, fs);
 
-describe('FSMonitor', function() {
-  beforeEach(function() {
+describe('FSMonitor', function () {
+  beforeEach(function () {
     process.env.HEIMDALL_FS_MONITOR_CALL_TRACING = 0;
   });
 
-  it('will only allow one active instance at a time', function() {
+  it('will only allow one active instance at a time', function () {
     let monitor0 = new FSMonitor();
     let monitor1 = new FSMonitor();
 
@@ -35,21 +35,24 @@ describe('FSMonitor', function() {
     monitor0.stop();
   });
 
-  it('does not mutate the prototype of classes on fs [GH#22]', function() {
+  it('does not mutate the prototype of classes on fs [GH#22]', function () {
     let monitor = new FSMonitor();
 
     expect(typeof fs.Stats.prototype.isFile).to.equal('function');
 
     monitor.start();
 
-    expect(typeof fs.Stats.prototype.isFile).to.equal('function', 'after updating fs');
+    expect(typeof fs.Stats.prototype.isFile).to.equal(
+      'function',
+      'after updating fs'
+    );
 
     monitor.stop();
 
     expect(typeof fs.Stats.prototype.isFile).to.equal('function');
   });
 
-  it('avoids mutating known classes on `fs` [GH#22]', function() {
+  it('avoids mutating known classes on `fs` [GH#22]', function () {
     let monitor = new FSMonitor();
 
     expect(fs.Stats.prototype.isFile).to.be;
@@ -83,7 +86,7 @@ describe('FSMonitor', function() {
     expect(fs.WriteStream).to.equal(originalFS.WriteStream);
   });
 
-  it('should be able to gather call tracking data from fs commands', function() {
+  it('should be able to gather call tracking data from fs commands', function () {
     process.env.HEIMDALL_FS_MONITOR_CALL_TRACING = 1;
 
     const monitor = new FSMonitor();
@@ -94,27 +97,28 @@ describe('FSMonitor', function() {
 
     monitor.stop();
 
-    const expected = [
-      'readFileSync',
-      'openSync',
-      'readSync',
-      'closeSync'
-    ];
+    const expected = ['readFileSync', 'openSync', 'readSync', 'closeSync'];
 
-    if(process.version.match(/v6/)) {
+    if (process.version.match(/v6/)) {
       expected.push('fstatSync');
     }
 
-    expect(Object.keys(heimdall.current.stats.fs).sort()).to.deep.equal(expected.sort());
-    expect(Object.keys(heimdall.current.stats.fs.readFileSync.invocations).length).to.equal(1);
-    expect(Object.keys(heimdall.current.stats.fs.readFileSync.invocations[Object.keys(heimdall.current.stats.fs.readFileSync.invocations)[0]])).to.deep.equal([
-      'lineNumber',
-      'fileName',
-      'count'
-    ]);
+    expect(Object.keys(heimdall.current.stats.fs).sort()).to.deep.equal(
+      expected.sort()
+    );
+    expect(
+      Object.keys(heimdall.current.stats.fs.readFileSync.invocations).length
+    ).to.equal(1);
+    expect(
+      Object.keys(
+        heimdall.current.stats.fs.readFileSync.invocations[
+          Object.keys(heimdall.current.stats.fs.readFileSync.invocations)[0]
+        ]
+      )
+    ).to.deep.equal(['lineNumber', 'fileName', 'count']);
   });
 
-  it('should not be able to gather call tracking data from fs commands', function() {
+  it('should not be able to gather call tracking data from fs commands', function () {
     heimdall.current.stats.fs = {};
 
     const monitor = new FSMonitor();
@@ -125,23 +129,22 @@ describe('FSMonitor', function() {
 
     monitor.stop();
 
-    const expected = [
-      'readFileSync',
-      'openSync',
-      'readSync',
-      'closeSync'
-    ];
+    const expected = ['readFileSync', 'openSync', 'readSync', 'closeSync'];
 
-    if(process.version.match(/v6/)) {
+    if (process.version.match(/v6/)) {
       expected.push('fstatSync');
     }
 
-    expect(Object.keys(heimdall.current.stats.fs).sort()).to.deep.equal(expected.sort());
-    expect(Object.keys(heimdall.current.stats.fs.readFileSync.invocations).length).to.equal(0);
+    expect(Object.keys(heimdall.current.stats.fs).sort()).to.deep.equal(
+      expected.sort()
+    );
+    expect(
+      Object.keys(heimdall.current.stats.fs.readFileSync.invocations).length
+    ).to.equal(0);
   });
 
-  describe('.prototype.stop', function() {
-    it('restores fs functions to their defaults', function() {
+  describe('.prototype.stop', function () {
+    it('restores fs functions to their defaults', function () {
       let monitor = new FSMonitor();
 
       expect(fs.statSync).to.equal(originalFS.statSync);

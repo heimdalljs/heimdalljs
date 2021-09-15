@@ -1,7 +1,7 @@
 language: node_js
 node_js:
-  - "lts/*"
-  - "node"
+  - 'lts/*'
+  - 'node'
 
 cache: yarn
 before_install:

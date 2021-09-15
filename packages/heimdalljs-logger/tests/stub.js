@@ -1,4 +1,3 @@
-
 export default function createStub(obj, methodName) {
   const orig = obj[methodName];
 
@@ -7,13 +6,13 @@ export default function createStub(obj, methodName) {
   }
 
   const calls = [];
-  
+
   const stub = function (...args) {
     calls.push([this, args]);
   };
 
   stub.calls = calls;
-  stub.restore = () => obj[methodName] = orig;
+  stub.restore = () => (obj[methodName] = orig);
 
   obj[methodName] = stub;
 }

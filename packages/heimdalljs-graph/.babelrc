@@ -1,13 +1,14 @@
 {
-  "presets": [
-    ["es2015", { "modules": false }]
-  ],
+  "presets": [["es2015", { "modules": false }]],
   "plugins": [
     "external-helpers",
-    ["transform-runtime", {
-      "helpers": false, // defaults to true
-      "polyfill": false, // defaults to true
-      "regenerator": true, // defaults to true
-    }]
+    [
+      "transform-runtime",
+      {
+        "helpers": false, // defaults to true
+        "polyfill": false, // defaults to true
+        "regenerator": true // defaults to true
+      }
+    ]
   ]
 }

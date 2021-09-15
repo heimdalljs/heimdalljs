@@ -19,7 +19,7 @@ class RequireSchema {
     return {
       count: this.count,
       time: this.time,
-      modules: this.modules
+      modules: this.modules,
     };
   }
 }
@@ -45,7 +45,6 @@ export default class RequireMonitor {
       this._attach();
       hasActiveInstance = true;
     } else {
-
     }
   }
 
@@ -80,13 +79,13 @@ export default class RequireMonitor {
         let info = {
           requestedModuleId,
           parentModuleId: parent.id,
-          duration: null
+          duration: null,
         };
 
         metrics.modules.push(info);
 
         let ret = _load.apply(Module, arguments);
-        let duration = info.duration = nanosecondsSince(start);
+        let duration = (info.duration = nanosecondsSince(start));
         metrics.time += duration;
         return ret;
       }

@@ -1,5 +1,5 @@
-module.exports = function prettyTimes({row, stats}) {
-  for (let i = 0; i <stats.length; ++i) {
+module.exports = function prettyTimes({ row, stats }) {
+  for (let i = 0; i < stats.length; ++i) {
     let stat = stats[i];
 
     row[0] = row[0].valueOf();

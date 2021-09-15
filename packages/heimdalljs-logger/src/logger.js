@@ -1,9 +1,7 @@
 import debugGen from 'debug';
 import Prefixer from './prefixer';
 
-export const [
-  ERROR, WARN, INFO, DEBUG, TRACE
-] = [ 0, 1, 2, 3, 4 ];
+export const [ERROR, WARN, INFO, DEBUG, TRACE] = [0, 1, 2, 3, 4];
 
 export default class Logger {
   constructor(namespace, level) {
@@ -41,9 +39,9 @@ export default class Logger {
 }
 
 export let NULL_LOGGER = {
-  trace() { },
-  debug() { },
-  info() { },
-  warn() { },
-  error() { }
+  trace() {},
+  debug() {},
+  info() {},
+  warn() {},
+  error() {},
 };

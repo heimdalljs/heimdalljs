@@ -7,24 +7,24 @@ const babel = require('babel-core');
 const StripHeimdall = require('../index');
 const stripIndent = require('common-tags').stripIndent;
 
-describe('babel6-plugin-strip-heimdall', function() {
+describe('babel6-plugin-strip-heimdall', function () {
   let precompile, plugins;
 
   function transform(code) {
-    return babel.transform(code, {
-      plugins
-    }).code.trim();
+    return babel
+      .transform(code, {
+        plugins,
+      })
+      .code.trim();
   }
 
-  beforeEach(function() {
+  beforeEach(function () {
     precompile = (template) => template.toUpperCase();
 
-    plugins = [
-      [StripHeimdall]
-    ];
+    plugins = [[StripHeimdall]];
   });
 
-  it("strips general heimdall statements", function() {
+  it('strips general heimdall statements', function () {
     let input = stripIndent`
       (function (global) {
         var heimdall = global.heimdall;

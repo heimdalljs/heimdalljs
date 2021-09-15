@@ -15,5 +15,5 @@ module.exports = {
     heimdall.increment(x);
     heimdall.stop(b);
     heimdall.stop(a);
-  }
+  },
 };

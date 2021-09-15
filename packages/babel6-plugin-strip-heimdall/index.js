@@ -1,15 +1,14 @@
 'use strict';
 
 function shouldStripNode(node) {
-  if (node.id &&
-    node.id.type === 'Identifier' &&
-    node.id.name === 'heimdall') {
+  if (node.id && node.id.type === 'Identifier' && node.id.name === 'heimdall') {
     return true;
-  } else if (node.type === 'CallExpression' &&
+  } else if (
+    node.type === 'CallExpression' &&
     node.callee &&
     node.callee.type === 'MemberExpression' &&
-    node.callee.object.name === 'heimdall') {
-
+    node.callee.object.name === 'heimdall'
+  ) {
     return true;
 
     // catch things like `token = heimdall.start('<id>')
@@ -30,10 +29,9 @@ function stripHeimdall(babel) {
   let t = babel.types;
 
   return {
-    name: "strip-heimdall", // not required
+    name: 'strip-heimdall', // not required
     visitor: {
-
-      ExpressionStatement: function(path) {
+      ExpressionStatement: function (path) {
         let node = path.node;
         // strip stops
         if (shouldStripNode(node.expression)) {
@@ -41,7 +39,7 @@ function stripHeimdall(babel) {
         }
       },
 
-      VariableDeclaration: function(path) {
+      VariableDeclaration: function (path) {
         let node = path.node;
         //strip `let token = heimdall.start('<id>');`
         if (node.declarations) {
@@ -62,12 +60,12 @@ function stripHeimdall(babel) {
             }
           }
         }
-      }
-    }
+      },
+    },
   };
 }
 
-stripHeimdall.baseDir = function() {
+stripHeimdall.baseDir = function () {
   return __dirname;
 };
 

@@ -8,17 +8,17 @@ import RequireMonitor from '../src';
 const { expect } = chai;
 const originalLoad = Module._load;
 
-describe('heimdalljs-require-monitor', function() {
-  beforeEach(function() {
+describe('heimdalljs-require-monitor', function () {
+  beforeEach(function () {
     clearRequire('./fixtures/silly-module');
     clearRequire('./fixtures/slow-module');
   });
 
-  afterEach(function() {
+  afterEach(function () {
     expect(Module._load, 'Module._load has been reset').to.equal(originalLoad);
   });
 
-  it('will only allow one active instance at a time', function() {
+  it('will only allow one active instance at a time', function () {
     let monitor0 = new RequireMonitor();
     let monitor1 = new RequireMonitor();
 
@@ -36,21 +36,20 @@ describe('heimdalljs-require-monitor', function() {
 
       expect(monitor0.state, 'monitor0 (m1 active)').to.eql('idle');
       expect(monitor1.state, 'monitor1 (m1 active)').to.eql('active');
-
     } finally {
       monitor0.stop();
       monitor1.stop();
     }
   });
 
-  describe('adds stats', function() {
+  describe('adds stats', function () {
     let token, monitor;
 
-    beforeEach(function() {
+    beforeEach(function () {
       token = heimdall.start('test harness');
     });
 
-    afterEach(function() {
+    afterEach(function () {
       if (token) {
         // stop in a way compat with 0.2 and 0.3
         heimdall.stop ? heimdall.stop(token) : token.stop();
@@ -61,17 +60,17 @@ describe('heimdalljs-require-monitor', function() {
       }
     });
 
-    it('does not log stats unless started', function() {
+    it('does not log stats unless started', function () {
       let stats = heimdall.statsFor('require');
       require('./fixtures/silly-module');
       expect(stats).to.deep.equal({
         time: 0,
         count: 0,
-        modules: []
+        modules: [],
       });
     });
 
-    it('logs stats when started', function() {
+    it('logs stats when started', function () {
       let stats = heimdall.statsFor('require');
       monitor = new RequireMonitor();
       monitor.start();

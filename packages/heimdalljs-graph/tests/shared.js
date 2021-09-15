@@ -41,17 +41,17 @@ k.stop();
 
 let node = heimdall.root._children[0];
 
-describe('heimdalljs-graph-shared', function() {
-  describe('.loadFromNode', function() {
-    it('loads without error', function() {
+describe('heimdalljs-graph-shared', function () {
+  describe('.loadFromNode', function () {
+    it('loads without error', function () {
       expect(() => {
         loadFromNode(node);
       }).to.not.throw();
     });
   });
 
-  describe('dfsIterator', function() {
-    it('works', function() {
+  describe('dfsIterator', function () {
+    it('works', function () {
       let tree = loadFromNode(node);
 
       let names = [];
@@ -59,39 +59,41 @@ describe('heimdalljs-graph-shared', function() {
         names.push(node.label.name);
       }
       expect(names, 'depth first, pre order').to.eql([
-        'j','f','a','d','h','k','z'
+        'j',
+        'f',
+        'a',
+        'd',
+        'h',
+        'k',
+        'z',
       ]);
     });
   });
 
-  describe('bfsIterator', function() {
-    it('works', function() {
+  describe('bfsIterator', function () {
+    it('works', function () {
       let tree = loadFromNode(node);
 
       let names = [];
       for (let node of tree.bfsIterator()) {
         names.push(node.label.name);
       }
-      expect(names).to.eql([
-        'j', 'f', 'k', 'a', 'h', 'z', 'd'
-      ]);
+      expect(names).to.eql(['j', 'f', 'k', 'a', 'h', 'z', 'd']);
     });
 
-    it('allows specifying `until`', function() {
+    it('allows specifying `until`', function () {
       let tree = loadFromNode(node);
 
       let names = [];
-      for (let node of tree.bfsIterator(n => n.label.name === 'a')) {
+      for (let node of tree.bfsIterator((n) => n.label.name === 'a')) {
         names.push(node.label.name);
       }
-      expect(names).to.eql([
-        'j', 'f', 'k', 'h', 'z'
-      ]);
+      expect(names).to.eql(['j', 'f', 'k', 'h', 'z']);
     });
   });
 
-  describe('ancestorsIterator', function() {
-    it('works', function() {
+  describe('ancestorsIterator', function () {
+    it('works', function () {
       let tree = loadFromNode(node);
 
       let d = null;
@@ -106,14 +108,12 @@ describe('heimdalljs-graph-shared', function() {
       for (let node of d.ancestorsIterator()) {
         names.push(node.label.name);
       }
-      expect(names).to.eql([
-        'a', 'f', 'j'
-      ]);
+      expect(names).to.eql(['a', 'f', 'j']);
     });
   });
 
-  describe('adjacentIterator', function() {
-    it('works', function() {
+  describe('adjacentIterator', function () {
+    it('works', function () {
       let tree = loadFromNode(node);
 
       let names = [];
@@ -121,14 +121,12 @@ describe('heimdalljs-graph-shared', function() {
         names.push(node.label.name);
       }
 
-      expect(names, 'adjacent nodes').to.eql([
-        'f', 'k'
-      ]);
+      expect(names, 'adjacent nodes').to.eql(['f', 'k']);
     });
   });
 
-  describe('Symbol.iterator', function() {
-    it('works', function() {
+  describe('Symbol.iterator', function () {
+    it('works', function () {
       let tree = loadFromNode(node);
 
       let names = [];
@@ -137,7 +135,13 @@ describe('heimdalljs-graph-shared', function() {
       }
 
       expect(names, 'depth first, pre order').to.eql([
-        'j','f','a','d','h','k','z'
+        'j',
+        'f',
+        'a',
+        'd',
+        'h',
+        'k',
+        'z',
       ]);
     });
   });

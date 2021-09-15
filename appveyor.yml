@@ -2,9 +2,9 @@
 
 # Test against these versions of Node.js.
 environment:
-  MOCHA_REPORTER: "mocha-appveyor-reporter"
+  MOCHA_REPORTER: 'mocha-appveyor-reporter'
   matrix:
-    - nodejs_version: "6"
+    - nodejs_version: '6'
 
 # Install scripts. (runs after repo cloning)
 install:
@@ -27,4 +27,4 @@ test_script:
 build: off
 
 # Set build version format here instead of in the admin panel.
-version: "{build}"
+version: '{build}'

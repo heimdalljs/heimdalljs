@@ -20,9 +20,7 @@ export function loadFromJSON(json) {
   return loadFromV02Nodes(nodesJSON);
 }
 
-
 function loadFromV02Nodes(nodesJSON) {
-
   let nodesById = {};
   let root = null;
 
@@ -46,7 +44,7 @@ function loadFromV02Nodes(nodesJSON) {
     let id = jsonNode._id || jsonNode.id;
 
     let node = nodesById[id];
-    let children = jsonNode.children.map(childId => {
+    let children = jsonNode.children.map((childId) => {
       let child = nodesById[childId];
 
       if (!child) {

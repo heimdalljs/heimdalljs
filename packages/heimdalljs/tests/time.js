@@ -8,8 +8,8 @@ const { expect } = chai;
 
 chai.use(chaiAsPromised);
 
-describe('timeFromDate', function() {
-  it('reports a diff in nanoseconds', function() {
+describe('timeFromDate', function () {
+  it('reports a diff in nanoseconds', function () {
     const markA = timeFromDate();
 
     return new Promise((resolve) => {

@@ -5,7 +5,13 @@ export default class HeimdallNode {
     this._id = heimdall.generateNextId();
     this.id = id;
 
-    if (!(typeof this.id === 'object' && this.id !== null && typeof this.id.name === 'string')) {
+    if (
+      !(
+        typeof this.id === 'object' &&
+        this.id !== null &&
+        typeof this.id.name === 'string'
+      )
+    ) {
       throw new TypeError('HeimdallNode#id.name must be a string');
     }
 
@@ -40,7 +46,7 @@ export default class HeimdallNode {
   }
 
   forEachChild(cb) {
-    for (let i=0; i<this._children.length; ++i) {
+    for (let i = 0; i < this._children.length; ++i) {
       cb(this._children[i]);
     }
   }
@@ -61,21 +67,23 @@ export default class HeimdallNode {
       _id: this._id,
       id: this.id,
       stats: this.stats,
-      children: this._children.map(child => child._id ),
+      children: this._children.map((child) => child._id),
     };
   }
 
   toJSONSubgraph() {
     let nodes = [];
 
-    this.visitPreOrder(node => nodes.push(node.toJSON()));
+    this.visitPreOrder((node) => nodes.push(node.toJSON()));
 
     return nodes;
   }
 
   addChild(node) {
     if (node.parent) {
-      throw new TypeError('Node ' + node._id + ' already has a parent.  Cannot add to ' + this._id);
+      throw new TypeError(
+        'Node ' + node._id + ' already has a parent.  Cannot add to ' + this._id
+      );
     }
 
     this._children.push(node);
@@ -83,12 +91,17 @@ export default class HeimdallNode {
     node.parent = this;
   }
 
-
   removeChild(child) {
     let index = this._children.indexOf(child);
 
     if (index < 0) {
-      throw new Error('Child(' + child._id + ') not found in Parent(' + this._id + ').  Something is very wrong.');
+      throw new Error(
+        'Child(' +
+          child._id +
+          ') not found in Parent(' +
+          this._id +
+          ').  Something is very wrong.'
+      );
     }
     this._children.splice(index, 1);
 

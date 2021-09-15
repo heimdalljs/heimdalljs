@@ -1,7 +1,7 @@
 // provides easily interceptable indirection.
 class Dict {
   constructor() {
-    this._storage  = {};
+    this._storage = {};
   }
 
   has(key) {
@@ -13,16 +13,15 @@ class Dict {
   }
 
   set(key, value) {
-    return this._storage[key] = value;
+    return (this._storage[key] = value);
   }
 
-  'delete'(key) {
+  delete(key) {
     delete this._storage[key];
   }
 }
 
 export default class HeimdallSession {
-
   constructor() {
     this.reset();
   }

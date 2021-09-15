@@ -1,7 +1,12 @@
 import debug from 'debug';
 import {
-  ERROR, WARN, INFO, DEBUG, TRACE,
-  NULL_LOGGER, default as Logger
+  ERROR,
+  WARN,
+  INFO,
+  DEBUG,
+  TRACE,
+  NULL_LOGGER,
+  default as Logger,
 } from './logger';
 
 function computeDebugLevel() {
@@ -11,11 +16,21 @@ function computeDebugLevel() {
     level = INFO;
   } else {
     switch (process.env.DEBUG_LEVEL.toUpperCase()) {
-      case 'ERROR': level = ERROR; break;
-      case 'WARN':  level = WARN; break;
-      case 'INFO':  level = INFO; break;
-      case 'DEBUG': level = DEBUG; break;
-      case 'TRACE': level = TRACE; break;
+      case 'ERROR':
+        level = ERROR;
+        break;
+      case 'WARN':
+        level = WARN;
+        break;
+      case 'INFO':
+        level = INFO;
+        break;
+      case 'DEBUG':
+        level = DEBUG;
+        break;
+      case 'TRACE':
+        level = TRACE;
+        break;
       default:
         level = parseInt(process.env.DEBUG_LEVEL, 10);
     }

@@ -9,5 +9,5 @@ module.exports = {
   },
   fn() {
     heimdall.increment(x);
-  }
+  },
 };

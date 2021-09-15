@@ -6,7 +6,14 @@ const resultsToTrees = require('./helpers/results-to-trees');
 
 module.exports = function analyzeRuns(slug, resultSet, config) {
   let len = resultSet.length;
-  let { ignoreBranches, stats, finderPath, compressAfter, collapseByName, maxDepth } = config;
+  let {
+    ignoreBranches,
+    stats,
+    finderPath,
+    compressAfter,
+    collapseByName,
+    maxDepth,
+  } = config;
   let trees = resultsToTrees(resultSet);
   let tables = new Array(len);
 
@@ -18,7 +25,7 @@ module.exports = function analyzeRuns(slug, resultSet, config) {
       ignoreBranches,
       collapseByName,
       maxDepth,
-      finder: name => name === finderPath,
+      finder: (name) => name === finderPath,
     });
   }
 
@@ -28,6 +35,6 @@ module.exports = function analyzeRuns(slug, resultSet, config) {
     name: '\n\n' + slugToPhrase(slug) + '\n====================\n',
     stats,
     runCount: len,
-    table: combinedTables
+    table: combinedTables,
   });
 };

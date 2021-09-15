@@ -11,17 +11,16 @@ TestRunner.prototype.run = function runTests() {
   let CACHE_DIR = this.outputDir;
 
   return slugs
-    .reduce(function(chain, slug) {
-      return chain.then(function() {
+    .reduce(function (chain, slug) {
+      return chain.then(function () {
         var test = new ChromeTest({ slug, runs, domain }, CACHE_DIR);
 
-        return test.run()
-          .then(function(result) {
-            results.push(result);
-          });
+        return test.run().then(function (result) {
+          results.push(result);
+        });
       });
     }, Promise.resolve())
-    .then(function() {
+    .then(function () {
       return results;
     });
 };

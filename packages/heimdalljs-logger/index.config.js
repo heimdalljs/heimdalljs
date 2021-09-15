@@ -5,15 +5,14 @@ import json from '@rollup/plugin-json';
 
 export default {
   input: 'src/index.js',
-  output: [{
-    name: 'heimdalljs-logger',
-    file: 'dist/index.js',
-    format: 'cjs',
-  }],
-  external: [
-    'heimdalljs',
-    'debug',
+  output: [
+    {
+      name: 'heimdalljs-logger',
+      file: 'dist/index.js',
+      format: 'cjs',
+    },
   ],
+  external: ['heimdalljs', 'debug'],
   plugins: [
     babel({ exclude: 'node_modules/**', babelrc: true }),
     nodeResolve({ jsnext: true, main: true }),

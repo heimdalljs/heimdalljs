@@ -10,29 +10,35 @@ var json = require('@rollup/plugin-json');
 async function build(input, dest, format, name) {
   const bundle = await rollup.rollup({
     input,
-    external: [
-      'fs',
-      'heimdalljs',
-      'chai'
-    ],
+    external: ['fs', 'heimdalljs', 'chai'],
     plugins: [
       babel({ exclude: 'node_modules/**' }),
       nodeResolve({ jsnext: true, main: true }),
       commonjs({ include: '../../node_modules/**', ignoreGlobal: true }),
       json(),
-    ]
+    ],
   });
 
   await bundle.write({
     name,
     file: dest,
-    format
+    format,
   });
 }
 
-(async function() {
-  await build('src/runtimes/browser.js', 'dist/amd/heimdalljs-graph.js', 'amd', 'heimdalljs-graph');
+(async function () {
+  await build(
+    'src/runtimes/browser.js',
+    'dist/amd/heimdalljs-graph.js',
+    'amd',
+    'heimdalljs-graph'
+  );
   await build('src/runtimes/node.js', 'dist/cjs/index.js', 'cjs');
-  await build('tests/runtimes/browser.js', 'dist/amd/heimdalljs-graph-tests.js', 'amd', 'heimdalljs-graph-tests');
+  await build(
+    'tests/runtimes/browser.js',
+    'dist/amd/heimdalljs-graph-tests.js',
+    'amd',
+    'heimdalljs-graph-tests'
+  );
   await build('tests/runtimes/node.js', 'dist/cjs/tests/index.js', 'cjs');
-}())
+})();

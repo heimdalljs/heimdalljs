@@ -10,5 +10,5 @@ module.exports = {
     let b = heimdall.start('b');
     heimdall.stop(b);
     heimdall.stop(a);
-  }
+  },
 };

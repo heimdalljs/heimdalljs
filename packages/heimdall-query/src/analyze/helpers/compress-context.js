@@ -13,7 +13,12 @@ module.exports = function compressContext({
     for (let i = 0; i < contextRows.length; i++) {
       let row = contextRows[i];
       let key = row[0];
-      let collapsedRow = keys[key] = keys[key] || { name: key, count: 0, data: row, nodes: [] };
+      let collapsedRow = (keys[key] = keys[key] || {
+        name: key,
+        count: 0,
+        data: row,
+        nodes: [],
+      });
 
       collapsedRow.count++;
       collapsedRow.nodes.push(row.node);
@@ -36,7 +41,11 @@ module.exports = function compressContext({
       if (i.count <= 1) {
         i.data.node = i.nodes[0];
       } else {
-        i.data.node = { nodes: i.nodes.reduce((c, i) => { return c.concat(i.nodes); }, []) };
+        i.data.node = {
+          nodes: i.nodes.reduce((c, i) => {
+            return c.concat(i.nodes);
+          }, []),
+        };
       }
 
       i.data.count = i.count;
@@ -49,12 +58,18 @@ module.exports = function compressContext({
     return contextRows;
   }
   const other = contextRows.slice(compressAfter);
-  const summaryRow = other.reduce((summary, row) => {
-    for (let i=1; i<row.length; ++i) {
-      summary[i] += row[i];
-    }
-    return summary;
-  }, [`${prefix(depth)}other (${other.length})`, ...arrayOf(0, other[0].length-1)]);
+  const summaryRow = other.reduce(
+    (summary, row) => {
+      for (let i = 1; i < row.length; ++i) {
+        summary[i] += row[i];
+      }
+      return summary;
+    },
+    [
+      `${prefix(depth)}other (${other.length})`,
+      ...arrayOf(0, other[0].length - 1),
+    ]
+  );
 
   return [...contextRows.slice(0, compressAfter), summaryRow];
 };

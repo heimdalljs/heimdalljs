@@ -15,27 +15,29 @@ let heimdall;
 let logOutput;
 
 function captureOutput() {
-  console.log = (msg) => { logOutput = msg; }
+  console.log = (msg) => {
+    logOutput = msg;
+  };
 }
 
 function getJSONSansTime() {
   let json = heimdall.toJSON();
-  for (let i=0; i<json.nodes.length; ++i) {
+  for (let i = 0; i < json.nodes.length; ++i) {
     delete json.nodes[i].stats.time;
   }
   return json;
 }
 
-describe('heimdall', function() {
+describe('heimdall', function () {
   beforeEach(function () {
     heimdall = new Heimdall();
   });
 
-  afterEach(function() {
+  afterEach(function () {
     console.log = origLog;
   });
 
-  it('creates a new session if none is provided', function() {
+  it('creates a new session if none is provided', function () {
     let h1 = new Heimdall();
     let h2 = new Heimdall();
 
@@ -50,7 +52,7 @@ describe('heimdall', function() {
     expect(h2.stack).to.eql(['b']);
   });
 
-  it('uses a provided session', function() {
+  it('uses a provided session', function () {
     let session = new Session();
 
     let h1 = new Heimdall(session);
@@ -73,21 +75,23 @@ describe('heimdall', function() {
     expect(h2.stack).to.eql(['a', 'b']);
   });
 
-  describe('with nodes from multiple heimdall instances', function() {
+  describe('with nodes from multiple heimdall instances', function () {
     let origHRTime;
     let nextTime;
 
-    beforeEach( function() {
+    beforeEach(function () {
       origHRTime = process.hrtime;
       nextTime = [0, 0];
-      process.hrtime = function () { return nextTime; };
+      process.hrtime = function () {
+        return nextTime;
+      };
     });
 
-    afterEach( function() {
+    afterEach(function () {
       process.hrtime = origHRTime;
     });
 
-    it('sets time correctly over shared sessions', function() {
+    it('sets time correctly over shared sessions', function () {
       let session = new Session();
       let h1 = new Heimdall(session);
       let h2 = new Heimdall(session);
@@ -109,48 +113,52 @@ describe('heimdall', function() {
     });
   });
 
-  describe('.node', function() {
+  describe('.node', function () {
     it('implicitly stops the cookie when the promise resolves', function () {
       let callbackInvoked = false;
 
       expect(heimdall.stack).to.eql([]);
 
-      return heimdall.node('node-a', function () {
-        callbackInvoked = true;
-        expect(heimdall.stack).to.eql(['node-a']);
-      }).finally(function () {
-        expect(callbackInvoked).to.equal(true);
-        expect(heimdall.stack).to.eql([]);
-      });
+      return heimdall
+        .node('node-a', function () {
+          callbackInvoked = true;
+          expect(heimdall.stack).to.eql(['node-a']);
+        })
+        .finally(function () {
+          expect(callbackInvoked).to.equal(true);
+          expect(heimdall.stack).to.eql([]);
+        });
     });
 
     it('implicitly stops the cookie when the promise resolves for a nested graph', function () {
       expect(heimdall.stack).to.eql([]);
 
-      return heimdall.node('node-a', function () {
-        expect(heimdall.stack).to.eql(['node-a']);
+      return heimdall
+        .node('node-a', function () {
+          expect(heimdall.stack).to.eql(['node-a']);
 
-        let nodeB = heimdall.node('node-b', function() {
+          let nodeB = heimdall.node('node-b', function () {
+            expect(heimdall.stack).to.eql(['node-a', 'node-b']);
+          });
+
           expect(heimdall.stack).to.eql(['node-a', 'node-b']);
+
+          return nodeB;
+        })
+        .finally(function () {
+          expect(heimdall.stack).to.eql([]);
         });
-
-        expect(heimdall.stack).to.eql(['node-a', 'node-b']);
-
-        return nodeB;
-      }).finally(function () {
-        expect(heimdall.stack).to.eql([]);
-      });
     });
   });
 
-  describe('.start/stop/resume', function() {
-    it('supports basic start/stop', function() {
+  describe('.start/stop/resume', function () {
+    it('supports basic start/stop', function () {
       expect(heimdall.stack).to.eql([]);
 
       let cookieA = heimdall.start({ name: 'node-a' });
       expect(heimdall.stack).to.eql(['node-a']);
 
-      let cookieB = heimdall.start({ name: 'node-b'});
+      let cookieB = heimdall.start({ name: 'node-b' });
       expect(heimdall.stack).to.eql(['node-a', 'node-b']);
 
       cookieB.stop();
@@ -176,7 +184,7 @@ describe('heimdall', function() {
       let cookieA = heimdall.start({ name: 'node-a' });
       expect(heimdall.stack).to.eql(['node-a']);
 
-      let cookieB = heimdall.start({ name: 'node-b'});
+      let cookieB = heimdall.start({ name: 'node-b' });
       expect(heimdall.stack).to.eql(['node-a', 'node-b']);
 
       cookieB.stop();
@@ -245,26 +253,32 @@ describe('heimdall', function() {
       }
     }
 
-    it('always includes time', function() {
-      return heimdall.node('node-a', function () {}).then(function () {
-        let json = heimdall.toJSON();
-        let nodeA;
-        for (let i=0; i<json.nodes.length; ++i) {
-          if (json.nodes[i].id.name === 'node-a') {
-            nodeA = json.nodes[i];
-            break;
+    it('always includes time', function () {
+      return heimdall
+        .node('node-a', function () {})
+        .then(function () {
+          let json = heimdall.toJSON();
+          let nodeA;
+          for (let i = 0; i < json.nodes.length; ++i) {
+            if (json.nodes[i].id.name === 'node-a') {
+              nodeA = json.nodes[i];
+              break;
+            }
           }
-        }
 
-        expect(nodeA).to.not.eql(undefined);
-        expect(typeof nodeA.stats.time).to.eql('object');
-      });
+          expect(nodeA).to.not.eql(undefined);
+          expect(typeof nodeA.stats.time).to.eql('object');
+        });
     });
 
     it('reports node-specific stats for an individual node', function () {
-      return expect(heimdall.node('node-a', SchemaA, function (h) {
-        h.count = 6;
-      }).then(getJSONSansTime)).to.eventually.deep.equal({
+      return expect(
+        heimdall
+          .node('node-a', SchemaA, function (h) {
+            h.count = 6;
+          })
+          .then(getJSONSansTime)
+      ).to.eventually.deep.equal({
         nodes: [
           {
             _id: 0,
@@ -272,7 +286,7 @@ describe('heimdall', function() {
               name: 'heimdall',
             },
             stats: {
-              own: { },
+              own: {},
             },
             children: [1],
           },
@@ -287,92 +301,98 @@ describe('heimdall', function() {
               },
             },
             children: [],
-          }
-        ]
+          },
+        ],
       });
     });
 
-    it('reports node-specific stats for a graph', function (){
-      return expect(heimdall.node('node-a', SchemaA, function (h) {
-        h.count = 1;
-        return heimdall.node('node-b', SchemaB, function (h) {
-          h.statA = 2;
-          h.statB = 4;
-          return heimdall.node('node-b2', SchemaB, function (h) {
-            h.statA = 8;
-            h.statB = 16;
-          });
-        }).then(function () {
-          return heimdall.node('node-b', SchemaB, function (h) {
-            h.statA = 32;
-            h.statB = 64;
-          });
-        });
-      }).then(getJSONSansTime)).to.eventually.deep.equal({
+    it('reports node-specific stats for a graph', function () {
+      return expect(
+        heimdall
+          .node('node-a', SchemaA, function (h) {
+            h.count = 1;
+            return heimdall
+              .node('node-b', SchemaB, function (h) {
+                h.statA = 2;
+                h.statB = 4;
+                return heimdall.node('node-b2', SchemaB, function (h) {
+                  h.statA = 8;
+                  h.statB = 16;
+                });
+              })
+              .then(function () {
+                return heimdall.node('node-b', SchemaB, function (h) {
+                  h.statA = 32;
+                  h.statB = 64;
+                });
+              });
+          })
+          .then(getJSONSansTime)
+      ).to.eventually.deep.equal({
         nodes: [
           {
             _id: 0,
             id: {
-              name: "heimdall"
+              name: 'heimdall',
             },
             stats: {
-              own: {}
+              own: {},
             },
             children: [1],
           },
           {
             _id: 1,
             id: {
-              name: "node-a"
+              name: 'node-a',
             },
             stats: {
               own: {
-                count: 1
-              }
+                count: 1,
+              },
             },
-            children: [2,4],
+            children: [2, 4],
           },
 
           {
             _id: 2,
             id: {
-              name: "node-b"
+              name: 'node-b',
             },
             stats: {
               own: {
                 statA: 2,
-                statB: 4
-              }
+                statB: 4,
+              },
             },
             children: [3],
           },
           {
             _id: 3,
             id: {
-              name: "node-b2"
+              name: 'node-b2',
             },
             stats: {
               own: {
                 statA: 8,
-                statB: 16
-              }
+                statB: 16,
+              },
             },
-            children: []
+            children: [],
           },
           {
             _id: 4,
             id: {
-              name: "node-b"
+              name: 'node-b',
             },
             stats: {
               own: {
                 statA: 32,
-                statB: 64
-              }
+                statB: 64,
+              },
             },
-            children: []
-          }
-        ]
+            children: [],
+          },
+        ],
       });
     });
   });
@@ -391,22 +411,24 @@ describe('heimdall', function() {
     });
   });
 
-  describe('.configFor', function() {
-    it('returns a config bucket for the given name', function() {
+  describe('.configFor', function () {
+    it('returns a config bucket for the given name', function () {
       expect(heimdall.configFor('logging')).to.deep.equal({});
     });
 
-    it('returns the same config each time for a given name', function() {
+    it('returns the same config each time for a given name', function () {
       let logConfig = heimdall.configFor('logging');
 
       logConfig.depth = 30;
 
-      expect(heimdall.configFor('logging')).to.equal(heimdall.configFor('logging'));
+      expect(heimdall.configFor('logging')).to.equal(
+        heimdall.configFor('logging')
+      );
       expect(heimdall.configFor('logging').depth).to.equal(30);
     });
   });
 
-  describe('monitors', function() {
+  describe('monitors', function () {
     class MonitorSchema {
       constructor() {
         this.mstatA = 0;
@@ -449,67 +471,83 @@ describe('heimdall', function() {
       }).to.throw('A monitor for "some-monitor" is already registered');
     });
 
-    it('throws if using the reserved namespaces own or time', function() {
+    it('throws if using the reserved namespaces own or time', function () {
       expect(function () {
         heimdall.registerMonitor('own', function MySchema() {});
-      }).to.throw('Cannot register monitor at namespace "own".  "own" and "time" are reserved');
+      }).to.throw(
+        'Cannot register monitor at namespace "own".  "own" and "time" are reserved'
+      );
 
       expect(function () {
         heimdall.registerMonitor('time', function MySchema() {});
-      }).to.throw('Cannot register monitor at namespace "time".  "own" and "time" are reserved');
+      }).to.throw(
+        'Cannot register monitor at namespace "time".  "own" and "time" are reserved'
+      );
     });
 
-    it('records stats for each node', function() {
+    it('records stats for each node', function () {
       heimdall.registerMonitor('my-monitor', MonitorSchema);
 
-      return expect(heimdall.node('node-a', function () {
-        return heimdall.node('node-b', function () {
-          monitorEvent();
-        }).then(monitorEvent);
-      }).then(function () {
-        return heimdall.node('node-c', function () {
-          monitorEvent();
-        });
-      }).then(getJSONSansTime)).to.eventually.deep.equal({
-        nodes: [{
-          _id: 0,
-          id: { name: 'heimdall' },
-          stats: { own: {}, },
-          children: [1, 3],
-        }, {
-          _id: 1,
-          id: { name: 'node-a' },
-          stats: {
-            own: {},
-            'my-monitor': {
-              mstatA: 2,
-              mstatB: 20,
-            },
+      return expect(
+        heimdall
+          .node('node-a', function () {
+            return heimdall
+              .node('node-b', function () {
+                monitorEvent();
+              })
+              .then(monitorEvent);
+          })
+          .then(function () {
+            return heimdall.node('node-c', function () {
+              monitorEvent();
+            });
+          })
+          .then(getJSONSansTime)
+      ).to.eventually.deep.equal({
+        nodes: [
+          {
+            _id: 0,
+            id: { name: 'heimdall' },
+            stats: { own: {} },
+            children: [1, 3],
           },
-          children: [2],
-        }, {
-          _id: 2,
-          id: { name: 'node-b' },
-          stats: {
-            own: {},
-            'my-monitor': {
-              mstatA: 1,
-              mstatB: 10,
+          {
+            _id: 1,
+            id: { name: 'node-a' },
+            stats: {
+              own: {},
+              'my-monitor': {
+                mstatA: 2,
+                mstatB: 20,
+              },
             },
+            children: [2],
           },
-          children: [],
-        }, {
-          _id: 3,
-          id: { name: 'node-c' },
-          stats: {
-            own: {},
-            'my-monitor': {
-              mstatA: 3,
-              mstatB: 30,
+          {
+            _id: 2,
+            id: { name: 'node-b' },
+            stats: {
+              own: {},
+              'my-monitor': {
+                mstatA: 1,
+                mstatB: 10,
+              },
             },
+            children: [],
           },
-          children: [],
-        }],
+          {
+            _id: 3,
+            id: { name: 'node-c' },
+            stats: {
+              own: {},
+              'my-monitor': {
+                mstatA: 3,
+                mstatB: 30,
+              },
+            },
+            children: [],
+          },
+        ],
       });
     });
   });

@@ -5,7 +5,7 @@ const analyzeRuns = require('./analyze-runs');
 const exp = {
   printTable,
   loadTree,
-  analyzeRuns
+  analyzeRuns,
 };
 
 module.exports = exp;

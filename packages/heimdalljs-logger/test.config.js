@@ -6,12 +6,18 @@ import pkg from './package.json';
 
 export default {
   input: 'tests/index.js',
-  output: [{
-    name: 'heimdall-js-logger',
-    file: 'dist/tests/index.js',
-    format: 'cjs',
-  }],
-  external: [...Object.keys(pkg.devDependencies), ...Object.keys(pkg.dependencies), 'path'],
+  output: [
+    {
+      name: 'heimdall-js-logger',
+      file: 'dist/tests/index.js',
+      format: 'cjs',
+    },
+  ],
+  external: [
+    ...Object.keys(pkg.devDependencies),
+    ...Object.keys(pkg.dependencies),
+    'path',
+  ],
   plugins: [
     babel({ exclude: 'node_modules/**', include: 'src/**', babelrc: true }),
     nodeResolve({ jsnext: true, main: true }),

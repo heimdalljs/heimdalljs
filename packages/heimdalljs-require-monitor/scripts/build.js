@@ -21,34 +21,42 @@ async function build(input, dest, format) {
     plugins: [
       babel({
         exclude: 'node_modules/**',
-        presets: [
-          ["es2015", { "modules": false }]
-        ],
+        presets: [['es2015', { modules: false }]],
         plugins: [
-          "external-helpers",
-          ["transform-runtime", {
-            "helpers": false, // defaults to true
-            "polyfill": false, // defaults to true
-            "regenerator": true, // defaults to true
-          }]
-        ]
+          'external-helpers',
+          [
+            'transform-runtime',
+            {
+              helpers: false, // defaults to true
+              polyfill: false, // defaults to true
+              regenerator: true, // defaults to true
+            },
+          ],
+        ],
       }),
       nodeResolve({ jsnext: true, main: true }),
       commonjs({ include: '../../node_modules/**', ignoreGlobal: true }),
       json(),
-    ]
+    ],
   });
 
   await bundle.write({
     file: dest,
-    format
+    format,
   });
 }
 
-
-(async function() {
+(async function () {
   await build('src/index.js', 'dist/index.js', 'cjs');
   await build('tests/index.js', 'dist/tests/index.js', 'cjs');
-  await build('tests/fixtures/silly-module.js', 'dist/tests/fixtures/silly-module.js', 'cjs');
-  await build('tests/fixtures/slow-module.js', 'dist/tests/fixtures/slow-module.js', 'cjs');
-}())
+  await build(
+    'tests/fixtures/silly-module.js',
+    'dist/tests/fixtures/silly-module.js',
+    'cjs'
+  );
+  await build(
+    'tests/fixtures/slow-module.js',
+    'dist/tests/fixtures/slow-module.js',
+    'cjs'
+  );
+})();
