@@ -4,7 +4,13 @@ import debug from 'debug';
 import heimdall from 'heimdalljs';
 
 import {
-  ERROR, WARN, INFO, DEBUG, TRACE, default as Logger, NULL_LOGGER
+  ERROR,
+  WARN,
+  INFO,
+  DEBUG,
+  TRACE,
+  default as Logger,
+  NULL_LOGGER,
 } from '../src/logger';
 import { default as Prefixer, defaultPrefixer } from '../src/prefixer';
 // This is the main, debug-like API
@@ -12,29 +18,31 @@ import logGenerator from '../src/index';
 
 let { expect } = chai;
 
-describe('logGenerator', function() {
+describe('logGenerator', function () {
   const origDebugLevel = process.env.DEBUG_LEVEL;
 
-  beforeEach( function() {
+  beforeEach(function () {
     debug.names.splice(0, debug.names.length);
     debug.skips.splice(0, debug.skips.length);
   });
 
-  afterEach( function() {
+  afterEach(function () {
     process.env.DEBUG_LEVEL = origDebugLevel;
   });
 
-  it('returns a null logger for disabled namespaces', function() {
+  it('returns a null logger for disabled namespaces', function () {
     expect(logGenerator('something')).to.equal(NULL_LOGGER);
   });
 
-  it('returns a logger', function() {
+  it('returns a logger', function () {
     debug.enable('super-duper:project');
 
-    expect(logGenerator('super-duper:project') instanceof Logger).to.equal(true);
+    expect(logGenerator('super-duper:project') instanceof Logger).to.equal(
+      true
+    );
   });
 
-  it('sets log level according to DEBUG_LEVEL for names', function() {
+  it('sets log level according to DEBUG_LEVEL for names', function () {
     debug.enable('super-duper:project');
 
     expect(logGenerator('something-else')).to.equal(NULL_LOGGER);
@@ -80,7 +88,7 @@ describe('logGenerator', function() {
     expect(logGenerator('super-duper:project').level).to.equal(TRACE);
   });
 
-  it('sets log level according to DEBUG_LEVEL for numbers', function() {
+  it('sets log level according to DEBUG_LEVEL for numbers', function () {
     debug.enable('super-duper:project');
 
     process.env.DEBUG_LEVEL = `${ERROR}`;
@@ -104,7 +112,7 @@ describe('logGenerator', function() {
     expect(logGenerator('super-duper:project').level).to.equal(TRACE);
   });
 
-  it('uses a default level of INFO', function() {
+  it('uses a default level of INFO', function () {
     debug.enable('super-duper:project');
 
     delete process.env.DEBUG_LEVEL;
@@ -113,22 +121,22 @@ describe('logGenerator', function() {
   });
 });
 
-describe('NullLogger', function() {
-  it('implements the logger API with noops', function() {
+describe('NullLogger', function () {
+  it('implements the logger API with noops', function () {
     let logger = NULL_LOGGER;
 
     const noopFnPattern = /^function (\w|\$)*\(\) \{\}$/;
 
-    expect(logger.error+'').to.match(noopFnPattern);
-    expect(logger.warn+'').to.match(noopFnPattern);
-    expect(logger.info+'').to.match(noopFnPattern);
-    expect(logger.debug+'').to.match(noopFnPattern);
-    expect(logger.trace+'').to.match(noopFnPattern);
+    expect(logger.error + '').to.match(noopFnPattern);
+    expect(logger.warn + '').to.match(noopFnPattern);
+    expect(logger.info + '').to.match(noopFnPattern);
+    expect(logger.debug + '').to.match(noopFnPattern);
+    expect(logger.trace + '').to.match(noopFnPattern);
   });
 });
 
-describe('Logger', function() {
-  it('prints messages <= its level', function() {
+describe('Logger', function () {
+  it('prints messages <= its level', function () {
     let logger = new Logger('namespace', TRACE);
     logger._print = spy('_print');
 
@@ -147,7 +155,7 @@ describe('Logger', function() {
     ]);
   });
 
-  it('ignores messages > its level', function() {
+  it('ignores messages > its level', function () {
     let logger = new Logger('namespace', ERROR - 1);
     logger._print = spy('_print');
 
@@ -160,7 +168,7 @@ describe('Logger', function() {
     expect(logger._print.calls.map((c) => c.slice(1))).to.eql([]);
   });
 
-  it('prefixes messages', function() {
+  it('prefixes messages', function () {
     let logger = new Logger('namespace', INFO);
     logger._print = spy('_print');
     logger._prefixer = {
@@ -176,12 +184,12 @@ describe('Logger', function() {
   });
 });
 
-describe('Prefixer', function() {
-  beforeEach( function() {
+describe('Prefixer', function () {
+  beforeEach(function () {
     heimdall._reset();
   });
 
-  it("reads matcher and depth from heimdall's logging config if present", function() {
+  it("reads matcher and depth from heimdall's logging config if present", function () {
     let logConfig = heimdall.configFor('logging');
 
     logConfig.depth = 1;
@@ -196,11 +204,11 @@ describe('Prefixer', function() {
     expect(prefixer.prefix()).to.match(/\[hello#\d\] /);
   });
 
-  it('ignores the heimdall root node', function() {
+  it('ignores the heimdall root node', function () {
     expect(new Prefixer().prefix()).to.equal('');
   });
 
-  it('collects nodes from path to root, limited by `matcher`', function() {
+  it('collects nodes from path to root, limited by `matcher`', function () {
     heimdall.start({ name: 'a' });
     heimdall.start({ name: 'b' });
     heimdall.start({ name: 'c' });
@@ -213,7 +221,7 @@ describe('Prefixer', function() {
     expect(prefixer.prefix()).to.match(/\[a#\d -> c#\d -> e#\d\] /);
   });
 
-  it('collects nodes from path to root, limited by `depth`', function() {
+  it('collects nodes from path to root, limited by `depth`', function () {
     heimdall.start({ name: 'a' });
     heimdall.start({ name: 'b' });
     heimdall.start({ name: 'c' });
@@ -226,7 +234,7 @@ describe('Prefixer', function() {
     expect(prefixer.prefix()).to.match(/\[b#\d -> c#\d -> d#\d -> e#\d\] /);
   });
 
-  it('defaults depth to 3', function() {
+  it('defaults depth to 3', function () {
     heimdall.start({ name: 'a' });
     heimdall.start({ name: 'b' });
     heimdall.start({ name: 'c' });

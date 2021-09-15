@@ -1,4 +1,4 @@
-export default function *keyValueIterator(obj, prefix = '') {
+export default function* keyValueIterator(obj, prefix = '') {
   for (let key in obj) {
     let value = obj[key];
 

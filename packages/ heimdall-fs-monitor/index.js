@@ -24,12 +24,14 @@ class FSMonitor {
       'FSWatcher',
       'ReadStream',
       'Stats',
-      'WriteStream'
+      'WriteStream',
     ];
   }
 
   get captureTracing() {
-    return parseInt(process.env.HEIMDALL_FS_MONITOR_CALL_TRACING) === 1 || false
+    return (
+      parseInt(process.env.HEIMDALL_FS_MONITOR_CALL_TRACING) === 1 || false
+    );
   }
 
   start() {
@@ -38,9 +40,11 @@ class FSMonitor {
       this._attach();
       hasActiveInstance = true;
     } else {
-      logger.warn('Multiple instances of heimdalljs-fs-monitor have been created'
-        + ' in the same session. Since this can cause fs operations to be counted'
-        + ' multiple times, this instance has been disabled.');
+      logger.warn(
+        'Multiple instances of heimdalljs-fs-monitor have been created' +
+          ' in the same session. Since this can cause fs operations to be counted' +
+          ' multiple times, this instance has been disabled.'
+      );
     }
   }
 
@@ -62,7 +66,7 @@ class FSMonitor {
     }
 
     let metrics = heimdall.statsFor('fs');
-    let m = metrics[name] = metrics[name] || new Metric();
+    let m = (metrics[name] = metrics[name] || new Metric());
 
     m.start(location);
 
@@ -81,8 +85,8 @@ class FSMonitor {
       if (this.blacklist.indexOf(member) === -1) {
         let old = fs[member];
         if (typeof old === 'function') {
-          fs[member] = (function(old, member) {
-            return function() {
+          fs[member] = (function (old, member) {
+            return function () {
               if (monitor.shouldMeasure()) {
                 let args = new Array(arguments.length);
                 for (let i = 0; i < arguments.length; i++) {
@@ -91,7 +95,7 @@ class FSMonitor {
 
                 let location;
 
-                if(monitor.captureTracing) {
+                if (monitor.captureTracing) {
                   try {
                     /*
                       Uses error to build a stack of where the fs call was coming from.
@@ -119,10 +123,12 @@ class FSMonitor {
                     location = {
                       fileName: calls[1].getFileName(),
                       lineNumber: calls[1].getLineNumber(),
-                      stackTrace: cleanStack(extractStack(error), { pretty: true }),
-                    }
-                  } catch(ex) {
-                    debug(`could not generate stack because: ${ex.message}`)
+                      stackTrace: cleanStack(extractStack(error), {
+                        pretty: true,
+                      }),
+                    };
+                  } catch (ex) {
+                    debug(`could not generate stack because: ${ex.message}`);
                   }
                 }
 
@@ -131,9 +137,9 @@ class FSMonitor {
                 return old.apply(fs, arguments);
               }
             };
-          }(old, member));
+          })(old, member);
 
-          fs[member].__restore = function() {
+          fs[member].__restore = function () {
             fs[member] = old;
           };
         }
@@ -144,7 +150,10 @@ class FSMonitor {
   _detach() {
     for (let member in fs) {
       let maybeFunction = fs[member];
-      if (typeof maybeFunction === 'function' && typeof maybeFunction.__restore === 'function') {
+      if (
+        typeof maybeFunction === 'function' &&
+        typeof maybeFunction.__restore === 'function'
+      ) {
         maybeFunction.__restore();
       }
     }
@@ -168,13 +177,13 @@ class Metric {
 
   start(location) {
     // we want to push all the locations of our invocations to an array
-    if(location) {
-      if(!this.invocations[location.stackTrace]) {
+    if (location) {
+      if (!this.invocations[location.stackTrace]) {
         this.invocations[location.stackTrace] = {
           lineNumber: location.lineNumber,
           fileName: location.fileName,
           count: 0,
-        }
+        };
       }
       this.invocations[location.stackTrace].count += 1;
     }
@@ -186,7 +195,8 @@ class Metric {
   stop() {
     let now = process.hrtime();
 
-    this.time += (now[0] - this.startTime[0]) * 1e9 + (now[1] - this.startTime[1]);
+    this.time +=
+      (now[0] - this.startTime[0]) * 1e9 + (now[1] - this.startTime[1]);
     this.startTime = undefined;
   }
 
@@ -194,7 +204,7 @@ class Metric {
     return {
       invocations: this.invocations,
       count: this.count,
-      time: this.time
+      time: this.time,
     };
   }
 }

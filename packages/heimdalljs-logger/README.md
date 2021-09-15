@@ -36,7 +36,7 @@ DEBUG=foo DEBUG_LEVEL=warn foo
 
 ```js
 var heimdall = require('heimdalljs');
-var config  = require('heimdalljs').configFor('logging');
+var config = require('heimdalljs').configFor('logging');
 
 config.matcher = (id) => /hai/.test(id.name);
 config.depth = 2;

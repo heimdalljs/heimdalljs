@@ -19,27 +19,27 @@ const { expect } = chai;
 
 chai.use(chaiAsPromised);
 
-describe('HeimdallSession', function() {
-  describe('current', function() {
-    it('exists on the session', function() {
+describe('HeimdallSession', function () {
+  describe('current', function () {
+    it('exists on the session', function () {
       expect(new Session()).to.have.property('current');
     });
   });
 
-  describe('root', function() {
-    it('exists on the session', function() {
+  describe('root', function () {
+    it('exists on the session', function () {
       expect(new Session()).to.have.property('root');
     });
   });
 
-  describe('previousTimeNS', function() {
-    it('exists on the session', function() {
+  describe('previousTimeNS', function () {
+    it('exists on the session', function () {
       expect(new Session()).to.have.property('previousTimeNS');
     });
   });
 
-  describe('monitorSchemas', function() {
-    it('is a dict on the session', function() {
+  describe('monitorSchemas', function () {
+    it('is a dict on the session', function () {
       let monitorSchemas = new Session().monitorSchemas;
 
       expect(typeof monitorSchemas.has).to.equal('function');
@@ -48,8 +48,8 @@ describe('HeimdallSession', function() {
     });
   });
 
-  describe('configs', function() {
-    it('is a dict on the session', function() {
+  describe('configs', function () {
+    it('is a dict on the session', function () {
       let configs = new Session().configs;
 
       expect(typeof configs.has).to.equal('function');
@@ -58,13 +58,13 @@ describe('HeimdallSession', function() {
     });
   });
 
-  describe('reset', function() {
-    it('resets properties', function() {
+  describe('reset', function () {
+    it('resets properties', function () {
       let session = new Session();
 
-      let current = session.current = {};
-      let root = session.root = {};
-      let previousTimeNS = session.previousTimeNS = 10;
+      let current = (session.current = {});
+      let root = (session.root = {});
+      let previousTimeNS = (session.previousTimeNS = 10);
 
       session.reset();
 
@@ -73,26 +73,38 @@ describe('HeimdallSession', function() {
       expect(session.previousTimeNS).to.equal(0);
     });
 
-    it('resets ids', function() {
+    it('resets ids', function () {
       let session = new Session();
-      let firstThreeIds = [session.generateNextId(), session.generateNextId(), session.generateNextId()];
-      let nextThreeIds = [session.generateNextId(), session.generateNextId(), session.generateNextId()];
+      let firstThreeIds = [
+        session.generateNextId(),
+        session.generateNextId(),
+        session.generateNextId(),
+      ];
+      let nextThreeIds = [
+        session.generateNextId(),
+        session.generateNextId(),
+        session.generateNextId(),
+      ];
 
       expect(firstThreeIds).to.not.eql(nextThreeIds);
 
       session.reset();
 
-      let nextThreeIdsAfterReset = [session.generateNextId(), session.generateNextId(), session.generateNextId()];
+      let nextThreeIdsAfterReset = [
+        session.generateNextId(),
+        session.generateNextId(),
+        session.generateNextId(),
+      ];
 
       expect(firstThreeIds).to.eql(nextThreeIdsAfterReset);
     });
 
-    it('resets monitorSchemas', function() {
+    it('resets monitorSchemas', function () {
       let session = new Session();
       let monitorSchemas = session.monitorSchemas;
 
-      function FSSchema() { }
-      function OtherSchema() { }
+      function FSSchema() {}
+      function OtherSchema() {}
 
       expect(monitorSchemas.has('fs')).to.equal(false);
       monitorSchemas.set('fs', OtherSchema);
@@ -116,7 +128,7 @@ describe('HeimdallSession', function() {
       expect(session.monitorSchemas.has('fs')).to.equal(false);
     });
 
-    it('resets configs', function() {
+    it('resets configs', function () {
       let session = new Session();
       let configs = session.configs;
 
@@ -146,8 +158,8 @@ describe('HeimdallSession', function() {
     });
   });
 
-  describe('generateNextId', function() {
-    it('returns unique ids', function() {
+  describe('generateNextId', function () {
+    it('returns unique ids', function () {
       let session = new Session();
       let firstId = session.generateNextId();
       let secondId = session.generateNextId();
@@ -160,33 +172,33 @@ describe('HeimdallSession', function() {
   });
 });
 
-describe('HeimdallNode', function() {
+describe('HeimdallNode', function () {
   let mockHeimdall;
 
-  beforeEach(function() {
+  beforeEach(function () {
     mockHeimdall = {
       id: 0,
 
       generateNextId: function () {
         return ++this.id;
-      }
+      },
     };
   });
 
-  describe('_id', function() {
-    it('exists on a node', function() {
+  describe('_id', function () {
+    it('exists on a node', function () {
       let node = new HeimdallNode(mockHeimdall, { name: 'a' }, {}, null);
       expect(node).to.have.property('_id');
     });
   });
 
-  describe('id', function() {
-    it('exists on a node', function() {
+  describe('id', function () {
+    it('exists on a node', function () {
       let node = new HeimdallNode(mockHeimdall, { name: 'a' }, {}, null);
       expect(node).to.have.property('id');
     });
 
-    it('must have a string name', function() {
+    it('must have a string name', function () {
       let node = new HeimdallNode(mockHeimdall, { name: 'a' }, {}, null);
       expect(node.id.name).to.equal('a');
 
@@ -196,14 +208,14 @@ describe('HeimdallNode', function() {
     });
   });
 
-  describe('isRoot', function() {
+  describe('isRoot', function () {
     let heimdall;
 
-    beforeEach( function() {
+    beforeEach(function () {
       heimdall = new Heimdall();
     });
 
-    it('is true for the root node only', function() {
+    it('is true for the root node only', function () {
       expect(heimdall.root.isRoot).to.equal(true);
       expect(heimdall.current.isRoot).to.equal(true);
 
@@ -218,15 +230,15 @@ describe('HeimdallNode', function() {
     });
   });
 
-  describe('parent', function() {
-    it('exists on a node', function() {
+  describe('parent', function () {
+    it('exists on a node', function () {
       let node = new HeimdallNode(mockHeimdall, { name: 'a' }, {}, null);
       expect(node).to.have.property('parent');
     });
   });
 
-  describe('toJSON', function() {
-    it('must return the minimum json properties', function() {
+  describe('toJSON', function () {
+    it('must return the minimum json properties', function () {
       let node = new HeimdallNode(mockHeimdall, { name: 'a' }, { foo: 'foo' });
       let child1 = new HeimdallNode(mockHeimdall, { name: 'b1' }, {});
       node.addChild(child1);
@@ -236,41 +248,53 @@ describe('HeimdallNode', function() {
       expect(node.toJSON()).to.eql({
         _id: 1,
         id: { name: 'a' },
-        stats: { time: { self: 0 }, own: { foo: 'foo' }},
+        stats: { time: { self: 0 }, own: { foo: 'foo' } },
         children: [2, 3],
       });
     });
   });
 
-  describe('toJSONSubgraph', function() {
-    it('returns the JSON of the subtree rooted at node, in an array', function() {
+  describe('toJSONSubgraph', function () {
+    it('returns the JSON of the subtree rooted at node, in an array', function () {
       let node = new HeimdallNode(mockHeimdall, { name: 'a' }, { foo: 'foo' });
-      let child1 = new HeimdallNode(mockHeimdall, { name: 'b1' }, { bar: 'bar' });
+      let child1 = new HeimdallNode(
+        mockHeimdall,
+        { name: 'b1' },
+        { bar: 'bar' }
+      );
       node.addChild(child1);
-      let child2 = new HeimdallNode(mockHeimdall, { name: 'b2' }, { baz: 'baz' });
+      let child2 = new HeimdallNode(
+        mockHeimdall,
+        { name: 'b2' },
+        { baz: 'baz' }
+      );
       node.addChild(child2);
 
-      expect(node.toJSONSubgraph()).to.eql([{
-        _id: 1,
-        id: { name: 'a' },
-        stats: { time: { self: 0 }, own: { foo: 'foo' }},
-        children: [2, 3],
-      }, {
-        _id: 2,
-        id: { name: 'b1' },
-        stats: { time: { self: 0 }, own: { bar: 'bar' }},
-        children: [],
-      }, {
-        _id: 3,
-        id: { name: 'b2' },
-        stats: { time: { self: 0 }, own: { baz: 'baz' }},
-        children: [],
-      }]);
+      expect(node.toJSONSubgraph()).to.eql([
+        {
+          _id: 1,
+          id: { name: 'a' },
+          stats: { time: { self: 0 }, own: { foo: 'foo' } },
+          children: [2, 3],
+        },
+        {
+          _id: 2,
+          id: { name: 'b1' },
+          stats: { time: { self: 0 }, own: { bar: 'bar' } },
+          children: [],
+        },
+        {
+          _id: 3,
+          id: { name: 'b2' },
+          stats: { time: { self: 0 }, own: { baz: 'baz' } },
+          children: [],
+        },
+      ]);
     });
   });
 
-  describe('.addChild', function() {
-    it('errors if child already has a parent', function() {
+  describe('.addChild', function () {
+    it('errors if child already has a parent', function () {
       let node = new HeimdallNode(mockHeimdall, { name: 'a' }, {});
       let parent1 = new HeimdallNode(mockHeimdall, { name: 'p1' }, {});
       let parent2 = new HeimdallNode(mockHeimdall, { name: 'p2' }, {});
@@ -284,7 +308,7 @@ describe('HeimdallNode', function() {
       }).to.throw(/already has a parent/);
     });
 
-    it("adds child to this node's children", function() {
+    it("adds child to this node's children", function () {
       let node = new HeimdallNode(mockHeimdall, { name: 'a' }, {});
       let parent = new HeimdallNode(mockHeimdall, { name: 'p' }, {});
 
@@ -296,7 +320,7 @@ describe('HeimdallNode', function() {
       expect(parent.toJSON().children).to.eql([1]);
     });
 
-    it('sets itself as the parent of child', function() {
+    it('sets itself as the parent of child', function () {
       let node = new HeimdallNode(mockHeimdall, { name: 'a' }, {});
       let parent = new HeimdallNode(mockHeimdall, { name: 'p' }, {});
 
@@ -308,8 +332,8 @@ describe('HeimdallNode', function() {
     });
   });
 
-  describe('removeChild', function() {
-    it("errors if child is not one of this node's children", function() {
+  describe('removeChild', function () {
+    it("errors if child is not one of this node's children", function () {
       let node = new HeimdallNode(mockHeimdall, { name: 'a' }, {});
       let stranger = new HeimdallNode(mockHeimdall, { name: 'p' }, {});
 
@@ -318,7 +342,7 @@ describe('HeimdallNode', function() {
       }).to.throw(/not found/);
     });
 
-    it("removes the child from this node's children", function() {
+    it("removes the child from this node's children", function () {
       let node = new HeimdallNode(mockHeimdall, { name: 'a' }, {});
       let child = new HeimdallNode(mockHeimdall, { name: 'b' }, {});
 
@@ -331,7 +355,7 @@ describe('HeimdallNode', function() {
       expect(node.toJSON().children).to.eql([]);
     });
 
-    it("clears the child's parent", function() {
+    it("clears the child's parent", function () {
       let node = new HeimdallNode(mockHeimdall, { name: 'a' }, {});
       let child = new HeimdallNode(mockHeimdall, { name: 'b' }, {});
 
@@ -347,10 +371,10 @@ describe('HeimdallNode', function() {
     });
   });
 
-  describe('remove', function() {
+  describe('remove', function () {
     // Really this should error if called on any active node, ie any node from
     // current to root
-    it('errors if called on the current node', function() {
+    it('errors if called on the current node', function () {
       let heimdall = new Heimdall();
 
       heimdall.start('a');
@@ -362,15 +386,23 @@ describe('HeimdallNode', function() {
       }).to.throw('Cannot remove an active heimdalljs node.');
     });
 
-    it('errors if called on nodes without a parent', function() {
-      let orphanNode = new HeimdallNode({ generateNextId: function () { return 1; }}, { name: 'a' }, {});
+    it('errors if called on nodes without a parent', function () {
+      let orphanNode = new HeimdallNode(
+        {
+          generateNextId: function () {
+            return 1;
+          },
+        },
+        { name: 'a' },
+        {}
+      );
 
       expect(function () {
         orphanNode.remove();
       }).to.throw(/Cannot remove/);
     });
 
-    it('errors if called on the root node', function() {
+    it('errors if called on the root node', function () {
       let heimdall = new Heimdall();
 
       heimdall.start('a');
@@ -382,7 +414,7 @@ describe('HeimdallNode', function() {
       }).to.throw('Cannot remove the root heimdalljs node.');
     });
 
-    it('calls removeChild on its parent', function() {
+    it('calls removeChild on its parent', function () {
       let heimdall = new Heimdall();
 
       heimdall.start('a');
@@ -409,7 +441,7 @@ describe('HeimdallNode', function() {
     });
   });
 
-  describe('visiting', function() {
+  describe('visiting', function () {
     let root;
     // root
     //-  |- a1
@@ -417,8 +449,7 @@ describe('HeimdallNode', function() {
     //   |
     //   |- a2
 
-
-    beforeEach( function() {
+    beforeEach(function () {
       heimdall = new Heimdall();
 
       let cookieRoot = heimdall.start('root');
@@ -439,35 +470,28 @@ describe('HeimdallNode', function() {
       heimdall.start('sibling2').stop();
     });
 
-    it('.visitPreOrder visits nodes depth first pre-order', function() {
+    it('.visitPreOrder visits nodes depth first pre-order', function () {
       let path = [];
 
-      root.visitPreOrder(node => path.push(node.id.name));
+      root.visitPreOrder((node) => path.push(node.id.name));
 
-      expect(path).to.eql([
-        'root', 'a1', 'a1.b', 'a2',
-      ]);
+      expect(path).to.eql(['root', 'a1', 'a1.b', 'a2']);
     });
 
-
-    it('.visitPostOrder visits nodes depth first post-order', function() {
+    it('.visitPostOrder visits nodes depth first post-order', function () {
       let path = [];
 
-      root.visitPostOrder(node => path.push(node.id.name));
+      root.visitPostOrder((node) => path.push(node.id.name));
 
-      expect(path).to.eql([
-        'a1.b', 'a1', 'a2', 'root',
-      ]);
+      expect(path).to.eql(['a1.b', 'a1', 'a2', 'root']);
     });
 
-    it('forEachChild visits each child only', function() {
+    it('forEachChild visits each child only', function () {
       let path = [];
 
-      root.forEachChild(node => path.push(node.id.name));
+      root.forEachChild((node) => path.push(node.id.name));
 
-      expect(path).to.eql([
-        'a1', 'a2'
-      ]);
+      expect(path).to.eql(['a1', 'a2']);
     });
   });
 });

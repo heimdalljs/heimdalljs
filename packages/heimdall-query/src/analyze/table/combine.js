@@ -7,23 +7,22 @@ function Stat() {
 }
 
 Object.defineProperty(Stat.prototype, 'length', {
-  get: function() {
+  get: function () {
     return this.value.length;
-  }
+  },
 });
 
 function fixForPlot(n) {
   return n.toFixed(2);
 }
 
-
 Object.defineProperty(Stat.prototype, 'filteredRange', {
-  get: function() {
+  get: function () {
     var r = this.range;
 
     // console.log('range', JSON.stringify(r, null, 2));
 
-    r.sort(function(a, b) {
+    r.sort(function (a, b) {
       if (a < b) {
         return -1;
       }
@@ -35,11 +34,11 @@ Object.defineProperty(Stat.prototype, 'filteredRange', {
     });
 
     return r.filter(outliers());
-  }
+  },
 });
 
 Object.defineProperty(Stat.prototype, 'stats', {
-  get: function() {
+  get: function () {
     if (typeof this.value !== 'number') {
       return {};
     }
@@ -49,30 +48,30 @@ Object.defineProperty(Stat.prototype, 'stats', {
     var len = filtered.length;
     var q1i = Math.round(len / 4);
     var q2i = Math.round(len / 2);
-    var q3i = Math.round(len / 4 * 3);
+    var q3i = Math.round((len / 4) * 3);
 
     var stats = {
       min: fixForPlot(Math.min.apply(Math, filtered)),
       q1: fixForPlot(filtered[q1i]),
       q2: fixForPlot(filtered[q2i]),
       q3: fixForPlot(filtered[q3i]),
-      max: fixForPlot(Math.max.apply(Math, filtered))
+      max: fixForPlot(Math.max.apply(Math, filtered)),
     };
 
     // console.log(stats);
 
     return stats;
-  }
+  },
 });
 
 Object.defineProperty(Stat.prototype, 'plot', {
-  get: function() {
+  get: function () {
     if (typeof this.value !== 'number') {
       return '';
     }
 
     return boxplot(this.stats, 25);
-  }
+  },
 });
 
 Stat.prototype.toFixed = function toFixed(n) {
@@ -85,7 +84,9 @@ Stat.prototype.toString = function toString() {
 
 Stat.prototype.valueOf = function valueOf() {
   if (typeof this.value === 'number' && this.range) {
-    var value = this.filteredRange.reduce(function(v, c) { return v + c; }, 0);
+    var value = this.filteredRange.reduce(function (v, c) {
+      return v + c;
+    }, 0);
     var len = this.filteredRange.length;
 
     return value / len;
@@ -104,7 +105,6 @@ function combineRows(a, b) {
   }
 
   for (let i = 1; i < l; i++) {
-
     if (!a[i]) {
       a[i] = new Stat();
     }
@@ -118,7 +118,6 @@ function combineRows(a, b) {
     }
   }
 }
-
 
 module.exports = function combineTables(tables) {
   let master = tables.shift();
@@ -134,7 +133,7 @@ module.exports = function combineTables(tables) {
       let row = tables[j][i];
 
       if (masterRow[0].value !== row[0]) {
-        throw new Error("Table Mismatch!");
+        throw new Error('Table Mismatch!');
       } else {
         combineRows(masterRow, row);
       }

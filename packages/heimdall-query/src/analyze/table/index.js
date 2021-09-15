@@ -3,7 +3,7 @@ const print = require('./print');
 
 const exp = {
   combine,
-  print
+  print,
 };
 
 module.exports = exp;

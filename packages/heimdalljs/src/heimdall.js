@@ -5,7 +5,7 @@ import HeimdallNode from './node';
 import Session from './session';
 import timeNS from './time';
 
-export default class Heimdall{
+export default class Heimdall {
   constructor(session) {
     if (arguments.length < 1) {
       session = new Session();
@@ -86,8 +86,9 @@ export default class Heimdall{
     // NOTE: only works in very specific scenarios, specifically promises must
     // not escape their parents lifetime. In theory, promises could be augmented
     // to support those more advanced scenarios.
-    return new Promise(resolve => resolve(callback.call(context, cookie._node.stats.own))).
-      finally(() => cookie.stop());
+    return new Promise((resolve) =>
+      resolve(callback.call(context, cookie._node.stats.own))
+    ).finally(() => cookie.stop());
   }
 
   hasMonitor(name) {
@@ -96,7 +97,11 @@ export default class Heimdall{
 
   registerMonitor(name, Schema) {
     if (name === 'own' || name === 'time') {
-      throw new Error('Cannot register monitor at namespace "' + name + '".  "own" and "time" are reserved');
+      throw new Error(
+        'Cannot register monitor at namespace "' +
+          name +
+          '".  "own" and "time" are reserved'
+      );
     }
     if (this.hasMonitor(name)) {
       throw new Error('A monitor for "' + name + '" is already registered"');
@@ -155,6 +160,6 @@ export default class Heimdall{
       top = top.parent;
     }
 
-    return stack.map(node => node.id.name);
+    return stack.map((node) => node.id.name);
   }
 }

@@ -14,7 +14,7 @@ export default class Node {
     return this._label;
   }
 
-  *dfsIterator(until = (() => false)) {
+  *dfsIterator(until = () => false) {
     yield this;
 
     for (let child of this._children) {
@@ -30,7 +30,7 @@ export default class Node {
     yield* this.dfsIterator();
   }
 
-  *bfsIterator(until = (() => false)) {
+  *bfsIterator(until = () => false) {
     let queue = [this];
 
     while (queue.length > 0) {
@@ -72,7 +72,7 @@ export default class Node {
         id: node._id,
         label: node._label,
         stats: node._stats,
-        children: node._children.map(x => x._id),
+        children: node._children.map((x) => x._id),
       });
     }
 

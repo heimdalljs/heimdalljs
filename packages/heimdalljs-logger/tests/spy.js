@@ -1,7 +1,7 @@
-const canRename = function () {
-  const descriptor = Object.getOwnPropertyDescriptor(function() {}, 'name');
+const canRename = (function () {
+  const descriptor = Object.getOwnPropertyDescriptor(function () {}, 'name');
   return descriptor.configurable;
-}();
+})();
 
 export default function createSpy(name) {
   const calls = [];
@@ -14,7 +14,9 @@ export default function createSpy(name) {
 
   if (canRename) {
     Object.defineProperty(spy, 'name', {
-      get() { return name; },
+      get() {
+        return name;
+      },
     });
   }
 

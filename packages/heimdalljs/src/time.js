@@ -8,7 +8,11 @@ if (typeof performance === 'object' && typeof performance.now === 'function') {
     return performance.now.call(performance);
   };
 } else {
-  now = Date.now || function () { return new Date().getTime(); };
+  now =
+    Date.now ||
+    function () {
+      return new Date().getTime();
+    };
 }
 
 const dateOffset = now();

@@ -1,6 +1,6 @@
 import heimdall from 'heimdalljs';
 
-const MATCHER = n => true;
+const MATCHER = (n) => true;
 
 export default class Prefixer {
   constructor() {

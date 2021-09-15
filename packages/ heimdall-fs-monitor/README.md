@@ -4,7 +4,6 @@
 
 file system monitor plugin for [heimdalljs](https://github.com/heimdalljs/heimdalljs)
 
-
 ## Installation
 
 ```
@@ -73,6 +72,6 @@ Accessing `heimdall.fs.stats.readFileSync`, for example will yeild a _Metric_ ob
 }
 ```
 
-
 ## License
+
 `heimdall-fs-monitor` is licensed under the [ISC License](https://opensource.org/licenses/isc-license.txt).

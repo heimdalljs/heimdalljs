@@ -1,26 +1,31 @@
 const _ = require('lodash');
 
 module.exports = function getStat(tree, ignoreBranches) {
-  return function(stat) {
+  return function (stat) {
     let account = stat.account || 0;
     if (stat.rollup === true) {
-      return _.sumBy([...tree.preOrderIterator(ignoreBranches)], function([node, ignore]) {
-        if (ignore === true) {
-          // console.log('ignoring ' + node.name);
-          return 0;
+      return _.sumBy(
+        [...tree.preOrderIterator(ignoreBranches)],
+        function ([node, ignore]) {
+          if (ignore === true) {
+            // console.log('ignoring ' + node.name);
+            return 0;
+          }
+
+          let value = _.get(node, stat.key);
+
+          if (value === undefined) {
+            return 0;
+          }
+
+          if (/time/i.test(stat.name)) {
+            value = value / 1e6;
+            value = Math.max(0, value - account);
+          }
+
+          return value;
         }
-
-        let value = _.get(node, stat.key);
-
-        if (value === undefined) { return 0; }
-
-        if (/time/i.test(stat.name)) {
-          value = value / 1e6;
-          value = Math.max(0, value - account);
-        }
-
-        return value;
-      });
+      );
     }
 
     let accountTotal = account;

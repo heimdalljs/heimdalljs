@@ -1,7 +1,7 @@
 # heimdalljs-graph
 
 `heimdalljs-graph` is intended to be the primary entry point for doing visualizations with data
-gathered by [Heimdall](https://github.com/heimdalljs/heimdalljs-lib). 
+gathered by [Heimdall](https://github.com/heimdalljs/heimdalljs-lib).
 
 ## Loading Data
 
@@ -27,29 +27,30 @@ let graph = heimdallGraph.loadFromNode(heimdallNode);
 
 ## Interacting with the Graph
 
-Once data is loaded, the resulting object is called a "node". Each node in the graph provides 
-an API for iterating its subgraph as well as iterating its own stats. 
+Once data is loaded, the resulting object is called a "node". Each node in the graph provides
+an API for iterating its subgraph as well as iterating its own stats.
 
 The API that each node supports is:
 
-* `label`
-* `toJSON`
-* `adjacentIterator`
-* `dfsIterator`
-* `bfsIterator`
+- `label`
+- `toJSON`
+- `adjacentIterator`
+- `dfsIterator`
+- `bfsIterator`
 
 ### label
 
-A POJO property that describes the node.  It will always include a `name`
+A POJO property that describes the node. It will always include a `name`
 property and for broccoli nodes will include a `broccoliNode` property.
 
 Example:
 
 ```js
-node.label === {
-  name: 'TreeMerger (allTrees)',
-  broccoliNode: true,
-}
+node.label ===
+  {
+    name: 'TreeMerger (allTrees)',
+    broccoliNode: true,
+  };
 ```
 
 ### toJSON()
@@ -70,32 +71,34 @@ console.log(JSON.stringify(node.toJSON(), null, 2));
 // might print
 //
 {
-  nodes: [{
-    id: 1,
-    children: [2,3],
-    stats: {
-      time: {
-        self: 5000000,
+  nodes: [
+    {
+      id: 1,
+      children: [2, 3],
+      stats: {
+        time: {
+          self: 5000000,
+        },
+        fs: {
+          lstat: {
+            count: 2,
+            time: 2000000,
+          },
+        },
+        own: {},
       },
-      fs: {
-        lstat: {
-          count: 2,
-          time: 2000000
-        }
-      },
-      own: {
-      }
-    }
-  }, {
-    // ...
-  }]
+    },
+    {
+      // ...
+    },
+  ];
 }
 ```
 
 ### dfsIterator(until)
 
 Returns an iterator that yields every node in the subgraph sourced at this node.
-Nodes are yielded in depth-first order.  If the optional parameter `until` is
+Nodes are yielded in depth-first order. If the optional parameter `until` is
 passed, nodes for which `until` returns `true` will not be yielded, nor will
 nodes in their subgraph, unless those nodes are reachable by some other path.
 
@@ -121,12 +124,12 @@ for (n of node.dfsIterator()) {
 ### bfsIterator()
 
 Returns an iterator that yields every node in the subgraph sourced at this node.
-Nodes are yielded in breadth-first order.  If the optional parameter `until` is
+Nodes are yielded in breadth-first order. If the optional parameter `until` is
 passed, nodes for which `until` returns `true` will not be yielded, nor will
 nodes in their subgraph, unless those nodes are reachable by some other path.
 
-
 Example:
+
 ```js
 // for a tree
 //  TreeMerger
@@ -171,8 +174,9 @@ for (n of node.adjacentIterator()) {
 Returns an iterator that yields `[name, value]` pairs of stat names and values.
 
 Example:
+
 ```js
-//  for a typical broccoli node 
+//  for a typical broccoli node
 for ([statName, statValue] of node.statsIterator()) {
   console.log(statName, statValue);
 }
