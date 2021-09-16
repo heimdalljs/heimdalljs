@@ -143,6 +143,38 @@ describe('FSMonitor', function () {
     ).to.equal(0);
   });
 
+  it('does not discard nested functions like realpath.native', async function () {
+    heimdall.current.stats.fs = {};
+
+    const monitor = new FSMonitor();
+
+    monitor.start();
+
+    expect(typeof fs.realpath.native).to.equal('function');
+    expect(typeof fs.realpathSync.native).to.equal('function');
+
+    let realPathToFile = fs.realpathSync.native(__dirname + '/tests.js');
+    expect(realPathToFile).to.match(/tests\.js$/);
+
+    realPathToFile = await new Promise((resolve, reject) => {
+      fs.realpath.native(__dirname + '/tests.js', (err, answer) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(answer);
+      });
+    });
+    expect(realPathToFile).to.match(/tests\.js$/);
+
+    monitor.stop();
+
+    const expected = ['lstat', 'realpath.native', 'realpathSync.native'];
+
+    expect(Object.keys(heimdall.current.stats.fs).sort()).to.deep.equal(
+      expected.sort()
+    );
+  });
+
   describe('.prototype.stop', function () {
     it('restores fs functions to their defaults', function () {
       let monitor = new FSMonitor();

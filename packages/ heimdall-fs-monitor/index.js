@@ -78,26 +78,21 @@ class FSMonitor {
     }
   }
 
-  _attach() {
+  _attachMember(parent, member, old, name = member) {
     let monitor = this;
+    parent[member] = (function (old, member) {
+      return function () {
+        if (monitor.shouldMeasure()) {
+          let args = new Array(arguments.length);
+          for (let i = 0; i < arguments.length; i++) {
+            args[i] = arguments[i];
+          }
 
-    for (let member in fs) {
-      if (this.blacklist.indexOf(member) === -1) {
-        let old = fs[member];
-        if (typeof old === 'function') {
-          fs[member] = (function (old, member) {
-            return function () {
-              if (monitor.shouldMeasure()) {
-                let args = new Array(arguments.length);
-                for (let i = 0; i < arguments.length; i++) {
-                  args[i] = arguments[i];
-                }
+          let location;
 
-                let location;
-
-                if (monitor.captureTracing) {
-                  try {
-                    /*
+          if (monitor.captureTracing) {
+            try {
+              /*
                       Uses error to build a stack of where the fs call was coming from.
 
                       An example output of what this will look like is
@@ -117,31 +112,45 @@ class FSMonitor {
                           '    at Immediate._onImmediate (~/heimdall-fs-monitor/node_modules/mocha/lib/runner.js:338:5)'
                       }
                      */
-                    const error = new Error();
-                    const calls = callsites();
+              const error = new Error();
+              const calls = callsites();
 
-                    location = {
-                      fileName: calls[1].getFileName(),
-                      lineNumber: calls[1].getLineNumber(),
-                      stackTrace: cleanStack(extractStack(error), {
-                        pretty: true,
-                      }),
-                    };
-                  } catch (ex) {
-                    debug(`could not generate stack because: ${ex.message}`);
-                  }
-                }
+              location = {
+                fileName: calls[1].getFileName(),
+                lineNumber: calls[1].getLineNumber(),
+                stackTrace: cleanStack(extractStack(error), {
+                  pretty: true,
+                }),
+              };
+            } catch (ex) {
+              debug(`could not generate stack because: ${ex.message}`);
+            }
+          }
 
-                return monitor._measure(member, old, fs, args, location);
-              } else {
-                return old.apply(fs, arguments);
-              }
-            };
-          })(old, member);
+          return monitor._measure(name, old, fs, args, location);
+        } else {
+          return old.apply(fs, arguments);
+        }
+      };
+    })(old, member);
 
-          fs[member].__restore = function () {
-            fs[member] = old;
-          };
+    parent[member].__restore = function () {
+      parent[member] = old;
+    };
+
+    return parent[member];
+  }
+
+  _attach() {
+    for (let member in fs) {
+      if (this.blacklist.indexOf(member) === -1) {
+        let old = fs[member];
+        if (typeof old === 'function') {
+          let monitored = this._attachMember(fs, member, old);
+
+          if ('native' in old) {
+            this._attachMember(monitored, 'native', old, `${member}.native`);
+          }
         }
       }
     }
