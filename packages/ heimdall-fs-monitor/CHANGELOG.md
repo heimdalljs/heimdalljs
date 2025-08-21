@@ -1,7 +1,8 @@
 ## 1.1.1
 
 #### :bug: Bug Fixes
-* [#153](https://github.com/heimdalljs/heimdalljs/pull/153) Monitor realpath.native ([@hjdivad](https://github.com/hjdivad))
+
+- [#153](https://github.com/heimdalljs/heimdalljs/pull/153) Monitor realpath.native ([@hjdivad](https://github.com/hjdivad))
 
 Previously when monitoring `realpath` and `realpathSync` would be replaced by functions that lacked the corresponding `.native` property. `realpath.native` and `realpathSync.native` are now included when monitoring and are themselves monitored.
 
