@@ -9,19 +9,20 @@ environment:
 # Install scripts. (runs after repo cloning)
 install:
   - ps: Install-Product node $env:nodejs_version
-  - appveyor-retry yarn
-  - appveyor-retry yarn add mocha-appveyor-reporter # must be installed locally.
+  - ps: npm install -g pnpm
+  - appveyor-retry pnpm install
+  - appveyor-retry pnpm add mocha-appveyor-reporter # must be installed locally.
 
 cache:
-  - '%LOCALAPPDATA%\Yarn'
+  - '%LOCALAPPDATA%\pnpm'
 
 # Post-install test scripts.
 test_script:
   # Output useful info for debugging.
   - git rev-parse HEAD
-  - yarn run build:node
-  - yarn run build:test
-  - cmd: yarn run test
+  - pnpm run build:node
+  - pnpm run build:test
+  - cmd: pnpm run test
 
 # Don't actually build.
 build: off
