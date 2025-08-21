@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha tests.js",
-    "test:debug": "mocha debug tests.js"
+    "test:debug": "mocha debug tests.js",
+    "lint": "prettier --check .",
+    "lint:fix": "prettier --write ."
   },
   "repository": {
     "type": "git",

@@ -11,6 +11,8 @@
     "build": "node ./scripts/build.js",
     "test": "npm run build && mocha dist/cjs/tests/index.js",
     "test:debug": "npm run build && mocha --no-timeouts debug dist/cjs/tests/index.js",
+    "lint": "prettier --check .",
+    "lint:fix": "prettier --write .",
     "prepublish": "npm run build"
   },
   "files": [
