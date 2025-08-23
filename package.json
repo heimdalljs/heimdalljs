@@ -1,17 +1,16 @@
 {
   "name": "heimdalljs",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
-    "build": "lerna run build --stream",
-    "build:node": "lerna run build:node --stream",
-    "build:browser": "lerna run build:browser --stream",
-    "build:test": "lerna run build:test --stream",
-    "test": "lerna run test --stream"
+    "build": "pnpm -r run build",
+    "build:node": "pnpm -r run build:node",
+    "build:browser": "pnpm -r run build:browser",
+    "build:test": "pnpm -r run build:test",
+    "test": "pnpm -r run test",
+    "lint": "pnpm -r run lint",
+    "lint:fix": "pnpm -r run lint:fix"
   },
   "devDependencies": {
-    "lerna": "^3.2.1"
+    "prettier": "^3.6.2"
   }
 }

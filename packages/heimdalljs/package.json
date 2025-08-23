@@ -11,6 +11,8 @@
     "build:test": "rollup --no-strict -c test.config.js",
     "test": "npm run build:node && npm run build:test && mocha dist/tests/bundle.cjs",
     "test:debug": "mocha --no-timeouts debug dist/tests/bundle.cjs",
+    "lint": "prettier --check .",
+    "lint:fix": "prettier --write .",
     "prepublish": "npm run build"
   },
   "repository": {

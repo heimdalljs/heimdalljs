@@ -4,7 +4,10 @@
   "description": "Analysis Tool for Heimdall Trees",
   "repository": "git://github.com/heimdalljs/heimdall-query.git",
   "directories": {},
-  "scripts": {},
+  "scripts": {
+    "lint": "prettier --check .",
+    "lint:fix": "prettier --write ."
+  },
   "engines": {
     "node": ">= 4.0.0"
   },
