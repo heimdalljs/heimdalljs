@@ -47,8 +47,8 @@ jobs:
       - run: cat <<< $(jq '.packageManager = "yarn@1.22.22"' package.json) > package.json
       - run: cat <<< $(jq '.workspaces = ["packages/*"]' package.json) > package.json
       - run: yarn install --frozen-lockfile --ignore-engines
-      - run: yarn workspaces run build
-      - run: yarn workspaces run test
+      - run: yarn workspaces --ignore-engines run build
+      - run: yarn workspaces --ignore-engines run test
 
   test:
     runs-on: ${{ matrix.os }}
