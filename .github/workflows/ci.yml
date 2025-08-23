@@ -24,15 +24,50 @@ jobs:
       - run: pnpm install
       - run: pnpm run lint
 
+  legacy-node-tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: 
+          - ubuntu-latest 
+          - windows-latest
+          - macos-latest
+        node-version: 
+          - 6
+          - 8
+          - 10
+          - 12
+          - 14
+          - 16
+          - 18
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: cat <<< $(jq '.packageManager = "yarn@1.22.22"' package.json) > package.json
+      - run: cat <<< $(jq '.workspaces = ["packages/*"]' package.json) > package.json
+      - run: yarn install --frozen-lockfile --ignore-engines
+      - run: yarn run build:node
+      - run: yarn run build:test
+      - run: yarn test
+
   test:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: 
-          - ubuntu-latest #later: windows-latest, macos-latest
+          - ubuntu-latest 
+          - windows-latest
+          - macos-latest
         node-version: 
-          - 20 # later: 22, 24
+          - 20
+          - 22
+          - 24
 
     steps:
       - uses: actions/checkout@v4
