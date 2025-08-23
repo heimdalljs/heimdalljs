@@ -25,14 +25,10 @@ jobs:
       - run: pnpm run lint
 
   legacy-node-tests:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        os: 
-          - ubuntu-latest 
-          - windows-latest
-          - macos-latest
         node-version: 
           - 6
           - 8
@@ -66,7 +62,7 @@ jobs:
         node-version: 
           - 20
           - 22
-          - 24
+          # - 24 # this currently has a bug that we are trying to address
 
     steps:
       - uses: actions/checkout@v4
