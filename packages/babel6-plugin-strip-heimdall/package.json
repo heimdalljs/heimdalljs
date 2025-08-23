@@ -4,6 +4,8 @@
   "description": "Strips heimdall instrumentation from babel6 output",
   "main": "index.js",
   "scripts": {
+    "build": "echo 'nothing to build'",
+    "test": "echo 'no tests in this package'",
     "lint": "prettier --check .",
     "lint:fix": "prettier --write ."
   },

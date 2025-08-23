@@ -4,6 +4,7 @@
   "description": "fs operation monitoring for heimdalljs",
   "main": "index.js",
   "scripts": {
+    "build": "echo 'nothing to build'",
     "test": "mocha tests.js",
     "test:debug": "mocha debug tests.js",
     "lint": "prettier --check .",
