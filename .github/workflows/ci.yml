@@ -48,8 +48,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Setup Node.js 8 for building
+        uses: actions/setup-node@v4
+        if: matrix.node-version < 8
+        with:
+          node-version: 8
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
+        if: matrix.node-version >= 8
         with:
           node-version: ${{ matrix.node-version }}
       - run: cat <<< $(jq '.packageManager = "yarn@1.22.22"' package.json) > package.json
@@ -57,6 +63,11 @@ jobs:
       - run: cat <<< $(jq '.resolutions["**/micromatch/picomatch"] = "2.3.0"' package.json) > package.json
       - run: yarn install --frozen-lockfile --ignore-engines
       - run: yarn workspaces --ignore-engines run build
+      - name: Setup Node.js ${{ matrix.node-version }} for running tests
+        uses: actions/setup-node@v4
+        if: matrix.node-version < 8
+        with:
+          node-version: ${{ matrix.node-version }}
       - run: yarn workspace --ignore-engines ${{ matrix.package }} run test
 
   test:
