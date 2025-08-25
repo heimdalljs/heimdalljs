@@ -144,13 +144,22 @@ class FSMonitor {
   _attach() {
     for (let member in fs) {
       if (this.blacklist.indexOf(member) === -1) {
-        let old = fs[member];
-        if (typeof old === 'function') {
-          let monitored = this._attachMember(fs, member, old);
+        continue;
+      }
 
-          if ('native' in old) {
-            this._attachMember(monitored, 'native', old, `${member}.native`);
-          }
+      const descriptor = Object.getOwnPropertyDescriptor(fs, member);
+
+      if (descriptor && descriptor.get && !descriptor.set) {
+        // Skip getter-only properties (like Utf8Stream, F_OK, etc. in Node.js 24+)
+        continue;
+      }
+
+      let old = fs[member];
+      if (typeof old === 'function') {
+        let monitored = this._attachMember(fs, member, old);
+
+        if ('native' in old) {
+          this._attachMember(monitored, 'native', old, `${member}.native`);
         }
       }
     }
