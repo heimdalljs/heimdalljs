@@ -45,6 +45,10 @@ jobs:
           - heimdalljs-graph             
           - heimdalljs-logger
           - heimdalljs-require-monitor
+        include:
+          - node-version: 4
+            package: heimdalljs
+
 
     steps:
       - uses: actions/checkout@v4
