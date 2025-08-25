@@ -37,6 +37,14 @@ jobs:
           - 14
           - 16
           - 18
+        package:
+          - babel6-plugin-strip-heimdall 
+          - heimdall-query               
+          - heimdalljs                   
+          - heimdalljs-fs-monitor     
+          - heimdalljs-graph             
+          - heimdalljs-logger
+          - heimdalljs-require-monitor
 
     steps:
       - uses: actions/checkout@v4
@@ -48,7 +56,7 @@ jobs:
       - run: cat <<< $(jq '.workspaces = ["packages/*"]' package.json) > package.json
       - run: yarn install --frozen-lockfile --ignore-engines
       - run: yarn workspaces --ignore-engines run build
-      - run: yarn workspaces --ignore-engines run test
+      - run: yarn workspace --ignore-engines ${{ matrix.package }} run test
 
   test:
     runs-on: ${{ matrix.os }}
