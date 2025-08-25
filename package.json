@@ -12,7 +12,7 @@
     "build:test": "pnpm -r run build:test",
     "lint": "pnpm -r run lint",
     "lint:fix": "pnpm -r run lint:fix",
-    "test": "pnpm -r run test"
+    "test": "pnpm -r run build && pnpm -r run test"
   },
   "devDependencies": {
     "prettier": "^3.6.2",

@@ -24,15 +24,69 @@ jobs:
       - run: pnpm install
       - run: pnpm run lint
 
+  legacy-node-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: 
+          - 6
+          - 8
+          - 10
+          - 12
+          - 14
+          - 16
+          - 18
+        package:
+          - babel6-plugin-strip-heimdall 
+          - heimdall-query               
+          - heimdalljs                   
+          - heimdalljs-fs-monitor     
+          - heimdalljs-graph             
+          - heimdalljs-logger
+          - heimdalljs-require-monitor
+        include:
+          - node-version: 4
+            package: heimdalljs
+
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js 8 for building
+        uses: actions/setup-node@v4
+        if: matrix.node-version < 8
+        with:
+          node-version: 8
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        if: matrix.node-version >= 8
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: cat <<< $(jq '.packageManager = "yarn@1.22.22"' package.json) > package.json
+      - run: cat <<< $(jq '.workspaces = ["packages/*"]' package.json) > package.json
+      - run: cat <<< $(jq '.resolutions["**/micromatch/picomatch"] = "2.3.0"' package.json) > package.json
+      - run: yarn install --frozen-lockfile --ignore-engines
+      - run: yarn workspaces --ignore-engines run build
+      - name: Setup Node.js ${{ matrix.node-version }} for running tests
+        uses: actions/setup-node@v4
+        if: matrix.node-version < 8
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: yarn workspace --ignore-engines ${{ matrix.package }} run test
+
   test:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: 
-          - ubuntu-latest #later: windows-latest, macos-latest
+          - ubuntu-latest 
+          - windows-latest
+          - macos-latest
         node-version: 
-          - 20 # later: 22, 24
+          - 20
+          - 22
+          # - 24 # this currently has a bug that we are trying to address
 
     steps:
       - uses: actions/checkout@v4

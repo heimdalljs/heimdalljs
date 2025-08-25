@@ -4,8 +4,8 @@
   "description": "Structured logging via heimdalljs",
   "main": "dist/index.js",
   "scripts": {
-    "build": "rollup --no-strict -c test.config.js && rollup -c index.config.js",
-    "test": "npm run build && mocha dist/tests/index.js",
+    "build": "node ./scripts/build-tests.js && node ./scripts/build-index.js",
+    "test": "mocha dist/tests/index.js",
     "test:debug": "npm run build && mocha --no-timeouts debug dist/tests/index.js",
     "lint": "prettier --check .",
     "lint:fix": "prettier --write .",

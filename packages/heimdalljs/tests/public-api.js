@@ -443,6 +443,7 @@ describe('HeimdallNode', function () {
 
   describe('visiting', function () {
     let root;
+    let heimdall;
     // root
     //-  |- a1
     //   |   |- a1.b

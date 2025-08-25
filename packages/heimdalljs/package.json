@@ -6,10 +6,10 @@
   "jsnext:main": "dist/heimdalljs.es.js",
   "scripts": {
     "build": "npm run build:node && npm run build:browser && npm run build:test",
-    "build:node": "rollup --no-strict -c node.config.js",
-    "build:browser": "rollup --no-strict -c browser.config.js",
-    "build:test": "rollup --no-strict -c test.config.js",
-    "test": "npm run build:node && npm run build:test && mocha dist/tests/bundle.cjs",
+    "build:node": "node scripts/build-node.js",
+    "build:browser": "node scripts/build-browser.js",
+    "build:test": "node scripts/build-tests.js",
+    "test": "mocha dist/tests/bundle.cjs",
     "test:debug": "mocha --no-timeouts debug dist/tests/bundle.cjs",
     "lint": "prettier --check .",
     "lint:fix": "prettier --write .",
@@ -49,7 +49,7 @@
     "chai": "^3.5.0",
     "mocha": "^2.2.5",
     "mocha-jshint": "~2.2.3",
-    "rollup": "^2.6.1",
+    "rollup": "~2.6.1",
     "rollup-plugin-babel": "^3.0.0"
   },
   "dependencies": {

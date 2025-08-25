@@ -4,6 +4,7 @@
   "description": "fs operation monitoring for heimdalljs",
   "main": "index.js",
   "scripts": {
+    "build": "echo 'nothing to build'",
     "test": "mocha tests.js",
     "test:debug": "mocha debug tests.js",
     "lint": "prettier --check .",
@@ -28,6 +29,6 @@
   "devDependencies": {
     "chai": "^4.2.0",
     "debug": "^4.1.1",
-    "mocha": "^9.1.1"
+    "mocha": "^7.0.0"
   }
 }
