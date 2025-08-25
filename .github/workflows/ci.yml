@@ -54,6 +54,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: cat <<< $(jq '.packageManager = "yarn@1.22.22"' package.json) > package.json
       - run: cat <<< $(jq '.workspaces = ["packages/*"]' package.json) > package.json
+      - run: cat <<< $(jq '.resolutions["**/micromatch/picomatch"] = "2.3.0"' package.json) > package.json
       - run: yarn install --frozen-lockfile --ignore-engines
       - run: yarn workspaces --ignore-engines run build
       - run: yarn workspace --ignore-engines ${{ matrix.package }} run test
