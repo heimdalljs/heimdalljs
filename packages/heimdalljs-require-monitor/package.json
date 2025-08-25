@@ -4,7 +4,6 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "node ./scripts/build.js",
-    "pretest": "npm run build",
     "test": "mocha dist/tests/index.js",
     "test:debug": "npm run build && mocha --no-timeouts debug dist/tests/index.js",
     "lint": "prettier --check .",

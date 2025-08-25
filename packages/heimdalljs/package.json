@@ -9,7 +9,7 @@
     "build:node": "node scripts/build-node.js",
     "build:browser": "node scripts/build-browser.js",
     "build:test": "node scripts/build-tests.js",
-    "test": "npm run build:node && npm run build:test && mocha dist/tests/bundle.cjs",
+    "test": "mocha dist/tests/bundle.cjs",
     "test:debug": "mocha --no-timeouts debug dist/tests/bundle.cjs",
     "lint": "prettier --check .",
     "lint:fix": "prettier --write .",
