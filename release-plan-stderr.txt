@@ -1,0 +1,37 @@
+# Unlabeled Changes
+
+* Other
+  * [#153](https://github.com/heimdalljs/heimdalljs/pull/153) Monitor realpath.native ([@hjdivad](https://github.com/hjdivad))
+  * [#126](https://github.com/heimdalljs/heimdalljs/pull/126) [chore] move heimdall-fs-monitor to monorepo ([@gabrielcsapo](https://github.com/gabrielcsapo))
+  * [#92](https://github.com/heimdalljs/heimdalljs/pull/92) update all deps and typings ([@lynchbomb](https://github.com/lynchbomb))
+  * [#89](https://github.com/heimdalljs/heimdalljs/pull/89) Tidy-up ([@stefanpenner](https://github.com/stefanpenner))
+  * [#88](https://github.com/heimdalljs/heimdalljs/pull/88) Fixes tslint warnings ([@twokul](https://github.com/twokul))
+  * [#86](https://github.com/heimdalljs/heimdalljs/pull/86) Exclude tests from publication ([@hjdivad](https://github.com/hjdivad))
+  * [#85](https://github.com/heimdalljs/heimdalljs/pull/85) Excluding tests from build output ([@twokul](https://github.com/twokul))
+  * [#81](https://github.com/heimdalljs/heimdalljs/pull/81) Removes now benchmark ([@twokul](https://github.com/twokul))
+  * [#79](https://github.com/heimdalljs/heimdalljs/pull/79) Converts to TypeScript ([@twokul](https://github.com/twokul))
+  * [#80](https://github.com/heimdalljs/heimdalljs/pull/80) fix arrayGrow imports ([@runspired](https://github.com/runspired))
+  * [#78](https://github.com/heimdalljs/heimdalljs/pull/78) Removes unused dependency ([@twokul](https://github.com/twokul))
+  * [#74](https://github.com/heimdalljs/heimdalljs/pull/74) fix use of TypedArray.set and cleanup TypedArray.fill for IE9 support ([@runspired](https://github.com/runspired))
+  * [#76](https://github.com/heimdalljs/heimdalljs/pull/76) Makes sure `CounterStore.fromJSON` returns a new instance of `CounterStore` ([@twokul](https://github.com/twokul))
+  * [#73](https://github.com/heimdalljs/heimdalljs/pull/73) fix build ([@runspired](https://github.com/runspired))
+  * [#66](https://github.com/heimdalljs/heimdalljs/pull/66) update travis ([@stefanpenner](https://github.com/stefanpenner))
+  * [#64](https://github.com/heimdalljs/heimdalljs/pull/64) Expanded documentation for counters and monitors. ([@runspired](https://github.com/runspired))
+  * [#60](https://github.com/heimdalljs/heimdalljs/pull/60) Remove duplicated and unused files. ([@rwjblue](https://github.com/rwjblue))
+  * [#59](https://github.com/heimdalljs/heimdalljs/pull/59) Add version information. ([@rwjblue](https://github.com/rwjblue))
+  * [#63](https://github.com/heimdalljs/heimdalljs/pull/63) Add public API's to CJS exports. ([@rwjblue](https://github.com/rwjblue))
+  * [#61](https://github.com/heimdalljs/heimdalljs/pull/61) Remove usage of `EmptyObject` in favor of `Object.create(null)`. ([@rwjblue](https://github.com/rwjblue))
+  * [#62](https://github.com/heimdalljs/heimdalljs/pull/62) Cleanup tested Node versions. ([@rwjblue](https://github.com/rwjblue))
+* `babel6-plugin-strip-heimdall`, `heimdall-query`, `heimdalljs-graph`, `heimdalljs-logger`, `heimdalljs-require-monitor`, `heimdalljs`
+  * [#125](https://github.com/heimdalljs/heimdalljs/pull/125) Add a copy of LICENSE to packages ([@hjdivad](https://github.com/hjdivad))
+* `babel6-plugin-strip-heimdall`
+  * [#113](https://github.com/heimdalljs/heimdalljs/pull/113) [chore] move babel6-plugin-strip-heimdall to monorepo ([@gabrielcsapo](https://github.com/gabrielcsapo))
+* `heimdall-query`
+  * [#111](https://github.com/heimdalljs/heimdalljs/pull/111) [chore] move heimdalljs-query to monorepo ([@gabrielcsapo](https://github.com/gabrielcsapo))
+* `heimdalljs-graph`, `heimdalljs`
+  * [#110](https://github.com/heimdalljs/heimdalljs/pull/110) [chore] move heimdalljs-graph to monorepo ([@gabrielcsapo](https://github.com/gabrielcsapo))
+* `heimdalljs-logger`, `heimdalljs`
+  * [#106](https://github.com/heimdalljs/heimdalljs/pull/106) [chore] move heimdalljs-logger to monorepo ([@gabrielcsapo](https://github.com/gabrielcsapo))
+
+
+*Cannot plan release until the above changes are labeled*.
